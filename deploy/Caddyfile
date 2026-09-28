@@ -1,0 +1,35 @@
+# Caddy gets and renews Let's Encrypt certificates for both domains
+# automatically once their DNS records point at this server.
+
+# Backend: REST API and the terminal WebSocket.
+{$API_DOMAIN} {
+	# socket.io (terminal, build and test streams) goes to the terminal service.
+	handle /socket.io/* {
+		reverse_proxy terminal-service:8004
+	}
+
+	handle {
+		reverse_proxy api-gateway:8000
+	}
+}
+
+# Frontend: the static Vite build in /srv/web (WEB_ROOT on the host).
+{$WEB_DOMAIN} {
+	root * /srv/web
+	encode zstd gzip
+
+	# Hashed build files never change, so browsers can cache them for good.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	@pages not path /assets/*
+	header @pages Cache-Control "no-cache"
+
+	# Single-page app: unknown paths fall back to index.html.
+	try_files {path} /index.html
+	file_server
+}
+
+www.{$WEB_DOMAIN} {
+	redir https://{$WEB_DOMAIN}{uri} permanent
+}

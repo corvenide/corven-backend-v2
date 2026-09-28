@@ -4,8 +4,15 @@ import { ApiGatewayModule } from './api-gateway.module';
 async function bootstrap() {
     const app = await NestFactory.create(ApiGatewayModule);
 
+    // Browsers reject "Access-Control-Allow-Origin: *" on credentialed
+    // requests, so list the frontend origins explicitly in production
+    // (comma-separated). Unset reflects the request origin, for local dev.
+    const corsOrigins = process.env.CORS_ORIGINS?.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+
     app.enableCors({
-        origin: '*',
+        origin: corsOrigins?.length ? corsOrigins : true,
         credentials: true,
     })
 
