@@ -41,9 +41,14 @@ if [ ! -f deploy/.env ]; then
     echo "==> Creating deploy/.env with generated secrets"
     db_password=$(openssl rand -hex 24)
     jwt_secret=$(openssl rand -hex 48)
+    # Each running workspace needs about 3 GB; keep 2 GB for the platform.
+    mem_gb=$(free -g | awk '/^Mem:/ {print $2}')
+    max_workspaces=$(( (mem_gb - 2) / 3 ))
+    [ "$max_workspaces" -ge 1 ] || max_workspaces=1
     sed -e "s#^POSTGRES_PASSWORD=.*#POSTGRES_PASSWORD=${db_password}#" \
         -e "s#^DATABASE_URL=.*#DATABASE_URL=postgresql://corven:${db_password}@postgres:5432/corven#" \
         -e "s#^JWT_SECRET=.*#JWT_SECRET=${jwt_secret}#" \
+        -e "s#^HOST_MAX_WORKSPACES=.*#HOST_MAX_WORKSPACES=${max_workspaces}#" \
         deploy/.env.example >deploy/.env
     chmod 600 deploy/.env
 else
@@ -54,6 +59,6 @@ cat <<'EOF'
 
 Setup done. Next:
   1. Log out and back in so the docker group applies (or run: newgrp docker).
-  2. Review deploy/.env (domains, CORS_ORIGINS).
+  2. Review deploy/.env (domains, CORS_ORIGINS, ANTHROPIC_API_KEY).
   3. Deploy the backend:  bash deploy/deploy.sh
 EOF

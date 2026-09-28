@@ -1,4 +1,4 @@
-// apps/auth-service/src/prisma.service.ts
+// libs/prisma/src/prisma.service.ts
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '../../../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';

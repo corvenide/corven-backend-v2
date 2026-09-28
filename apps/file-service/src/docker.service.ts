@@ -5,9 +5,10 @@ import {
     Logger,
     OnModuleInit,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Docker from 'dockerode';
 import type { Duplex } from 'node:stream';
+
+import { PrismaService } from '../../../libs/prisma/src/prisma.service';
+import { ContainerHostRouter } from '../../../libs/runtime-hosts/src';
 
 interface ExecuteOptions {
     containerId: string;
@@ -28,32 +29,21 @@ export class DockerService
     private readonly logger =
         new Logger(DockerService.name);
 
-    private readonly docker: Docker;
+    /** Workspaces can run on several Docker hosts; find the right one per container. */
+    private readonly router: ContainerHostRouter;
 
-    constructor(
-        private readonly config: ConfigService,
-    ) {
-        const configuredSocket =
-            this.config.get<string>(
-                'DOCKER_SOCKET_PATH',
-            ) || '/var/run/docker.sock';
-
-        const socketPath = configuredSocket.replace(
-            /^unix:\/\//,
-            '',
-        );
+    constructor(prisma: PrismaService) {
+        this.router = new ContainerHostRouter(prisma);
 
         this.logger.log(
-            `Using Docker socket: ${socketPath}`,
+            `Docker hosts: ${this.router.registry.hosts.map((h) => h.id).join(', ')}`,
         );
-
-        this.docker = new Docker({
-            socketPath,
-        });
     }
 
     async onModuleInit(): Promise<void> {
-        await this.docker.ping();
+        // Only the default host is checked here; other hosts may be added
+        // or down, and are reached when a workspace on them is used.
+        await this.router.registry.client().ping();
 
         this.logger.log(
             'File service connected to Docker',
@@ -63,7 +53,9 @@ export class DockerService
     async execute(
         options: ExecuteOptions,
     ): Promise<ExecuteResult> {
-        const container = this.docker.getContainer(
+        const docker = await this.router.clientFor(options.containerId);
+
+        const container = docker.getContainer(
             options.containerId,
         );
 
@@ -108,7 +100,7 @@ export class DockerService
             stderrChunks.push(Buffer.from(chunk));
         });
 
-        this.docker.modem.demuxStream(
+        docker.modem.demuxStream(
             stream,
             stdout,
             stderr,

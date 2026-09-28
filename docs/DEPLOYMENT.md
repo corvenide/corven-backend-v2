@@ -37,7 +37,7 @@ free -h && nproc
 | 32 GB | about 9 |
 | 64 GB | about 20 |
 
-Stopped workspaces don't count. To move to a bigger plan later: create a snapshot, create a new instance from it with a larger plan, then move the static IP to it.
+Stopped workspaces don't count, and workspaces nobody has used for 20 minutes are stopped automatically (`WORKSPACE_IDLE_MINUTES`). `setup-server.sh` sets `HOST_MAX_WORKSPACES` from the server's RAM; when the server is full, starting another workspace fails with a clear "at capacity" message instead of running out of memory. To move to a bigger plan later: create a snapshot, create a new instance from it with a larger plan, then move the static IP to it.
 
 **Static IP.** Lightsail public IPs change when an instance is stopped and started. In the Lightsail console, open **Networking → Create static IP**, attach it to the instance, and use that IP in DNS below.
 
@@ -112,7 +112,7 @@ newgrp docker   # or log out and back in
 
 This installs Docker, enables log rotation for all containers, adds a 4 GB swap file if there is none, creates `/opt/corven/web` for the frontend, and writes `deploy/.env` with a generated database password and JWT secret.
 
-Open `deploy/.env` and check the domains and `CORS_ORIGINS`. Keep this file private; it holds the secrets.
+Open `deploy/.env` and check the domains and `CORS_ORIGINS`. To turn on the Claude assistant, set `ANTHROPIC_API_KEY`. Keep this file private; it holds the secrets.
 
 ## 5. Deploy the backend
 
@@ -121,7 +121,7 @@ cd /opt/corven/backend
 bash deploy/deploy.sh
 ```
 
-The first run takes a while (about 15–30 minutes) because it builds the workspace runtime image with LLVM and Rust tools. It then builds the backend image, runs database migrations, and starts every service and Caddy.
+The first run takes a while (about 15–30 minutes) because it builds the workspace images (the runtime image includes LLVM and Rust tools) and the shared build-cache image. It then builds the backend image, runs database migrations, and starts every service and Caddy.
 
 Check it:
 
@@ -176,11 +176,10 @@ What limits the number of users is the number of **running workspaces**, since e
 
 In order of effort:
 
-1. **Bigger instance.** Snapshot and recreate on a larger plan (see the table above). This is the only step needed for the first few hundred users, as long as they aren't all running workspaces at once.
-2. **Managed database.** Create a Lightsail managed PostgreSQL database in the same region, set `DATABASE_URL` in `deploy/.env` to it (with `?sslmode=require`), and redeploy. This takes database load and backups off the instance.
-3. **CDN for the frontend.** Put a Lightsail distribution in front of `corven.space` to serve the static files from edge locations.
-4. **Stop idle workspaces.** The frontend already calls `POST /workspaces/:id/heartbeat`, but the backend doesn't implement it yet, so workspaces keep running until a user stops them. Stopping workspaces with no recent heartbeat frees memory for active users.
-5. **More than one workspace server.** The runtime, file and terminal services currently talk to a single Docker daemon, so all workspaces run on one machine. Spreading workspaces across several servers needs a backend change: record which server hosts each workspace, and route runtime, file and terminal calls to that server's Docker daemon.
+1. **Bigger instance.** Snapshot and recreate on a larger plan (see the table above), then raise `HOST_MAX_WORKSPACES` in `deploy/.env` and redeploy.
+2. **More workspace servers.** The backend can place workspaces on several Docker hosts (`DOCKER_HOSTS`). Create more Lightsail instances in the same region, install Docker and build the three images on each (`fiberdev/ckb-node:dev`, `fiberdev/ckb-runtime:dev`, `corven/build-cache:dev`), and list them in `deploy/.env`, reachable over the private network with TLS. New workspaces go to the host with the most free slots. See [`HOSTS, BUILD CACHE AND AI.md`](HOSTS,%20BUILD%20CACHE%20AND%20AI.md) for the format, health checks and draining a host.
+3. **Managed database.** Create a Lightsail managed PostgreSQL database in the same region, set `DATABASE_URL` in `deploy/.env` to it (with `?sslmode=require`), and redeploy. This takes database load and backups off the instance.
+4. **CDN for the frontend.** Put a Lightsail distribution in front of `corven.space` to serve the static files from edge locations.
 
 ## Troubleshooting
 

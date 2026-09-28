@@ -29,6 +29,15 @@
         "tsConfigPath": "apps/auth-service/tsconfig.app.json"
       }
     },
+    "cell-service": {
+      "type": "application",
+      "root": "apps/cell-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/cell-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cell-service/tsconfig.app.json"
+      }
+    },
     "file-service": {
       "type": "application",
       "root": "apps/file-service",

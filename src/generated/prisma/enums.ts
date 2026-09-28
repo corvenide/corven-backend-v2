@@ -52,9 +52,61 @@ export const RuntimeContainerStatus = {
 export type RuntimeContainerStatus = (typeof RuntimeContainerStatus)[keyof typeof RuntimeContainerStatus]
 
 
+export const HostStatus = {
+  ONLINE: 'ONLINE',
+  OFFLINE: 'OFFLINE'
+} as const
+
+export type HostStatus = (typeof HostStatus)[keyof typeof HostStatus]
+
+
+export const DeployNetwork = {
+  DEVNET: 'DEVNET',
+  TESTNET: 'TESTNET',
+  MAINNET: 'MAINNET'
+} as const
+
+export type DeployNetwork = (typeof DeployNetwork)[keyof typeof DeployNetwork]
+
+
 export const AuthProvider = {
   EMAIL: 'EMAIL',
   CKB_WALLET: 'CKB_WALLET'
 } as const
 
 export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
+
+
+export const CellStatus = {
+  LIVE: 'LIVE',
+  DEAD: 'DEAD'
+} as const
+
+export type CellStatus = (typeof CellStatus)[keyof typeof CellStatus]
+
+
+export const ScriptKind = {
+  LOCK: 'LOCK',
+  TYPE: 'TYPE'
+} as const
+
+export type ScriptKind = (typeof ScriptKind)[keyof typeof ScriptKind]
+
+
+export const HashType = {
+  DATA: 'DATA',
+  TYPE: 'TYPE',
+  DATA1: 'DATA1'
+} as const
+
+export type HashType = (typeof HashType)[keyof typeof HashType]
+
+
+export const TxStatus = {
+  PENDING: 'PENDING',
+  PROPOSED: 'PROPOSED',
+  COMMITTED: 'COMMITTED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type TxStatus = (typeof TxStatus)[keyof typeof TxStatus]

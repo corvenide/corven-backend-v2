@@ -8,6 +8,8 @@ import {
 
 import Docker from 'dockerode';
 
+import { DockerHostRegistry, describeEndpoint } from 'libs/runtime-hosts/src';
+
 import {
     Duplex,
     PassThrough,
@@ -34,6 +36,15 @@ export interface CreateContainerOptions {
     pidsLimit?: number;
 
     privileged?: boolean;
+
+    /** Extra DNS names for this container on `networkName`. */
+    networkAliases?: string[];
+
+    /** Extra labels, merged over the defaults. */
+    labels?: Record<string, string>;
+
+    /** Docker restart policy (default: none). */
+    restartPolicy?: 'no' | 'unless-stopped' | 'always';
 }
 
 export interface ExecuteCommandOptions {
@@ -42,6 +53,9 @@ export interface ExecuteCommandOptions {
 
     workingDirectory?: string;
     environment?: string[];
+
+    /** Written to the command's stdin, then stdin is closed. */
+    input?: string | Buffer;
 }
 
 export interface ExecuteCommandResult {
@@ -55,36 +69,30 @@ export interface ContainerPort {
     hostPort: number | null;
 }
 
-@Injectable()
-export class DockerService implements OnModuleInit {
-    private readonly logger =
-        new Logger(DockerService.name);
+/**
+ * Docker operations against one host. Workspaces can run on several hosts
+ * (see libs/runtime-hosts); get the client for a workspace's host with
+ * `DockerService.on(hostId)`.
+ */
+export class DockerClient {
+    protected readonly logger: Logger;
 
-    private readonly docker: Docker;
-
-    constructor() {
-        const dockerSocketPath =
-            process.env.DOCKER_SOCKET_PATH;
-
-        if (dockerSocketPath) {
-            this.logger.log(
-                `Using Docker socket: ${dockerSocketPath}`,
-            );
-
-            this.docker = new Docker({
-                socketPath: dockerSocketPath,
-            });
-        } else {
-            this.logger.log(
-                'Using default Docker socket',
-            );
-
-            this.docker = new Docker();
-        }
+    constructor(
+        protected readonly docker: Docker,
+        readonly hostId: string,
+    ) {
+        this.logger = new Logger(`Docker:${hostId}`);
     }
 
-    async onModuleInit(): Promise<void> {
-        await this.ping();
+    /** Engine facts used by the scheduler. */
+    async hostInfo(): Promise<{ cpus: number; memoryBytes: number; containersRunning: number; name: string }> {
+        const info = await this.docker.info();
+        return {
+            cpus: Number(info.NCPU) || 0,
+            memoryBytes: Number(info.MemTotal) || 0,
+            containersRunning: Number(info.ContainersRunning) || 0,
+            name: String(info.Name ?? this.hostId),
+        };
     }
 
     async ping(): Promise<void> {
@@ -108,6 +116,16 @@ export class DockerService implements OnModuleInit {
             );
 
             throw error;
+        }
+    }
+
+    /** Local image id (sha256:...), or null if the image isn't on this host. */
+    async imageId(imageName: string): Promise<string | null> {
+        try {
+            const details = await this.docker.getImage(imageName).inspect();
+            return details.Id;
+        } catch {
+            return null;
         }
     }
 
@@ -454,10 +472,26 @@ export class DockerService implements OnModuleInit {
 
                         'fiberdev.container-type':
                             options.containerType,
+
+                        ...(options.labels ?? {}),
                     },
+
+                    NetworkingConfig: options.networkAliases?.length
+                        ? {
+                              EndpointsConfig: {
+                                  [options.networkName]: {
+                                      Aliases: options.networkAliases,
+                                  },
+                              },
+                          }
+                        : undefined,
 
                     HostConfig: {
                         AutoRemove: false,
+
+                        RestartPolicy: options.restartPolicy
+                            ? { Name: options.restartPolicy }
+                            : undefined,
 
                         NetworkMode:
                             options.networkName,
@@ -659,11 +693,13 @@ export class DockerService implements OnModuleInit {
             );
         }
 
+        const hasInput = options.input !== undefined;
+
         const exec =
             await container.exec({
                 AttachStdout: true,
                 AttachStderr: true,
-                AttachStdin: false,
+                AttachStdin: hasInput,
 
                 Tty: false,
 
@@ -679,7 +715,7 @@ export class DockerService implements OnModuleInit {
         const stream =
             (await exec.start({
                 hijack: true,
-                stdin: false,
+                stdin: hasInput,
                 Tty: false,
             })) as Duplex;
 
@@ -738,6 +774,11 @@ export class DockerService implements OnModuleInit {
             stdoutStream,
             stderrStream,
         );
+
+        if (hasInput) {
+            stream.write(options.input);
+            stream.end();
+        }
 
         await new Promise<void>(
             (resolve, reject) => {
@@ -943,6 +984,48 @@ export class DockerService implements OnModuleInit {
             : String(logs);
     }
 
+    async renameContainer(
+        containerNameOrId: string,
+        newName: string,
+    ): Promise<void> {
+        await this.docker
+            .getContainer(containerNameOrId)
+            .rename({ name: newName });
+    }
+
+    async connectToNetwork(
+        networkName: string,
+        containerId: string,
+        aliases?: string[],
+    ): Promise<void> {
+        await this.docker.getNetwork(networkName).connect({
+            Container: containerId,
+            EndpointConfig: aliases?.length ? { Aliases: aliases } : undefined,
+        });
+    }
+
+    async disconnectFromNetwork(
+        networkName: string,
+        containerId: string,
+    ): Promise<void> {
+        try {
+            await this.docker
+                .getNetwork(networkName)
+                .disconnect({ Container: containerId, Force: true });
+        } catch {
+            // Not connected.
+        }
+    }
+
+    async listContainersByLabel(
+        label: string,
+    ): Promise<Docker.ContainerInfo[]> {
+        return this.docker.listContainers({
+            all: true,
+            filters: { label: [label] },
+        });
+    }
+
     private async sleep(
         milliseconds: number,
     ): Promise<void> {
@@ -954,5 +1037,51 @@ export class DockerService implements OnModuleInit {
                 );
             },
         );
+    }
+}
+
+/**
+ * Injectable entry point. Acts as the client for the default host (so
+ * single-host code keeps working) and hands out clients for other hosts.
+ */
+@Injectable()
+export class DockerService extends DockerClient implements OnModuleInit {
+    readonly registry: DockerHostRegistry;
+    private readonly clients = new Map<string, DockerClient>();
+
+    constructor() {
+        const registry = new DockerHostRegistry();
+        super(registry.client(), registry.defaultHostId);
+        this.registry = registry;
+        this.clients.set(registry.defaultHostId, this);
+
+        for (const host of registry.hosts) {
+            this.logger.log(
+                `Workspace host ${host.id}: ${describeEndpoint(host.endpoint)} (max ${host.maxWorkspaces} workspaces)`,
+            );
+        }
+    }
+
+    async onModuleInit(): Promise<void> {
+        // With one host, not reaching Docker is fatal (nothing can run).
+        // With several, the scheduler marks unreachable hosts offline.
+        if (this.registry.hosts.length === 1) {
+            await this.ping();
+        } else {
+            await this.ping().catch(() => undefined);
+        }
+    }
+
+    /** Client for a host; null/undefined means the default host. */
+    on(hostId?: string | null): DockerClient {
+        const id = hostId ?? this.registry.defaultHostId;
+
+        let client = this.clients.get(id);
+        if (!client) {
+            client = new DockerClient(this.registry.client(id), id);
+            this.clients.set(id, client);
+        }
+
+        return client;
     }
 }

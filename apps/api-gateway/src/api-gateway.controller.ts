@@ -1,19 +1,34 @@
 // apps/api-gateway/src/api-gateway.controller.ts
 
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
     Get,
     Headers,
+    HttpCode,
     Param,
     Post,
     Put,
     Query,
+    Req,
+    Res,
     UnauthorizedException,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
+
+import { findTemplate, WORKSPACE_TEMPLATES } from 'libs/prisma/src/workspace-templates';
 
 import { ApiGatewayService } from './api-gateway.service';
+import {
+    assertTrustedOrigin,
+    clearRefreshCookie,
+    RateLimiter,
+    readRefreshCookie,
+    sessionMeta,
+    setRefreshCookie,
+} from './auth-session';
 
 @Controller()
 export class ApiGatewayController {
@@ -25,66 +40,24 @@ export class ApiGatewayController {
     // Authentication
     // =========================================
 
-    @Post('auth/register')
-    register(
-        @Body()
-        body: {
-            name: string;
-            email: string;
-            password: string;
-        },
-    ) {
-        return this.gatewayService.register(body);
-    }
-
-    @Post('auth/login')
-    login(
-        @Body()
-        body: {
-            email: string;
-            password: string;
-        },
-    ) {
-        return this.gatewayService.login(body);
-    }
-
-    @Post('auth/verify')
-    verify(
-        @Body()
-        body: {
-            token: string;
-        },
-    ) {
-        return this.gatewayService.verifyToken(
-            body.token,
-        );
-    }
-
-    @Get('auth/me')
-    async me(
-        @Headers('authorization')
-        authorization?: string,
-    ) {
-        const user =
-            await this.getUserFromAuthorizationHeader(
-                authorization,
-            );
-
-        return user;
-    }
+    private readonly authLimiter = new RateLimiter(20, 60_000);
 
     @Post('auth/wallet/challenge')
     createWalletChallenge(
-        @Body()
-        body: {
-            walletAddress: string;
-        },
+        @Req() req: Request,
+        @Body() body: { walletAddress: string },
     ) {
-        return this.gatewayService.createWalletChallenge(body);
+        this.authLimiter.consume(`challenge:${req.ip}`);
+
+        return this.gatewayService.createWalletChallenge({
+            walletAddress: body?.walletAddress,
+        });
     }
 
     @Post('auth/wallet/login')
-    walletLogin(
+    async walletLogin(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
         @Body()
         body: {
             walletAddress: string;
@@ -92,12 +65,161 @@ export class ApiGatewayController {
             signature: unknown;
         },
     ) {
-        return this.gatewayService.walletLogin(body);
+        this.authLimiter.consume(`login:${req.ip}`);
+
+        const session = await this.gatewayService.walletLogin({
+            walletAddress: body?.walletAddress,
+            challengeId: body?.challengeId,
+            signature: body?.signature,
+            meta: sessionMeta(req),
+        });
+
+        return this.startSession(res, session);
+    }
+
+    @Post('auth/register')
+    async register(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+        @Body() body: { name: string; email: string; password: string },
+    ) {
+        this.authLimiter.consume(`login:${req.ip}`);
+
+        const session = await this.gatewayService.register({
+            name: body?.name,
+            email: body?.email,
+            password: body?.password,
+            meta: sessionMeta(req),
+        });
+
+        return this.startSession(res, session);
+    }
+
+    @Post('auth/login')
+    async login(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+        @Body() body: { email: string; password: string },
+    ) {
+        this.authLimiter.consume(`login:${req.ip}`);
+
+        const session = await this.gatewayService.login({
+            email: body?.email,
+            password: body?.password,
+            meta: sessionMeta(req),
+        });
+
+        return this.startSession(res, session);
+    }
+
+    /**
+     * Exchanges the httpOnly refresh cookie for a new access token and
+     * rotates the cookie. Called on page load and before the access token
+     * expires.
+     */
+    @Post('auth/refresh')
+    @HttpCode(200)
+    async refresh(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        assertTrustedOrigin(req);
+        this.authLimiter.consume(`refresh:${req.ip}`);
+
+        const refreshToken = readRefreshCookie(req);
+
+        if (!refreshToken) {
+            throw new UnauthorizedException('No session');
+        }
+
+        try {
+            const session = await this.gatewayService.refreshSession({
+                refreshToken,
+                meta: sessionMeta(req),
+            });
+
+            return this.startSession(res, session);
+        } catch (error) {
+            if (error instanceof UnauthorizedException) {
+                clearRefreshCookie(res);
+            }
+
+            throw error;
+        }
+    }
+
+    @Post('auth/logout')
+    @HttpCode(200)
+    async logout(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        assertTrustedOrigin(req);
+
+        const refreshToken = readRefreshCookie(req);
+
+        clearRefreshCookie(res);
+
+        if (refreshToken) {
+            await this.gatewayService.logout({ refreshToken }).catch(() => undefined);
+        }
+
+        return { success: true };
+    }
+
+    @Post('auth/logout-all')
+    @HttpCode(200)
+    async logoutAll(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+        @Headers('authorization') authorization?: string,
+    ) {
+        assertTrustedOrigin(req);
+
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+
+        clearRefreshCookie(res);
+
+        return this.gatewayService.logoutAll(user.id);
+    }
+
+    @Post('auth/verify')
+    verify(@Body() body: { token: string }) {
+        return this.gatewayService.verifyToken(body?.token);
+    }
+
+    @Get('auth/me')
+    me(@Headers('authorization') authorization?: string) {
+        return this.getUserFromAuthorizationHeader(authorization);
+    }
+
+    /** Moves the refresh token into the cookie; the body never carries it. */
+    private startSession(
+        res: Response,
+        session: {
+            accessToken: string;
+            refreshToken: string;
+            refreshTokenExpiresAt: string | Date;
+            user: unknown;
+        },
+    ) {
+        setRefreshCookie(res, session.refreshToken, session.refreshTokenExpiresAt);
+
+        return {
+            accessToken: session.accessToken,
+            user: session.user,
+        };
     }
 
     // =========================================
     // Workspace management
     // =========================================
+
+    /** Project templates a new workspace can start from. Public, static. */
+    @Get('workspace-templates')
+    listWorkspaceTemplates() {
+        return WORKSPACE_TEMPLATES;
+    }
 
     @Post('workspaces')
     async createWorkspace(
@@ -114,6 +236,10 @@ export class ApiGatewayController {
             await this.getUserFromAuthorizationHeader(
                 authorization,
             );
+
+        if (body.templateId && !findTemplate(body.templateId)) {
+            throw new BadRequestException(`Unknown project template: ${body.templateId}`);
+        }
 
         return this.gatewayService.createWorkspace({
             userId: user.id,
@@ -193,6 +319,230 @@ export class ApiGatewayController {
             );
 
         return this.gatewayService.startWorkspace(
+            user.id,
+            workspaceId,
+        );
+    }
+
+    /** Sent by the open IDE tab; keeps the workspace from being stopped as idle. */
+    @Post('workspaces/:id/heartbeat')
+    @HttpCode(200)
+    async workspaceHeartbeat(
+        @Headers('authorization')
+        authorization: string,
+
+        @Param('id')
+        workspaceId: string,
+    ) {
+        const user =
+            await this.getUserFromAuthorizationHeader(
+                authorization,
+            );
+
+        return this.gatewayService.workspaceHeartbeat(
+            user.id,
+            workspaceId,
+        );
+    }
+
+    /** Starts the workspace's CKB devnet (devnets start on demand). */
+    @Post('workspaces/:id/devnet/start')
+    async startDevnet(
+        @Headers('authorization')
+        authorization: string,
+
+        @Param('id')
+        workspaceId: string,
+    ) {
+        const user =
+            await this.getUserFromAuthorizationHeader(
+                authorization,
+            );
+
+        return this.gatewayService.startDevnet(
+            user.id,
+            workspaceId,
+        );
+    }
+
+    // =========================================
+    // Contracts and deployments
+    // =========================================
+
+    /** Contract binaries in the project's build/release folder. */
+    @Get('workspaces/:id/contracts')
+    async listContracts(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.listContracts(user.id, workspaceId);
+    }
+
+    /** A built binary as base64, for deploys signed in the user's wallet. */
+    @Get('workspaces/:id/contracts/:name/binary')
+    async contractBinary(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Param('name') name: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.contractBinary(user.id, workspaceId, name);
+    }
+
+    @Get('workspaces/:id/deployments')
+    async listDeployments(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.listDeployments(user.id, workspaceId);
+    }
+
+    /** Deploys a built contract to the workspace devnet. */
+    @Post('workspaces/:id/deployments/devnet')
+    async deployDevnet(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: { contract?: string; upgradable?: boolean },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.deployDevnet(user.id, workspaceId, String(body?.contract ?? ''), body?.upgradable !== false);
+    }
+
+    /** Records a deploy the user signed in their wallet (testnet). */
+    @Post('workspaces/:id/deployments')
+    async recordDeployment(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: Record<string, unknown>,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.recordDeployment(user.id, workspaceId, body ?? {});
+    }
+
+    // =========================================
+    // Debugger
+    // =========================================
+
+    /** Runs a built contract on its own in ckb-debugger. */
+    @Post('workspaces/:id/debug/run')
+    @HttpCode(200)
+    async debugRunContract(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: { contract?: string },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.debugRunContract(user.id, workspaceId, String(body?.contract ?? ''));
+    }
+
+    /** Recent devnet transactions (including rejected ones sent via the RPC proxy). */
+    @Get('workspaces/:id/debug/transactions')
+    async debugTransactions(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.debugTransactions(user.id, workspaceId);
+    }
+
+    /** Replays every script of a devnet transaction. */
+    @Post('workspaces/:id/debug/tx')
+    @HttpCode(200)
+    async debugTransaction(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: { txHash?: string; replace?: unknown },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const replace = Array.isArray(body?.replace) ? body.replace.filter((n): n is string => typeof n === 'string').slice(0, 10) : [];
+        return this.gatewayService.debugTransaction(user.id, workspaceId, String(body?.txHash ?? ''), replace);
+    }
+
+    /** Generates Rust or C bindings for a Molecule schema, next to it. */
+    @Post('workspaces/:id/molecule/generate')
+    @HttpCode(200)
+    async generateMolecule(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: { path?: unknown; language?: unknown },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.generateMolecule(user.id, workspaceId, String(body?.path ?? ''), body?.language === 'c' ? 'c' : 'rust');
+    }
+
+    // =========================================
+    // Devnet tools
+    // =========================================
+
+    /** The devnet's pre-funded test accounts, with balances. */
+    @Get('workspaces/:id/devnet/accounts')
+    async devnetAccounts(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.devnetAccounts(user.id, workspaceId);
+    }
+
+    /** Devnet system scripts in CCC's format. */
+    @Get('workspaces/:id/devnet/scripts')
+    async devnetScripts(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.devnetScripts(user.id, workspaceId);
+    }
+
+    /** Relays one JSON-RPC call to the workspace devnet (allow-listed methods). */
+    @Post('workspaces/:id/devnet/rpc')
+    @HttpCode(200)
+    async devnetRpc(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: unknown,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.devnetRpc(user.id, workspaceId, body);
+    }
+
+    /** Stops the devnet node; its chain data is kept. */
+    @Post('workspaces/:id/devnet/stop')
+    async stopDevnet(
+        @Headers('authorization')
+        authorization: string,
+
+        @Param('id')
+        workspaceId: string,
+    ) {
+        const user =
+            await this.getUserFromAuthorizationHeader(
+                authorization,
+            );
+
+        return this.gatewayService.stopDevnet(
+            user.id,
+            workspaceId,
+        );
+    }
+
+    /** Live devnet facts (tip, recent blocks, tx pool) for the Nodes page. */
+    @Get('workspaces/:id/devnet')
+    async getDevnetInfo(
+        @Headers('authorization')
+        authorization: string,
+
+        @Param('id')
+        workspaceId: string,
+    ) {
+        const user =
+            await this.getUserFromAuthorizationHeader(
+                authorization,
+            );
+
+        return this.gatewayService.getDevnetInfo(
             user.id,
             workspaceId,
         );

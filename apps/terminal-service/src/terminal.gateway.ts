@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { TerminalService } from './terminal-service.service';
 import { DockerService } from './docker.service';
 import { PrismaService } from 'libs/prisma/src/prisma.service';
+import { recordWorkspaceActivity } from 'libs/prisma/src/workspace-activity';
 import { type AuthenticatedSocket } from './terminal.types';
 
 @WebSocketGateway({
@@ -220,6 +221,10 @@ export class TerminalGateway
         }
 
         client.terminalStream.write(payload.data);
+
+        if (client.workspaceId) {
+            void recordWorkspaceActivity(this.prisma, client.workspaceId);
+        }
         this.logger.debug(`[${client.id}] Input written to terminal stream`);
     }
 
@@ -314,6 +319,7 @@ export class TerminalGateway
                 throw new Error('Workspace runtime is not running');
             }
 
+            void recordWorkspaceActivity(this.prisma, workspaceId, 0);
             this.logger.debug(`[${client.id}] Fetching runtime container for workspace: ${workspaceId}`);
             const runtimeContainer = await this.prisma.workspaceContainer.findUnique({
                 where: {
@@ -329,7 +335,7 @@ export class TerminalGateway
                 throw new Error('Runtime container not found');
             }
 
-            const container = this.dockerService.getContainer(runtimeContainer.containerId);
+            const container = await this.dockerService.getContainer(runtimeContainer.containerId);
             const details = await container.inspect();
 
             if (!details.State.Running) {
@@ -550,6 +556,7 @@ export class TerminalGateway
                 throw new Error('Unauthorized');
             }
 
+            void recordWorkspaceActivity(this.prisma, workspaceId, 0);
             this.logger.debug(`[${client.id}] Fetching runtime container for workspace: ${workspaceId}`);
             const runtimeContainer = await this.prisma.workspaceContainer.findUnique({
                 where: {
@@ -664,6 +671,7 @@ export class TerminalGateway
                 throw new Error('Workspace runtime is not running');
             }
 
+            void recordWorkspaceActivity(this.prisma, workspaceId, 0);
             this.logger.debug(`[${client.id}] Fetching runtime container for workspace: ${workspaceId}`);
             const runtimeContainer = await this.prisma.workspaceContainer.findUnique({
                 where: {
@@ -679,7 +687,7 @@ export class TerminalGateway
                 throw new Error('Runtime container not found');
             }
 
-            const container = this.dockerService.getContainer(runtimeContainer.containerId);
+            const container = await this.dockerService.getContainer(runtimeContainer.containerId);
             const details = await container.inspect();
 
             if (!details.State.Running) {

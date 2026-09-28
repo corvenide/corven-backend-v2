@@ -16,10 +16,11 @@ if [ "${1:-}" != "--no-pull" ]; then
     git pull --ff-only
 fi
 
-# The runtime service starts every workspace from these two images.
+# The runtime service starts workspaces and the shared build cache from these.
 echo "==> Building workspace images"
 docker build -t fiberdev/ckb-node:dev docker/ckb-node
 docker build -t fiberdev/ckb-runtime:dev docker/ckb-runtime
+docker build -t corven/build-cache:dev docker/build-cache
 
 compose=(docker compose -f deploy/docker-compose.yml)
 
