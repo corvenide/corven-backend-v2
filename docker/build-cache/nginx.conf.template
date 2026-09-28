@@ -1,0 +1,64 @@
+# Rendered by entrypoint.sh (__CACHE_WRITE_TOKEN__ is replaced).
+load_module /usr/lib/nginx/modules/ngx_http_dav_ext_module.so;
+
+user nginx;
+worker_processes auto;
+pid /run/nginx/nginx.pid;
+error_log /dev/stderr warn;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    access_log off;
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    server_tokens off;
+
+    # Read-only: what workspaces use.
+    server {
+        listen 8081;
+        root /cache;
+
+        location = /healthz {
+            default_type text/plain;
+            return 200 "ok\n";
+        }
+
+        location /sccache/ {
+            dav_ext_methods PROPFIND OPTIONS;
+            limit_except GET HEAD PROPFIND OPTIONS {
+                deny all;
+            }
+        }
+
+        location / {
+            return 404;
+        }
+    }
+
+    # Read-write: the cache warmer only.
+    server {
+        listen 8082;
+        root /cache;
+        client_max_body_size 1g;
+        client_body_temp_path /cache/.upload-tmp;
+
+        location /sccache/ {
+            if ($http_authorization != "Bearer __CACHE_WRITE_TOKEN__") {
+                return 401;
+            }
+
+            dav_methods PUT DELETE MKCOL COPY MOVE;
+            dav_ext_methods PROPFIND OPTIONS;
+            create_full_put_path on;
+            dav_access user:rw group:r all:r;
+        }
+
+        location / {
+            return 404;
+        }
+    }
+}

@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '../../../libs/prisma/src/prisma.service';
+import { recordWorkspaceActivity } from '../../../libs/prisma/src/workspace-activity';
+import { isIgnoredPath } from '../../../libs/prisma/src/workspace-files';
 import { DockerService } from './docker.service';
+import { OfflineFileStore } from './offline-file-store';
 import {
     CreateDirectoryPayload,
     FilePathPayload,
@@ -25,19 +28,28 @@ import {
 
 @Injectable()
 export class FileServiceService {
+    private readonly offline: OfflineFileStore;
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly docker: DockerService,
-    ) { }
+    ) {
+        this.offline = new OfflineFileStore(prisma);
+    }
 
     async listFiles(
         payload: WorkspacePayload,
     ): Promise<WorkspaceEntry[]> {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.list(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const result = await this.docker.execute({
             containerId,
@@ -96,11 +108,16 @@ export class FileServiceService {
     async readFile(
         payload: FilePathPayload,
     ) {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.read(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const normalizedPath =
             normalizeWorkspacePath(payload.path);
@@ -137,11 +154,16 @@ export class FileServiceService {
     async createFile(
         payload: WriteFilePayload,
     ) {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.create(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const normalizedPath =
             normalizeWorkspacePath(payload.path);
@@ -167,17 +189,24 @@ export class FileServiceService {
             content: payload.content ?? '',
         });
 
+        await this.offline.mirrorWrite(payload.workspaceId, normalizedPath, payload.content ?? '');
+
         return this.readFile(payload);
     }
 
     async updateFile(
         payload: WriteFilePayload,
     ) {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.update(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const normalizedPath =
             normalizeWorkspacePath(payload.path);
@@ -203,17 +232,24 @@ export class FileServiceService {
             content: payload.content,
         });
 
+        await this.offline.mirrorWrite(payload.workspaceId, normalizedPath, payload.content);
+
         return this.readFile(payload);
     }
 
     async createDirectory(
         payload: CreateDirectoryPayload,
     ) {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.mkdir(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const normalizedPath =
             normalizeWorkspacePath(payload.path);
@@ -236,6 +272,8 @@ export class FileServiceService {
             result.stderr,
         );
 
+        await this.offline.mirrorMkdir(payload.workspaceId, normalizedPath);
+
         return {
             name:
                 normalizedPath.split('/').pop() ||
@@ -249,11 +287,16 @@ export class FileServiceService {
     async deleteEntry(
         payload: FilePathPayload,
     ) {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.delete(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const normalizedPath =
             normalizeWorkspacePath(payload.path);
@@ -288,6 +331,8 @@ export class FileServiceService {
             result.stderr,
         );
 
+        await this.offline.mirrorDelete(payload.workspaceId, normalizedPath);
+
         return {
             success: true,
             path: normalizedPath,
@@ -297,11 +342,16 @@ export class FileServiceService {
     async renameEntry(
         payload: RenameFilePayload,
     ) {
-        const containerId =
-            await this.getRuntimeContainer(
-                payload.userId,
-                payload.workspaceId,
-            );
+        const target = await this.resolveTarget(
+            payload.userId,
+            payload.workspaceId,
+        );
+
+        if (target.mode === 'offline') {
+            return this.offline.rename(payload as never) as never;
+        }
+
+        const containerId = target.containerId;
 
         const oldPath = normalizeWorkspacePath(
             payload.oldPath,
@@ -375,6 +425,8 @@ export class FileServiceService {
             result.exitCode,
             result.stderr,
         );
+
+        await this.offline.mirrorRename(payload.workspaceId, oldPath, newPath);
 
         return {
             success: true,
@@ -454,10 +506,14 @@ export class FileServiceService {
         return result.exitCode === 0;
     }
 
-    private async getRuntimeContainer(
+    /**
+     * Where this workspace's files live right now: its running container,
+     * or (while the runtime is off) the database copy.
+     */
+    private async resolveTarget(
         userId: string,
         workspaceId: string,
-    ): Promise<string> {
+    ): Promise<{ mode: 'container'; containerId: string } | { mode: 'offline' }> {
         const workspace =
             await this.prisma.workspace.findUnique({
                 where: {
@@ -480,29 +536,34 @@ export class FileServiceService {
             );
         }
 
-        if (workspace.status !== 'RUNNING') {
-            throw new RpcException(
-                'Workspace must be running before files can be accessed',
-            );
-        }
-
-        const runtimeContainer =
-            await this.prisma.workspaceContainer.findUnique({
-                where: {
-                    workspaceId_type: {
-                        workspaceId,
-                        type: 'FIBER_RUNTIME',
+        if (workspace.status === 'RUNNING') {
+            const runtimeContainer =
+                await this.prisma.workspaceContainer.findUnique({
+                    where: {
+                        workspaceId_type: {
+                            workspaceId,
+                            type: 'FIBER_RUNTIME',
+                        },
                     },
-                },
-            });
+                });
 
-        if (!runtimeContainer) {
+            if (runtimeContainer) {
+                await recordWorkspaceActivity(this.prisma, workspaceId);
+
+                return {
+                    mode: 'container',
+                    containerId: runtimeContainer.containerId,
+                };
+            }
+        }
+
+        if (!workspace.filesSnapshotAt) {
             throw new RpcException(
-                'Fiber runtime container not found',
+                'Files are available once the workspace has started for the first time',
             );
         }
 
-        return runtimeContainer.containerId;
+        return { mode: 'offline' };
     }
 
     private assertCommandSucceeded(
@@ -520,18 +581,6 @@ export class FileServiceService {
     private shouldIgnore(
         filePath: string,
     ): boolean {
-        const ignoredSegments = [
-            '.git',
-            'node_modules',
-            'target',
-            '.next',
-            'dist',
-        ];
-
-        return filePath
-            .split('/')
-            .some((segment) =>
-                ignoredSegments.includes(segment),
-            );
+        return isIgnoredPath(filePath);
     }
 }

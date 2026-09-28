@@ -1,141 +1,427 @@
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "cjs"
+    provider     = "prisma-client"
+    output       = "../src/generated/prisma"
+    moduleFormat = "cjs"
 }
 
 datasource db {
-  provider = "postgresql"
+    provider = "postgresql"
 }
 
 enum WorkspaceStatus {
-  PENDING
-  PROVISIONING
-  RUNNING
-  IDLE
-  STOPPED
-  FAILED
-  DELETED
+    PENDING
+    PROVISIONING
+    RUNNING
+    IDLE
+    STOPPED
+    FAILED
+    DELETED
 }
 
 enum UserRole {
-  USER
-  ADMIN
+    USER
+    ADMIN
 }
 
 enum RuntimeContainerType {
-  IDE
-  CKB_NODE
-  FIBER_RUNTIME
-  PREVIEW
-  TEST_RUNNER
+    IDE
+    CKB_NODE
+    FIBER_RUNTIME
+    PREVIEW
+    TEST_RUNNER
 }
 
 enum RuntimeContainerStatus {
-  CREATED
-  STARTING
-  RUNNING
-  STOPPED
-  FAILED
+    CREATED
+    STARTING
+    RUNNING
+    STOPPED
+    FAILED
+}
+
+enum HostStatus {
+    ONLINE
+    OFFLINE
+}
+
+enum DeployNetwork {
+    DEVNET
+    TESTNET
+    MAINNET
 }
 
 enum AuthProvider {
-  EMAIL
-  CKB_WALLET
+    EMAIL
+    CKB_WALLET
+}
+
+enum CellStatus {
+    LIVE
+    DEAD
+}
+
+enum ScriptKind {
+    LOCK
+    TYPE
+}
+
+enum HashType {
+    DATA
+    TYPE
+    DATA1
+}
+
+enum TxStatus {
+    PENDING
+    PROPOSED
+    COMMITTED
+    REJECTED
 }
 
 model User {
-  id String @id @default(uuid())
+    id String @id @default(uuid())
 
-  name         String
-  email        String? @unique
-  passwordHash String?
+    name         String
+    email        String? @unique
+    passwordHash String?
 
-  walletAddress String?      @unique
-  authProvider  AuthProvider @default(EMAIL)
+    walletAddress String?      @unique
+    authProvider  AuthProvider @default(EMAIL)
 
-  role UserRole @default(USER)
+    role UserRole @default(USER)
 
-  workspaces       Workspace[]
-  walletChallenges WalletChallenge[]
+    workspaces       Workspace[]
+    walletChallenges WalletChallenge[]
+    refreshTokens    RefreshToken[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  @@index([walletAddress])
+    @@index([walletAddress])
 }
 
 model WalletChallenge {
-  id String @id @default(uuid())
+    id String @id @default(uuid())
 
-  walletAddress String
-  nonce         String @unique
-  message       String
+    walletAddress String
+    nonce         String @unique
+    message       String
 
-  expiresAt DateTime
-  usedAt    DateTime?
+    expiresAt DateTime
+    usedAt    DateTime?
 
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String?
+    user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
+    createdAt DateTime @default(now())
 
-  @@index([walletAddress])
-  @@index([expiresAt])
+    @@index([walletAddress])
+    @@index([expiresAt])
+}
+
+/// One row per issued refresh token. Tokens are stored hashed (SHA-256).
+/// Every rotation creates a new row in the same `familyId`; reusing a
+/// revoked token revokes the whole family (theft detection).
+model RefreshToken {
+    id String @id @default(uuid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    tokenHash String @unique
+    familyId  String
+
+    expiresAt    DateTime
+    revokedAt    DateTime?
+    replacedById String?
+    lastUsedAt   DateTime?
+
+    userAgent String?
+    ipAddress String?
+
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([familyId])
+    @@index([expiresAt])
+}
+
+/// A Docker host that runs workspaces. Rows are kept in step with the
+/// DOCKER_HOSTS setting by runtime-service; `draining` is set by operators
+/// to move workspaces off a host as they restart.
+model Host {
+    /// Same id as in DOCKER_HOSTS.
+    id       String @id
+    /// Endpoint without credentials, for display.
+    endpoint String
+
+    status   HostStatus @default(ONLINE)
+    draining Boolean    @default(false)
+
+    maxWorkspaces Int @default(8)
+
+    /// From the Docker engine at the last health check.
+    cpus              Int?
+    memoryBytes       BigInt?
+    containersRunning Int?
+    lastSeenAt        DateTime?
+    lastError         String?
+
+    workspaces Workspace[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Workspace {
-  id     String          @id @default(uuid())
-  name   String
-  status WorkspaceStatus @default(PENDING)
+    id     String          @id @default(uuid())
+    name   String
+    status WorkspaceStatus @default(PENDING)
 
-  userId String
+    /// Host the workspace's containers and volumes live on. Assigned on
+    /// first start and kept (volumes are local to a host). Null = the
+    /// default host, for workspaces created before multi-host support.
+    hostId String?
+    host   Host?   @relation(fields: [hostId], references: [id], onDelete: SetNull)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
 
-  templateId String?
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  runtimeNetwork String?
-  runtimeVolume  String?
-  ckbDataVolume  String?
+    templateId String?
 
-  lastStartedAt DateTime?
-  lastStoppedAt DateTime?
+    runtimeNetwork String?
+    runtimeVolume  String?
+    ckbDataVolume  String?
 
-  containers WorkspaceContainer[]
+    lastStartedAt DateTime?
+    lastStoppedAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    /// Current step while status is PROVISIONING (preparing | starting | project).
+    provisionStage String?
+    /// Why the last start failed, shown to the user.
+    provisionError String?
 
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
+    /// Last sign of use (open IDE tab, terminal input, file edits, builds).
+    /// Running workspaces idle for too long are stopped automatically.
+    lastActivityAt DateTime?
+
+    /// When the source-file copy in WorkspaceFile was last refreshed from
+    /// the container. Null until the workspace has run once.
+    filesSnapshotAt DateTime?
+
+    containers  WorkspaceContainer[]
+    files       WorkspaceFile[]
+    deployments ContractDeployment[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+    @@index([status])
+    @@index([createdAt])
+    @@index([hostId, status])
+}
+
+/// Copy of a workspace's source files, so the editor works while the
+/// runtime container is stopped. Build output (target/, build/) and .git are
+/// not stored. Edits made while offline are flagged `dirty` / `deleted` and
+/// applied to the container on the next start.
+model WorkspaceFile {
+    id String @id @default(uuid())
+
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+    path        String
+    isDirectory Boolean @default(false)
+    content     String  @default("")
+    size        Int     @default(0)
+
+    dirty   Boolean @default(false)
+    deleted Boolean @default(false)
+
+    updatedAt DateTime @updatedAt
+
+    @@unique([workspaceId, path])
+    @@index([workspaceId, dirty])
+}
+
+/// A contract deployed from a workspace. Devnet deploys are made by
+/// runtime-service (offckb); testnet/mainnet deploys are signed in the
+/// user's wallet and recorded here afterwards.
+model ContractDeployment {
+    id String @id @default(uuid())
+
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    userId      String
+
+    network      DeployNetwork
+    contractName String
+
+    /// Where the code cell is (the cell dep users add to their transactions).
+    txHash      String
+    outputIndex Int    @default(0)
+
+    /// Script fields that reference this contract.
+    codeHash String
+    hashType String
+
+    /// Set for upgradable (Type ID) deploys; stays the same across upgrades.
+    typeId   String?
+    /// Type ID script args, needed to upgrade the cell from the wallet.
+    typeArgs String?
+
+    dataHash  String
+    sizeBytes Int
+    /// Occupied capacity in shannons.
+    capacity  String
+
+    /// Lock address that owns the code cell (testnet/mainnet).
+    deployerAddress String?
+
+    /// Earlier deployment this one replaced (Type ID upgrade).
+    upgradeOfId String?
+
+    createdAt DateTime @default(now())
+
+    @@index([workspaceId, createdAt])
+    @@index([typeId])
 }
 
 model WorkspaceContainer {
-  id String @id @default(uuid())
+    id String @id @default(uuid())
 
-  workspaceId String
+    workspaceId String
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  containerId String @unique
-  name        String
-  image       String
+    containerId String @unique
+    name        String
+    image       String
 
-  type RuntimeContainerType
+    type RuntimeContainerType
 
-  status RuntimeContainerStatus @default(CREATED)
+    status RuntimeContainerStatus @default(CREATED)
 
-  internalPort Int?
-  hostPort     Int?
+    internalPort Int?
+    hostPort     Int?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  @@unique([workspaceId, type])
-  @@index([workspaceId])
-  @@index([containerId])
-  @@index([status])
-  @@index([type])
+    @@unique([workspaceId, type])
+    @@index([workspaceId])
+    @@index([containerId])
+    @@index([status])
+    @@index([type])
+}
+
+model Block {
+    id String @id @default(uuid())
+
+    number     BigInt @unique
+    hash       String @unique
+    parentHash String
+
+    epoch     String?
+    timeStamp DateTime
+
+    createdAt DateTime @default(now())
+
+    transactions Transaction[]
+}
+
+model Transaction {
+    id   String @id @default(uuid())
+    hash String @unique
+
+    blockId String?
+    block   Block?  @relation(fields: [blockId], references: [id])
+
+    fee    String?
+    cycles BigInt?
+
+    status TxStatus
+
+    createdAt DateTime @default(now())
+
+    inputs  Cell[] @relation("ConsumedCells")
+    outputs Cell[] @relation("CreatedCells")
+}
+
+model Cell {
+    id String @id @default(cuid())
+
+    txHash String
+
+    outputIndex Int
+
+    outPoint String @unique
+
+    capacity String
+
+    data String?
+
+    status CellStatus
+
+    lockScriptId String
+
+    typeScriptId String?
+
+    createdByTxId String
+
+    consumedByTxId String?
+
+    createdBlockId String?
+
+    consumedBlockId String?
+
+    lockScript Script @relation("LockScript", fields: [lockScriptId], references: [id])
+
+    typeScript Script? @relation("TypeScript", fields: [typeScriptId], references: [id])
+
+    createdBy Transaction @relation("CreatedCells", fields: [createdByTxId], references: [id])
+
+    consumedBy Transaction? @relation("ConsumedCells", fields: [consumedByTxId], references: [id])
+
+    addressId String?
+
+    address Address? @relation(fields: [addressId], references: [id])
+
+    createdAt DateTime @default(now())
+}
+
+model Script {
+    id String @id @default(cuid())
+
+    codeHash String
+
+    hashType HashType
+
+    args String
+
+    scriptHash String @unique
+
+    kind ScriptKind
+
+    cellsAsLock Cell[] @relation("LockScript")
+    cellsAsType Cell[] @relation("TypeScript")
+}
+
+model Address {
+    id String @id @default(cuid())
+
+    address String @unique
+
+    balance String
+
+    liveCapacity String
+
+    occupiedCapacity String
+
+    freeCapacity String
+
+    cells Cell[]
 }

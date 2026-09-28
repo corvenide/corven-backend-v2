@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
+import { AiController } from './ai/ai.controller';
+import { AiService } from './ai/ai.service';
 
 @Module({
     imports: [
@@ -74,7 +76,7 @@ import { ApiGatewayService } from './api-gateway.service';
             }
         ]),
     ],
-    controllers: [ApiGatewayController],
-    providers: [ApiGatewayService],
+    controllers: [ApiGatewayController, AiController],
+    providers: [ApiGatewayService, AiService],
 })
 export class ApiGatewayModule { }

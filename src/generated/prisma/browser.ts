@@ -28,12 +28,66 @@ export type User = Prisma.UserModel
  */
 export type WalletChallenge = Prisma.WalletChallengeModel
 /**
+ * Model RefreshToken
+ * One row per issued refresh token. Tokens are stored hashed (SHA-256).
+ * Every rotation creates a new row in the same `familyId`; reusing a
+ * revoked token revokes the whole family (theft detection).
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model Host
+ * A Docker host that runs workspaces. Rows are kept in step with the
+ * DOCKER_HOSTS setting by runtime-service; `draining` is set by operators
+ * to move workspaces off a host as they restart.
+ */
+export type Host = Prisma.HostModel
+/**
  * Model Workspace
  * 
  */
 export type Workspace = Prisma.WorkspaceModel
 /**
+ * Model WorkspaceFile
+ * Copy of a workspace's source files, so the editor works while the
+ * runtime container is stopped. Build output (target/, build/) and .git are
+ * not stored. Edits made while offline are flagged `dirty` / `deleted` and
+ * applied to the container on the next start.
+ */
+export type WorkspaceFile = Prisma.WorkspaceFileModel
+/**
+ * Model ContractDeployment
+ * A contract deployed from a workspace. Devnet deploys are made by
+ * runtime-service (offckb); testnet/mainnet deploys are signed in the
+ * user's wallet and recorded here afterwards.
+ */
+export type ContractDeployment = Prisma.ContractDeploymentModel
+/**
  * Model WorkspaceContainer
  * 
  */
 export type WorkspaceContainer = Prisma.WorkspaceContainerModel
+/**
+ * Model Block
+ * 
+ */
+export type Block = Prisma.BlockModel
+/**
+ * Model Transaction
+ * 
+ */
+export type Transaction = Prisma.TransactionModel
+/**
+ * Model Cell
+ * 
+ */
+export type Cell = Prisma.CellModel
+/**
+ * Model Script
+ * 
+ */
+export type Script = Prisma.ScriptModel
+/**
+ * Model Address
+ * 
+ */
+export type Address = Prisma.AddressModel

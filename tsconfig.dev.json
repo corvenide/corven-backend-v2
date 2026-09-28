@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist-dev",
+    "declaration": false,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist-dev/.tsbuildinfo"
+  },
+  "include": ["apps/*/src/**/*.ts", "libs/*/src/**/*.ts", "src/generated/**/*.ts"],
+  "exclude": ["node_modules", "dist", "dist-dev", "**/*.spec.ts", "apps/*/src/generated/**"]
+}

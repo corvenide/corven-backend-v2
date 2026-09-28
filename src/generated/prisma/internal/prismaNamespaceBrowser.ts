@@ -53,8 +53,17 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   WalletChallenge: 'WalletChallenge',
+  RefreshToken: 'RefreshToken',
+  Host: 'Host',
   Workspace: 'Workspace',
-  WorkspaceContainer: 'WorkspaceContainer'
+  WorkspaceFile: 'WorkspaceFile',
+  ContractDeployment: 'ContractDeployment',
+  WorkspaceContainer: 'WorkspaceContainer',
+  Block: 'Block',
+  Transaction: 'Transaction',
+  Cell: 'Cell',
+  Script: 'Script',
+  Address: 'Address'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -102,10 +111,46 @@ export const WalletChallengeScalarFieldEnum = {
 export type WalletChallengeScalarFieldEnum = (typeof WalletChallengeScalarFieldEnum)[keyof typeof WalletChallengeScalarFieldEnum]
 
 
+export const RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  familyId: 'familyId',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  replacedById: 'replacedById',
+  lastUsedAt: 'lastUsedAt',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  createdAt: 'createdAt'
+} as const
+
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
+export const HostScalarFieldEnum = {
+  id: 'id',
+  endpoint: 'endpoint',
+  status: 'status',
+  draining: 'draining',
+  maxWorkspaces: 'maxWorkspaces',
+  cpus: 'cpus',
+  memoryBytes: 'memoryBytes',
+  containersRunning: 'containersRunning',
+  lastSeenAt: 'lastSeenAt',
+  lastError: 'lastError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HostScalarFieldEnum = (typeof HostScalarFieldEnum)[keyof typeof HostScalarFieldEnum]
+
+
 export const WorkspaceScalarFieldEnum = {
   id: 'id',
   name: 'name',
   status: 'status',
+  hostId: 'hostId',
   userId: 'userId',
   templateId: 'templateId',
   runtimeNetwork: 'runtimeNetwork',
@@ -113,11 +158,53 @@ export const WorkspaceScalarFieldEnum = {
   ckbDataVolume: 'ckbDataVolume',
   lastStartedAt: 'lastStartedAt',
   lastStoppedAt: 'lastStoppedAt',
+  provisionStage: 'provisionStage',
+  provisionError: 'provisionError',
+  lastActivityAt: 'lastActivityAt',
+  filesSnapshotAt: 'filesSnapshotAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type WorkspaceScalarFieldEnum = (typeof WorkspaceScalarFieldEnum)[keyof typeof WorkspaceScalarFieldEnum]
+
+
+export const WorkspaceFileScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  path: 'path',
+  isDirectory: 'isDirectory',
+  content: 'content',
+  size: 'size',
+  dirty: 'dirty',
+  deleted: 'deleted',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkspaceFileScalarFieldEnum = (typeof WorkspaceFileScalarFieldEnum)[keyof typeof WorkspaceFileScalarFieldEnum]
+
+
+export const ContractDeploymentScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  userId: 'userId',
+  network: 'network',
+  contractName: 'contractName',
+  txHash: 'txHash',
+  outputIndex: 'outputIndex',
+  codeHash: 'codeHash',
+  hashType: 'hashType',
+  typeId: 'typeId',
+  typeArgs: 'typeArgs',
+  dataHash: 'dataHash',
+  sizeBytes: 'sizeBytes',
+  capacity: 'capacity',
+  deployerAddress: 'deployerAddress',
+  upgradeOfId: 'upgradeOfId',
+  createdAt: 'createdAt'
+} as const
+
+export type ContractDeploymentScalarFieldEnum = (typeof ContractDeploymentScalarFieldEnum)[keyof typeof ContractDeploymentScalarFieldEnum]
 
 
 export const WorkspaceContainerScalarFieldEnum = {
@@ -135,6 +222,77 @@ export const WorkspaceContainerScalarFieldEnum = {
 } as const
 
 export type WorkspaceContainerScalarFieldEnum = (typeof WorkspaceContainerScalarFieldEnum)[keyof typeof WorkspaceContainerScalarFieldEnum]
+
+
+export const BlockScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  hash: 'hash',
+  parentHash: 'parentHash',
+  epoch: 'epoch',
+  timeStamp: 'timeStamp',
+  createdAt: 'createdAt'
+} as const
+
+export type BlockScalarFieldEnum = (typeof BlockScalarFieldEnum)[keyof typeof BlockScalarFieldEnum]
+
+
+export const TransactionScalarFieldEnum = {
+  id: 'id',
+  hash: 'hash',
+  blockId: 'blockId',
+  fee: 'fee',
+  cycles: 'cycles',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const CellScalarFieldEnum = {
+  id: 'id',
+  txHash: 'txHash',
+  outputIndex: 'outputIndex',
+  outPoint: 'outPoint',
+  capacity: 'capacity',
+  data: 'data',
+  status: 'status',
+  lockScriptId: 'lockScriptId',
+  typeScriptId: 'typeScriptId',
+  createdByTxId: 'createdByTxId',
+  consumedByTxId: 'consumedByTxId',
+  createdBlockId: 'createdBlockId',
+  consumedBlockId: 'consumedBlockId',
+  addressId: 'addressId',
+  createdAt: 'createdAt'
+} as const
+
+export type CellScalarFieldEnum = (typeof CellScalarFieldEnum)[keyof typeof CellScalarFieldEnum]
+
+
+export const ScriptScalarFieldEnum = {
+  id: 'id',
+  codeHash: 'codeHash',
+  hashType: 'hashType',
+  args: 'args',
+  scriptHash: 'scriptHash',
+  kind: 'kind'
+} as const
+
+export type ScriptScalarFieldEnum = (typeof ScriptScalarFieldEnum)[keyof typeof ScriptScalarFieldEnum]
+
+
+export const AddressScalarFieldEnum = {
+  id: 'id',
+  address: 'address',
+  balance: 'balance',
+  liveCapacity: 'liveCapacity',
+  occupiedCapacity: 'occupiedCapacity',
+  freeCapacity: 'freeCapacity'
+} as const
+
+export type AddressScalarFieldEnum = (typeof AddressScalarFieldEnum)[keyof typeof AddressScalarFieldEnum]
 
 
 export const SortOrder = {

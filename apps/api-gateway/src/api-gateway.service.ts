@@ -21,6 +21,18 @@ import {
     TimeoutError,
 } from 'rxjs';
 
+interface SessionMeta {
+    userAgent?: string;
+    ipAddress?: string;
+}
+
+export interface AuthSession {
+    accessToken: string;
+    refreshToken: string;
+    refreshTokenExpiresAt: string;
+    user: unknown;
+}
+
 @Injectable()
 export class ApiGatewayService {
     constructor(
@@ -41,73 +53,51 @@ export class ApiGatewayService {
     // Authentication
     // =========================================
 
-    async register(data: {
-        name: string;
-        email: string;
-        password: string;
-    }) {
-        return this.sendToAuthService(
-            'auth.register',
-            data,
-        );
-    }
-
-    async login(data: {
-        email: string;
-        password: string;
-    }) {
-        return this.sendToAuthService(
-            'auth.login',
-            data,
-        );
-    }
-
-    async verifyToken(token: string) {
-        return this.sendToAuthService(
-            'auth.verify',
-            {
-                token,
-            },
-        );
-    }
-
-    async getProfile(userId: string) {
-        return this.sendToAuthService(
-            'auth.profile',
-            {
-                userId,
-            },
-        );
-    }
-
-    createWalletChallenge(data: {
-        walletAddress: string;
-    }) {
-        return firstValueFrom(
-            this.authClient.send(
-                {
-                    cmd: 'auth.wallet.challenge',
-                },
-                data,
-            ),
-        );
+    createWalletChallenge(data: { walletAddress: string }) {
+        return this.sendToAuthService('auth.wallet.challenge', data);
     }
 
     walletLogin(data: {
         walletAddress: string;
         challengeId: string;
         signature: unknown;
+        meta: SessionMeta;
     }) {
-        return firstValueFrom(
-            this.authClient.send(
-                {
-                    cmd: 'auth.wallet.login',
-                },
-                data,
-            ),
+        // Signature verification can call out to public CKB nodes for
+        // known-script lookups, so allow a little longer than default.
+        return this.sendToAuthService<AuthSession>('auth.wallet.login', data, 15_000);
+    }
+
+    register(data: { name: string; email: string; password: string; meta: SessionMeta }) {
+        return this.sendToAuthService<AuthSession>('auth.register', data);
+    }
+
+    login(data: { email: string; password: string; meta: SessionMeta }) {
+        return this.sendToAuthService<AuthSession>('auth.login', data);
+    }
+
+    refreshSession(data: { refreshToken: string; meta: SessionMeta }) {
+        return this.sendToAuthService<AuthSession>('auth.refresh', data);
+    }
+
+    logout(data: { refreshToken: string }) {
+        return this.sendToAuthService('auth.logout', data);
+    }
+
+    logoutAll(userId: string) {
+        return this.sendToAuthService('auth.logout-all', { userId });
+    }
+
+    verifyToken(token: string) {
+        return this.sendToAuthService<{ valid: boolean; user: { id: string } }>(
+            'auth.verify',
+            { token },
         );
     }
 
+    getProfile(userId: string) {
+        return this.sendToAuthService('auth.profile', { userId });
+    }
 
     // =========================================
     // Workspace service
@@ -185,8 +175,108 @@ export class ApiGatewayService {
                 userId,
                 workspaceId,
             },
-            15 * 60 * 1_000,
+            // Returns as soon as the start is claimed; provisioning continues
+            // in the background and is followed via runtime.status.
+            30_000,
         );
+    }
+
+    workspaceHeartbeat(
+        userId: string,
+        workspaceId: string,
+    ) {
+        return this.send(
+            this.runtimeClient,
+            'runtime.heartbeat',
+            { userId, workspaceId },
+            10_000,
+        );
+    }
+
+    startDevnet(
+        userId: string,
+        workspaceId: string,
+    ) {
+        return this.send(
+            this.runtimeClient,
+            'runtime.devnet.start',
+            { userId, workspaceId },
+            60_000,
+        );
+    }
+
+    stopDevnet(
+        userId: string,
+        workspaceId: string,
+    ) {
+        return this.send(
+            this.runtimeClient,
+            'runtime.devnet.stop',
+            { userId, workspaceId },
+            30_000,
+        );
+    }
+
+    getDevnetInfo(
+        userId: string,
+        workspaceId: string,
+    ) {
+        return this.send(
+            this.runtimeClient,
+            'runtime.devnet.info',
+            { userId, workspaceId },
+            15_000,
+        );
+    }
+
+    listContracts(userId: string, workspaceId: string) {
+        return this.send(this.runtimeClient, 'runtime.contracts.list', { userId, workspaceId }, 15_000);
+    }
+
+    contractBinary(userId: string, workspaceId: string, contract: string) {
+        return this.send(this.runtimeClient, 'runtime.contracts.binary', { userId, workspaceId, contract }, 30_000);
+    }
+
+    deployDevnet(userId: string, workspaceId: string, contract: string, upgradable: boolean) {
+        // offckb waits for the transaction to be committed.
+        return this.send(this.runtimeClient, 'runtime.deploy.devnet', { userId, workspaceId, contract, upgradable }, 180_000);
+    }
+
+    devnetAccounts(userId: string, workspaceId: string) {
+        return this.send(this.runtimeClient, 'runtime.devnet.accounts', { userId, workspaceId }, 30_000);
+    }
+
+    devnetScripts(userId: string, workspaceId: string) {
+        return this.send(this.runtimeClient, 'runtime.devnet.scripts', { userId, workspaceId }, 30_000);
+    }
+
+    devnetRpc(userId: string, workspaceId: string, request: unknown) {
+        return this.send(this.runtimeClient, 'runtime.devnet.rpc', { userId, workspaceId, request }, 70_000);
+    }
+
+    debugRunContract(userId: string, workspaceId: string, contract: string) {
+        return this.send(this.runtimeClient, 'runtime.debug.run', { userId, workspaceId, contract }, 90_000);
+    }
+
+    debugTransactions(userId: string, workspaceId: string) {
+        return this.send(this.runtimeClient, 'runtime.debug.transactions', { userId, workspaceId }, 20_000);
+    }
+
+    debugTransaction(userId: string, workspaceId: string, txHash: string, replace: string[]) {
+        // Loads the transaction and runs each of its scripts.
+        return this.send(this.runtimeClient, 'runtime.debug.tx', { userId, workspaceId, txHash, replace }, 240_000);
+    }
+
+    generateMolecule(userId: string, workspaceId: string, path: string, language: 'rust' | 'c') {
+        return this.send(this.runtimeClient, 'runtime.molecule.generate', { userId, workspaceId, path, language }, 60_000);
+    }
+
+    listDeployments(userId: string, workspaceId: string) {
+        return this.send(this.runtimeClient, 'runtime.deployments.list', { userId, workspaceId }, 15_000);
+    }
+
+    recordDeployment(userId: string, workspaceId: string, body: Record<string, unknown>) {
+        return this.send(this.runtimeClient, 'runtime.deployments.record', { ...body, userId, workspaceId }, 15_000);
     }
 
     stopWorkspace(
@@ -249,7 +339,8 @@ export class ApiGatewayService {
                 userId,
                 workspaceId,
             },
-            15 * 60 * 1_000,
+            // Removing the old containers and volumes, then claiming a start.
+            2 * 60 * 1_000,
         );
     }
 
@@ -459,12 +550,12 @@ export class ApiGatewayService {
     // Transport helpers
     // =========================================
 
-    private async sendToAuthService(
+    private async sendToAuthService<T = unknown>(
         cmd: string,
         payload: unknown,
         timeoutMs = 5_000,
-    ) {
-        return this.send(
+    ): Promise<T> {
+        return this.send<T>(
             this.authClient,
             cmd,
             payload,
