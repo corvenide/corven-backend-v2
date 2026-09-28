@@ -153,6 +153,68 @@ cd /opt/corven/platform && bash deploy/deploy.sh   # frontend
 
 Each script pulls the latest code on the checked-out branch, rebuilds, and restarts only what changed. Add `--no-pull` to deploy what is already checked out.
 
+## Automatic deploys (CI/CD)
+
+Both repositories have two GitHub Actions workflows:
+
+| Workflow | Runs on | Does |
+|---|---|---|
+| `test.yml` | every pull request | Builds and runs unit and end-to-end tests |
+| `deploy.yml` | every push to `main` (and by hand from the Actions tab) | Runs the same tests, then deploys to the server and checks the site is up |
+
+A deploy only happens when every test passes. It connects to the server over SSH and runs `deploy/ci-deploy.sh`, which runs the same `deploy/deploy.sh` described above. The SSH key GitHub uses can't do anything else on the server.
+
+### One-time setup
+
+**1. Make `git pull` work without a password on the server.** Deploys run `git pull` unattended. If you cloned with deploy keys (step 3 above), this already works. If you cloned over HTTPS with a token, store it once:
+
+```bash
+cd /opt/corven/backend && git config credential.helper store && git pull
+cd /opt/corven/platform && git config credential.helper store && git pull
+```
+
+**2. Create a key for GitHub Actions** (on your laptop):
+
+```bash
+ssh-keygen -t ed25519 -f corven-deploy -N "" -C github-actions
+```
+
+This makes `corven-deploy` (private) and `corven-deploy.pub` (public).
+
+**3. Let that key run deploys, and nothing else** (on the server). Add one line to `~/.ssh/authorized_keys`, replacing `ssh-ed25519 AAAA...` with the contents of `corven-deploy.pub`:
+
+```bash
+echo 'command="/opt/corven/backend/deploy/ci-deploy.sh",restrict ssh-ed25519 AAAA... github-actions' >> ~/.ssh/authorized_keys
+```
+
+`command=` forces the deploy script whatever the client asks for, and `restrict` turns off shells, port forwarding and the rest. Your own login key is unaffected.
+
+**4. Get the server's host key** (on your laptop), so GitHub can check it's talking to your server:
+
+```bash
+ssh-keyscan -t ed25519 STATIC_IP
+```
+
+**5. Add secrets in both GitHub repositories.** In each repository, open **Settings → Secrets and variables → Actions → New repository secret** and add:
+
+| Secret | Value |
+|---|---|
+| `DEPLOY_HOST` | the server's static IP |
+| `DEPLOY_USER` | `ubuntu` |
+| `DEPLOY_SSH_KEY` | the whole contents of `corven-deploy` (the private key) |
+| `DEPLOY_KNOWN_HOSTS` | the output of the `ssh-keyscan` command |
+
+Then delete the private key from your laptop.
+
+**6. (Optional) Require approval.** Deploy jobs use a GitHub environment called `production`. In **Settings → Environments → production**, add yourself under *Required reviewers* to approve each deploy by hand.
+
+### Using it
+
+- Merge a pull request, or push to `main`: tests run, then the deploy. Follow it in the repository's **Actions** tab.
+- Re-deploy without a new commit: **Actions → Deploy → Run workflow**.
+- A failed test stops the deploy, and the server keeps running the previous version.
+- If the frontend and API move to other domains, set the repository variables `SITE_URL` (frontend repo) and `API_URL` (backend repo) under **Settings → Secrets and variables → Actions → Variables**, so the post-deploy checks look in the right place.
+
 ## Operating
 
 ```bash

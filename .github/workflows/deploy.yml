@@ -1,0 +1,55 @@
+name: Deploy
+
+# Every push to main is tested, then deployed to the Lightsail server.
+# Setup: docs/DEPLOYMENT.md, "Automatic deploys (CI/CD)".
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at once; a newer push waits for the current one.
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    name: Deploy to production
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    # The first deploy on a new server builds the workspace images (~30 min).
+    timeout-minutes: 60
+    env:
+      API_URL: ${{ vars.API_URL || 'https://staging-api.corvanide.space/api' }}
+    steps:
+      - name: Set up SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # The server only lets this key run deploy/ci-deploy.sh.
+      - name: Deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o ServerAliveInterval=30 \
+            "$DEPLOY_USER@$DEPLOY_HOST" backend
+
+      - name: Check the API is up
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "$API_URL/health"; then exit 0; fi
+            sleep 5
+          done
+          echo "API did not become healthy at $API_URL/health" >&2
+          exit 1

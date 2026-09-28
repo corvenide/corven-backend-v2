@@ -1,9 +1,9 @@
 name: Test
 
+# Pushes to main run these tests through deploy.yml, before deploying.
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_call:
 
 jobs:
   unit:
