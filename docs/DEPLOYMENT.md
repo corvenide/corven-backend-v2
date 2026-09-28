@@ -1,6 +1,6 @@
 # Deploying to AWS Lightsail
 
-This guide deploys the backend and the frontend ([corven-platform](https://github.com/lestonEth/corven-platform)) to one Ubuntu Lightsail instance:
+This guide deploys the backend and the frontend ([corven-fronted](https://github.com/corvenide/corven-fronted)) to one Ubuntu Lightsail instance:
 
 | Domain | Serves |
 |---|---|
@@ -97,7 +97,7 @@ Clone both repositories under `/opt/corven`:
 sudo mkdir -p /opt/corven && sudo chown ubuntu:ubuntu /opt/corven
 cd /opt/corven
 git clone git@github-backend:corvenide/corven-backend-v2.git backend
-git clone git@github-platform:lestonEth/corven-platform.git platform
+git clone git@github-platform:corvenide/corven-fronted.git platform
 ```
 
 (For public repositories, clone with the plain `https://github.com/...` URLs instead.)

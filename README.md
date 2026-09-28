@@ -230,7 +230,7 @@ In production, set `CORS_ORIGINS` to the frontend origins (comma-separated). Whe
 
 ## Related repositories
 
-- [lestonEth/corven-platform](https://github.com/lestonEth/corven-platform): the Corven IDE web frontend
+- [corvenide/corven-fronted](https://github.com/corvenide/corven-fronted): the Corven IDE web frontend
 
 ## License
 
