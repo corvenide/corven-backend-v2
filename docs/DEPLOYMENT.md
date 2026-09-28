@@ -4,20 +4,20 @@ This guide deploys the backend and the frontend ([corven-fronted](https://github
 
 | Domain | Serves |
 |---|---|
-| `https://corven.space` | Frontend (static build) |
-| `https://staging-api.corvan.space/api` | REST API (api-gateway) |
-| `https://staging-api.corvan.space/socket.io` | Terminal, build and test WebSockets (terminal-service) |
+| `https://corvanide.space` | Frontend (static build) |
+| `https://staging-api.corvanide.space/api` | REST API (api-gateway) |
+| `https://staging-api.corvanide.space/socket.io` | Terminal, build and test WebSockets (terminal-service) |
 
 ```text
-                 ┌─────────────────────── Lightsail instance ────────────────────────┐
- corven.space ──▶│ Caddy :443 ── /srv/web (frontend build)                           │
- staging-api. ──▶│   ├─ /socket.io/* ─▶ terminal-service ─┐                          │
- corvan.space    │   └─ everything else ─▶ api-gateway ─▶ auth / workspace /         │
-                 │                                        runtime / file services    │
-                 │   PostgreSQL          Docker daemon ◀──┘  (one CKB node + one     │
-                 │                                            build container per     │
-                 │                                            running workspace)      │
-                 └───────────────────────────────────────────────────────────────────┘
+                      ┌─────────────────────── Lightsail instance ────────────────────────┐
+ corvanide.space ────▶│ Caddy :443 ── /srv/web (frontend build)                           │
+ staging-api.    ────▶│   ├─ /socket.io/* ─▶ terminal-service ─┐                          │
+ corvanide.space      │   └─ everything else ─▶ api-gateway ─▶ auth / workspace /         │
+                      │                                        runtime / file services    │
+                      │   PostgreSQL          Docker daemon ◀──┘  (one CKB node + one     │
+                      │                                            build container per     │
+                      │                                            running workspace)      │
+                      └───────────────────────────────────────────────────────────────────┘
 ```
 
 Caddy gets HTTPS certificates from Let's Encrypt automatically. Only ports 22, 80 and 443 are open to the internet; the services, PostgreSQL and the workspace containers are reachable only inside the server.
@@ -50,19 +50,19 @@ Remove any other open ports.
 
 ## 2. Point DNS at the server (Namecheap)
 
-In Namecheap, open **Domain List → Manage → Advanced DNS** for each domain and add:
+In Namecheap, open **Domain List → corvanide.space → Manage → Advanced DNS** and add:
 
-| Domain | Type | Host | Value |
-|---|---|---|---|
-| corven.space | A Record | `@` | your static IP |
-| corven.space | CNAME Record | `www` | `corven.space.` |
-| corvan.space | A Record | `staging-api` | your static IP |
+| Type | Host | Value |
+|---|---|---|
+| A Record | `@` | your static IP |
+| CNAME Record | `www` | `corvanide.space.` |
+| A Record | `staging-api` | your static IP |
 
 Remove any conflicting parking-page records for `@` and `www`. Check propagation before deploying (Caddy can't get certificates until DNS resolves):
 
 ```bash
-dig +short corven.space
-dig +short staging-api.corvan.space
+dig +short corvanide.space
+dig +short staging-api.corvanide.space
 ```
 
 ## 3. Get the code onto the server
@@ -126,8 +126,8 @@ The first run takes a while (about 15–30 minutes) because it builds the worksp
 Check it:
 
 ```bash
-curl https://staging-api.corvan.space/api/health
-curl https://staging-api.corvan.space/api/health/runtime
+curl https://staging-api.corvanide.space/api/health
+curl https://staging-api.corvanide.space/api/health/runtime
 ```
 
 ## 6. Deploy the frontend
@@ -139,10 +139,10 @@ bash deploy/deploy.sh
 
 This builds the app in a temporary Node container with:
 
-- `VITE_API_URL=https://staging-api.corvan.space/api`
-- `VITE_TERMINAL_URL=https://staging-api.corvan.space`
+- `VITE_API_URL=https://staging-api.corvanide.space/api`
+- `VITE_TERMINAL_URL=https://staging-api.corvanide.space`
 
-and copies the result to `/opt/corven/web`, which Caddy serves at `https://corven.space`. Override either URL by setting it before the command.
+and copies the result to `/opt/corven/web`, which Caddy serves at `https://corvanide.space`. Override either URL by setting it before the command.
 
 ## Updating
 
@@ -179,7 +179,7 @@ In order of effort:
 1. **Bigger instance.** Snapshot and recreate on a larger plan (see the table above), then raise `HOST_MAX_WORKSPACES` in `deploy/.env` and redeploy.
 2. **More workspace servers.** The backend can place workspaces on several Docker hosts (`DOCKER_HOSTS`). Create more Lightsail instances in the same region, install Docker and build the three images on each (`fiberdev/ckb-node:dev`, `fiberdev/ckb-runtime:dev`, `corven/build-cache:dev`), and list them in `deploy/.env`, reachable over the private network with TLS. New workspaces go to the host with the most free slots. See [`HOSTS, BUILD CACHE AND AI.md`](HOSTS,%20BUILD%20CACHE%20AND%20AI.md) for the format, health checks and draining a host.
 3. **Managed database.** Create a Lightsail managed PostgreSQL database in the same region, set `DATABASE_URL` in `deploy/.env` to it (with `?sslmode=require`), and redeploy. This takes database load and backups off the instance.
-4. **CDN for the frontend.** Put a Lightsail distribution in front of `corven.space` to serve the static files from edge locations.
+4. **CDN for the frontend.** Put a Lightsail distribution in front of `corvanide.space` to serve the static files from edge locations.
 
 ## Troubleshooting
 

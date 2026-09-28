@@ -1,0 +1,101 @@
+# Throwaway stack for the end-to-end tests: PostgreSQL on tmpfs and the
+# backend services, with the gateway on 127.0.0.1:${E2E_PORT:-8000}.
+# Started and removed by test/e2e/run.sh.
+
+name: corven-e2e
+
+x-env: &env
+  DATABASE_URL: postgresql://corven:corven@postgres:5432/corven
+  JWT_SECRET: e2e-secret-e2e-secret-e2e-secret-e2e-secret
+  CORS_ORIGINS: http://localhost:5173
+  TRUST_PROXY_HOPS: "1"
+  AUTH_SERVICE_HOST: auth-service
+  AUTH_SERVICE_PORT: "8001"
+  WORKSPACE_SERVICE_HOST: workspace-service
+  WORKSPACE_SERVICE_PORT: "8002"
+  RUNTIME_SERVICE_HOST: runtime-service
+  RUNTIME_SERVICE_PORT: "8003"
+  TERMINAL_SERVICE_PORT: "8004"
+  FILE_SERVICE_HOST: file-service
+  FILE_SERVICE_PORT: "8005"
+  API_GATEWAY_PORT: "8000"
+  DOCKER_SOCKET_PATH: /var/run/docker.sock
+  # The tests never start workspaces.
+  HOST_MAX_WORKSPACES: "1"
+  RUNTIME_POOL_SIZE: "0"
+  BUILD_CACHE: "off"
+
+x-backend: &backend
+  image: corven-backend:e2e
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+
+services:
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: corven
+      POSTGRES_PASSWORD: corven
+      POSTGRES_DB: corven
+    tmpfs:
+      - /var/lib/postgresql/data
+    # The tests use it directly for setup the API can't do (see support/db.ts).
+    ports:
+      - "127.0.0.1:${E2E_DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corven -d corven"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    image: corven-backend:e2e
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    environment: *env
+    command: ["node_modules/.bin/prisma", "migrate", "deploy"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  auth-service:
+    <<: *backend
+    environment:
+      <<: *env
+      SERVICE: auth-service
+      AUTH_SERVICE_HOST: 0.0.0.0
+
+  workspace-service:
+    <<: *backend
+    environment:
+      <<: *env
+      SERVICE: workspace-service
+      WORKSPACE_SERVICE_HOST: 0.0.0.0
+
+  runtime-service:
+    <<: *backend
+    environment:
+      <<: *env
+      SERVICE: runtime-service
+      RUNTIME_SERVICE_HOST: 0.0.0.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  file-service:
+    <<: *backend
+    environment:
+      <<: *env
+      SERVICE: file-service
+      FILE_SERVICE_HOST: 0.0.0.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  api-gateway:
+    <<: *backend
+    environment:
+      <<: *env
+      SERVICE: api-gateway
+    ports:
+      - "127.0.0.1:${E2E_PORT:-8000}:8000"

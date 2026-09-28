@@ -27,7 +27,11 @@ export function normalizeWorkspacePath(
         );
     }
 
-    const normalized = path.posix.normalize(cleaned);
+    // Drop trailing slashes so "./" and "src/../" are caught below as the
+    // workspace root instead of becoming "/workspace/".
+    const normalized = path.posix
+        .normalize(cleaned)
+        .replace(/\/+$/, '');
 
     if (
         normalized === '..' ||

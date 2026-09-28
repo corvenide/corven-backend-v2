@@ -22,7 +22,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json"
+    "test:e2e": "jest --config test/e2e/jest-e2e.json --runInBand",
+    "test:e2e:docker": "bash test/e2e/run.sh"
   },
   "dependencies": {
     "@ckb-ccc/core": "^1.18.0",
@@ -59,12 +60,14 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.13.2",
+    "@types/pg": "^8.23.1",
     "@types/supertest": "^7.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
     "jest": "^30.0.0",
+    "pg": "^8.23.0",
     "prettier": "^3.4.2",
     "prisma": "^7.8.0",
     "source-map-support": "^0.5.21",
@@ -97,7 +100,9 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1"
+      "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",
+      "^(libs|src)/(.*)$": "<rootDir>/$1/$2",
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     }
   }
 }
