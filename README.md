@@ -226,7 +226,37 @@ In production, set `CORS_ORIGINS` to the frontend origins (comma-separated). Whe
 | `pnpm format` | Prettier over `apps/` and `libs/` |
 | `pnpm test` | Unit tests (Jest) |
 | `pnpm test:cov` | Unit tests with coverage |
-| `pnpm test:e2e` | Gateway end-to-end tests |
+| `pnpm test:e2e:docker` | End-to-end tests against a throwaway stack in Docker |
+| `pnpm test:e2e` | End-to-end tests against a stack that is already running |
+
+## Testing
+
+**Unit tests** (`pnpm test`) sit next to the code as `*.spec.ts` and need nothing running. They cover the security-sensitive pieces: wallet signature ownership, the refresh-cookie and CORS rules, the auth rate limiter, workspace file-path checks, and `DOCKER_HOSTS` parsing.
+
+**End-to-end tests** (`test/e2e/`) call the real API gateway over HTTP, backed by PostgreSQL and every service. They sign in with real CKB wallet signatures and cover:
+
+- wallet sign-in, including a wallet trying to sign in as another address, replayed and mismatched challenges, and the rate limit
+- sessions: refresh-cookie rotation, reuse of an old cookie revoking the session, cross-site refresh, logout and logout everywhere
+- CORS for the configured frontend origin
+- workspaces: create, list, read, delete, unknown templates, and one user being unable to see or change another user's workspaces
+- files: create, read, update, rename, delete, directories, and paths that try to leave the workspace
+
+The easiest way to run them needs only Docker:
+
+```bash
+pnpm test:e2e:docker            # builds the image, starts the stack, runs the tests, removes it
+KEEP=1 pnpm test:e2e:docker     # leave the stack running afterwards
+```
+
+To run them against a stack you started yourself, point them at its gateway. That stack's `CORS_ORIGINS` must include `http://localhost:5173` (or set `E2E_ORIGIN`), and `TRUST_PROXY_HOPS` must be at least 1 so each test client gets its own rate-limit bucket:
+
+```bash
+E2E_API_URL=http://localhost:8000/api pnpm test:e2e
+```
+
+The tests never start a workspace, so they don't need the workspace images.
+
+Both suites run in GitHub Actions on every pull request (`.github/workflows/test.yml`).
 
 ## Related repositories
 
