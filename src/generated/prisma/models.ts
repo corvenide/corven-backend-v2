@@ -9,6 +9,9 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User.js'
+export type * from './models/CommunityPost.js'
+export type * from './models/CommunityComment.js'
+export type * from './models/CommunityVote.js'
 export type * from './models/WalletChallenge.js'
 export type * from './models/RefreshToken.js'
 export type * from './models/Host.js'

@@ -110,3 +110,23 @@ export const TxStatus = {
 } as const
 
 export type TxStatus = (typeof TxStatus)[keyof typeof TxStatus]
+
+
+export const CommunityPostKind = {
+  NEWS: 'NEWS',
+  FEEDBACK: 'FEEDBACK',
+  PROPOSAL: 'PROPOSAL'
+} as const
+
+export type CommunityPostKind = (typeof CommunityPostKind)[keyof typeof CommunityPostKind]
+
+
+export const CommunityPostStatus = {
+  OPEN: 'OPEN',
+  PLANNED: 'PLANNED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+  DECLINED: 'DECLINED'
+} as const
+
+export type CommunityPostStatus = (typeof CommunityPostStatus)[keyof typeof CommunityPostStatus]

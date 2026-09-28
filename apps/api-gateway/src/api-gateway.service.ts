@@ -2,9 +2,11 @@
 
 import {
     BadRequestException,
+    ForbiddenException,
     GatewayTimeoutException,
     Inject,
     Injectable,
+    NotFoundException,
     ServiceUnavailableException,
     UnauthorizedException,
 } from '@nestjs/common';
@@ -547,6 +549,53 @@ export class ApiGatewayService {
     }
 
     // =========================================
+    // Community (news, feedback, proposals)
+    // =========================================
+
+    communityPermissions(userId?: string) {
+        return this.sendToAuthService<{ isAdmin: boolean }>('community.permissions', { userId });
+    }
+
+    listCommunityPosts(query: { kind?: string; sort?: string; status?: string; offset?: number; viewerId?: string }) {
+        return this.sendToAuthService('community.posts.list', query, 10_000);
+    }
+
+    getCommunityPost(postId: string, viewerId?: string) {
+        return this.sendToAuthService('community.posts.get', { postId, viewerId }, 10_000);
+    }
+
+    createCommunityPost(data: { userId: string; kind: string; title: string; body: string }) {
+        return this.sendToAuthService('community.posts.create', data, 10_000);
+    }
+
+    updateCommunityPost(data: {
+        userId: string;
+        postId: string;
+        title?: string;
+        body?: string;
+        status?: string;
+        pinned?: boolean;
+    }) {
+        return this.sendToAuthService('community.posts.update', data, 10_000);
+    }
+
+    deleteCommunityPost(userId: string, postId: string) {
+        return this.sendToAuthService('community.posts.delete', { userId, postId });
+    }
+
+    addCommunityComment(data: { userId: string; postId: string; body: string }) {
+        return this.sendToAuthService('community.comments.create', data);
+    }
+
+    deleteCommunityComment(userId: string, commentId: string) {
+        return this.sendToAuthService('community.comments.delete', { userId, commentId });
+    }
+
+    toggleCommunityVote(userId: string, postId: string) {
+        return this.sendToAuthService('community.posts.vote', { userId, postId });
+    }
+
+    // =========================================
     // Transport helpers
     // =========================================
 
@@ -628,6 +677,13 @@ export class ApiGatewayService {
         const statusCode =
             source?.response?.statusCode ??
             source?.statusCode;
+
+        // Community calls report "not allowed" and "not found" precisely, so
+        // the page can show them instead of treating them as a lost session.
+        if (command.startsWith('community.')) {
+            if (statusCode === 403) return new ForbiddenException(message);
+            if (statusCode === 404) return new NotFoundException(message);
+        }
 
         if (
             statusCode === 401 ||

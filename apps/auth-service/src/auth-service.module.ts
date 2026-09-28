@@ -8,6 +8,9 @@ import { PrismaService } from 'libs/prisma/src/prisma.service';
 
 import { AuthServiceController } from './auth-service.controller';
 import { AuthService } from './auth-service.service';
+import { CommunityAdmins } from './community/community-admins';
+import { CommunityController } from './community/community.controller';
+import { CommunityService } from './community/community.service';
 
 @Module({
     imports: [
@@ -40,7 +43,13 @@ import { AuthService } from './auth-service.service';
             },
         }),
     ],
-    controllers: [AuthServiceController],
-    providers: [AuthService, PrismaService],
+    controllers: [AuthServiceController, CommunityController],
+    providers: [
+        AuthService,
+        PrismaService,
+        CommunityService,
+        // Reads COMMUNITY_ADMIN_WALLETS.
+        { provide: CommunityAdmins, useFactory: () => new CommunityAdmins() },
+    ],
 })
 export class AuthServiceModule { }

@@ -217,6 +217,9 @@ export type UserWhereInput = {
   workspaces?: Prisma.WorkspaceListRelationFilter
   walletChallenges?: Prisma.WalletChallengeListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
+  communityPosts?: Prisma.CommunityPostListRelationFilter
+  communityComments?: Prisma.CommunityCommentListRelationFilter
+  communityVotes?: Prisma.CommunityVoteListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -232,6 +235,9 @@ export type UserOrderByWithRelationInput = {
   workspaces?: Prisma.WorkspaceOrderByRelationAggregateInput
   walletChallenges?: Prisma.WalletChallengeOrderByRelationAggregateInput
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
+  communityPosts?: Prisma.CommunityPostOrderByRelationAggregateInput
+  communityComments?: Prisma.CommunityCommentOrderByRelationAggregateInput
+  communityVotes?: Prisma.CommunityVoteOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -250,6 +256,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   workspaces?: Prisma.WorkspaceListRelationFilter
   walletChallenges?: Prisma.WalletChallengeListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
+  communityPosts?: Prisma.CommunityPostListRelationFilter
+  communityComments?: Prisma.CommunityCommentListRelationFilter
+  communityVotes?: Prisma.CommunityVoteListRelationFilter
 }, "id" | "email" | "walletAddress">
 
 export type UserOrderByWithAggregationInput = {
@@ -295,6 +304,9 @@ export type UserCreateInput = {
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   walletChallenges?: Prisma.WalletChallengeCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -310,6 +322,9 @@ export type UserUncheckedCreateInput = {
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   walletChallenges?: Prisma.WalletChallengeUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostUncheckedCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentUncheckedCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -325,6 +340,9 @@ export type UserUpdateInput = {
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   walletChallenges?: Prisma.WalletChallengeUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -340,6 +358,9 @@ export type UserUncheckedUpdateInput = {
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   walletChallenges?: Prisma.WalletChallengeUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUncheckedUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -414,14 +435,14 @@ export type UserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserNullableScalarRelationFilter = {
-  is?: Prisma.UserWhereInput | null
-  isNot?: Prisma.UserWhereInput | null
-}
-
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -442,6 +463,48 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutCommunityPostsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommunityPostsInput, Prisma.UserUncheckedCreateWithoutCommunityPostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommunityPostsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCommunityPostsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommunityPostsInput, Prisma.UserUncheckedCreateWithoutCommunityPostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommunityPostsInput
+  upsert?: Prisma.UserUpsertWithoutCommunityPostsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCommunityPostsInput, Prisma.UserUpdateWithoutCommunityPostsInput>, Prisma.UserUncheckedUpdateWithoutCommunityPostsInput>
+}
+
+export type UserCreateNestedOneWithoutCommunityCommentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommunityCommentsInput, Prisma.UserUncheckedCreateWithoutCommunityCommentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommunityCommentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCommunityCommentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommunityCommentsInput, Prisma.UserUncheckedCreateWithoutCommunityCommentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommunityCommentsInput
+  upsert?: Prisma.UserUpsertWithoutCommunityCommentsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCommunityCommentsInput, Prisma.UserUpdateWithoutCommunityCommentsInput>, Prisma.UserUncheckedUpdateWithoutCommunityCommentsInput>
+}
+
+export type UserCreateNestedOneWithoutCommunityVotesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommunityVotesInput, Prisma.UserUncheckedCreateWithoutCommunityVotesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommunityVotesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCommunityVotesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommunityVotesInput, Prisma.UserUncheckedCreateWithoutCommunityVotesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommunityVotesInput
+  upsert?: Prisma.UserUpsertWithoutCommunityVotesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCommunityVotesInput, Prisma.UserUpdateWithoutCommunityVotesInput>, Prisma.UserUncheckedUpdateWithoutCommunityVotesInput>
 }
 
 export type UserCreateNestedOneWithoutWalletChallengesInput = {
@@ -488,6 +551,258 @@ export type UserUpdateOneRequiredWithoutWorkspacesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWorkspacesInput, Prisma.UserUpdateWithoutWorkspacesInput>, Prisma.UserUncheckedUpdateWithoutWorkspacesInput>
 }
 
+export type UserCreateWithoutCommunityPostsInput = {
+  id?: string
+  name: string
+  email?: string | null
+  passwordHash?: string | null
+  walletAddress?: string | null
+  authProvider?: $Enums.AuthProvider
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  walletChallenges?: Prisma.WalletChallengeCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  communityComments?: Prisma.CommunityCommentCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCommunityPostsInput = {
+  id?: string
+  name: string
+  email?: string | null
+  passwordHash?: string | null
+  walletAddress?: string | null
+  authProvider?: $Enums.AuthProvider
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  walletChallenges?: Prisma.WalletChallengeUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  communityComments?: Prisma.CommunityCommentUncheckedCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCommunityPostsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommunityPostsInput, Prisma.UserUncheckedCreateWithoutCommunityPostsInput>
+}
+
+export type UserUpsertWithoutCommunityPostsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCommunityPostsInput, Prisma.UserUncheckedUpdateWithoutCommunityPostsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommunityPostsInput, Prisma.UserUncheckedCreateWithoutCommunityPostsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCommunityPostsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCommunityPostsInput, Prisma.UserUncheckedUpdateWithoutCommunityPostsInput>
+}
+
+export type UserUpdateWithoutCommunityPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authProvider?: Prisma.EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  walletChallenges?: Prisma.WalletChallengeUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  communityComments?: Prisma.CommunityCommentUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCommunityPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authProvider?: Prisma.EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  walletChallenges?: Prisma.WalletChallengeUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  communityComments?: Prisma.CommunityCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCommunityCommentsInput = {
+  id?: string
+  name: string
+  email?: string | null
+  passwordHash?: string | null
+  walletAddress?: string | null
+  authProvider?: $Enums.AuthProvider
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  walletChallenges?: Prisma.WalletChallengeCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCommunityCommentsInput = {
+  id?: string
+  name: string
+  email?: string | null
+  passwordHash?: string | null
+  walletAddress?: string | null
+  authProvider?: $Enums.AuthProvider
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  walletChallenges?: Prisma.WalletChallengeUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostUncheckedCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCommunityCommentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommunityCommentsInput, Prisma.UserUncheckedCreateWithoutCommunityCommentsInput>
+}
+
+export type UserUpsertWithoutCommunityCommentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCommunityCommentsInput, Prisma.UserUncheckedUpdateWithoutCommunityCommentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommunityCommentsInput, Prisma.UserUncheckedCreateWithoutCommunityCommentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCommunityCommentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCommunityCommentsInput, Prisma.UserUncheckedUpdateWithoutCommunityCommentsInput>
+}
+
+export type UserUpdateWithoutCommunityCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authProvider?: Prisma.EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  walletChallenges?: Prisma.WalletChallengeUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCommunityCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authProvider?: Prisma.EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  walletChallenges?: Prisma.WalletChallengeUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUncheckedUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCommunityVotesInput = {
+  id?: string
+  name: string
+  email?: string | null
+  passwordHash?: string | null
+  walletAddress?: string | null
+  authProvider?: $Enums.AuthProvider
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  walletChallenges?: Prisma.WalletChallengeCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentCreateNestedManyWithoutAuthorInput
+}
+
+export type UserUncheckedCreateWithoutCommunityVotesInput = {
+  id?: string
+  name: string
+  email?: string | null
+  passwordHash?: string | null
+  walletAddress?: string | null
+  authProvider?: $Enums.AuthProvider
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  walletChallenges?: Prisma.WalletChallengeUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostUncheckedCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentUncheckedCreateNestedManyWithoutAuthorInput
+}
+
+export type UserCreateOrConnectWithoutCommunityVotesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommunityVotesInput, Prisma.UserUncheckedCreateWithoutCommunityVotesInput>
+}
+
+export type UserUpsertWithoutCommunityVotesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCommunityVotesInput, Prisma.UserUncheckedUpdateWithoutCommunityVotesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommunityVotesInput, Prisma.UserUncheckedCreateWithoutCommunityVotesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCommunityVotesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCommunityVotesInput, Prisma.UserUncheckedUpdateWithoutCommunityVotesInput>
+}
+
+export type UserUpdateWithoutCommunityVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authProvider?: Prisma.EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  walletChallenges?: Prisma.WalletChallengeUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCommunityVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authProvider?: Prisma.EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  walletChallenges?: Prisma.WalletChallengeUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUncheckedUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUncheckedUpdateManyWithoutAuthorNestedInput
+}
+
 export type UserCreateWithoutWalletChallengesInput = {
   id?: string
   name: string
@@ -500,6 +815,9 @@ export type UserCreateWithoutWalletChallengesInput = {
   updatedAt?: Date | string
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWalletChallengesInput = {
@@ -514,6 +832,9 @@ export type UserUncheckedCreateWithoutWalletChallengesInput = {
   updatedAt?: Date | string
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostUncheckedCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentUncheckedCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWalletChallengesInput = {
@@ -544,6 +865,9 @@ export type UserUpdateWithoutWalletChallengesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWalletChallengesInput = {
@@ -558,6 +882,9 @@ export type UserUncheckedUpdateWithoutWalletChallengesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUncheckedUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRefreshTokensInput = {
@@ -572,6 +899,9 @@ export type UserCreateWithoutRefreshTokensInput = {
   updatedAt?: Date | string
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
   walletChallenges?: Prisma.WalletChallengeCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -586,6 +916,9 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   updatedAt?: Date | string
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
   walletChallenges?: Prisma.WalletChallengeUncheckedCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostUncheckedCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentUncheckedCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -616,6 +949,9 @@ export type UserUpdateWithoutRefreshTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
   walletChallenges?: Prisma.WalletChallengeUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -630,6 +966,9 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
   walletChallenges?: Prisma.WalletChallengeUncheckedUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUncheckedUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkspacesInput = {
@@ -644,6 +983,9 @@ export type UserCreateWithoutWorkspacesInput = {
   updatedAt?: Date | string
   walletChallenges?: Prisma.WalletChallengeCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspacesInput = {
@@ -658,6 +1000,9 @@ export type UserUncheckedCreateWithoutWorkspacesInput = {
   updatedAt?: Date | string
   walletChallenges?: Prisma.WalletChallengeUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  communityPosts?: Prisma.CommunityPostUncheckedCreateNestedManyWithoutAuthorInput
+  communityComments?: Prisma.CommunityCommentUncheckedCreateNestedManyWithoutAuthorInput
+  communityVotes?: Prisma.CommunityVoteUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspacesInput = {
@@ -688,6 +1033,9 @@ export type UserUpdateWithoutWorkspacesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   walletChallenges?: Prisma.WalletChallengeUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspacesInput = {
@@ -702,6 +1050,9 @@ export type UserUncheckedUpdateWithoutWorkspacesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   walletChallenges?: Prisma.WalletChallengeUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  communityPosts?: Prisma.CommunityPostUncheckedUpdateManyWithoutAuthorNestedInput
+  communityComments?: Prisma.CommunityCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  communityVotes?: Prisma.CommunityVoteUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -713,12 +1064,18 @@ export type UserCountOutputType = {
   workspaces: number
   walletChallenges: number
   refreshTokens: number
+  communityPosts: number
+  communityComments: number
+  communityVotes: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspaces?: boolean | UserCountOutputTypeCountWorkspacesArgs
   walletChallenges?: boolean | UserCountOutputTypeCountWalletChallengesArgs
   refreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
+  communityPosts?: boolean | UserCountOutputTypeCountCommunityPostsArgs
+  communityComments?: boolean | UserCountOutputTypeCountCommunityCommentsArgs
+  communityVotes?: boolean | UserCountOutputTypeCountCommunityVotesArgs
 }
 
 /**
@@ -752,6 +1109,27 @@ export type UserCountOutputTypeCountRefreshTokensArgs<ExtArgs extends runtime.Ty
   where?: Prisma.RefreshTokenWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCommunityPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommunityPostWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCommunityCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommunityCommentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCommunityVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommunityVoteWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -766,6 +1144,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
   walletChallenges?: boolean | Prisma.User$walletChallengesArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
+  communityPosts?: boolean | Prisma.User$communityPostsArgs<ExtArgs>
+  communityComments?: boolean | Prisma.User$communityCommentsArgs<ExtArgs>
+  communityVotes?: boolean | Prisma.User$communityVotesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -810,6 +1191,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
   walletChallenges?: boolean | Prisma.User$walletChallengesArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
+  communityPosts?: boolean | Prisma.User$communityPostsArgs<ExtArgs>
+  communityComments?: boolean | Prisma.User$communityCommentsArgs<ExtArgs>
+  communityVotes?: boolean | Prisma.User$communityVotesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -821,6 +1205,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     workspaces: Prisma.$WorkspacePayload<ExtArgs>[]
     walletChallenges: Prisma.$WalletChallengePayload<ExtArgs>[]
     refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
+    communityPosts: Prisma.$CommunityPostPayload<ExtArgs>[]
+    communityComments: Prisma.$CommunityCommentPayload<ExtArgs>[]
+    communityVotes: Prisma.$CommunityVotePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1229,6 +1616,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   workspaces<T extends Prisma.User$workspacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workspacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   walletChallenges<T extends Prisma.User$walletChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$walletChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WalletChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   refreshTokens<T extends Prisma.User$refreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  communityPosts<T extends Prisma.User$communityPostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$communityPostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommunityPostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  communityComments<T extends Prisma.User$communityCommentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$communityCommentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommunityCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  communityVotes<T extends Prisma.User$communityVotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$communityVotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommunityVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1729,6 +2119,78 @@ export type User$refreshTokensArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.RefreshTokenScalarFieldEnum | Prisma.RefreshTokenScalarFieldEnum[]
+}
+
+/**
+ * User.communityPosts
+ */
+export type User$communityPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommunityPost
+   */
+  select?: Prisma.CommunityPostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CommunityPost
+   */
+  omit?: Prisma.CommunityPostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityPostInclude<ExtArgs> | null
+  where?: Prisma.CommunityPostWhereInput
+  orderBy?: Prisma.CommunityPostOrderByWithRelationInput | Prisma.CommunityPostOrderByWithRelationInput[]
+  cursor?: Prisma.CommunityPostWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommunityPostScalarFieldEnum | Prisma.CommunityPostScalarFieldEnum[]
+}
+
+/**
+ * User.communityComments
+ */
+export type User$communityCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommunityComment
+   */
+  select?: Prisma.CommunityCommentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CommunityComment
+   */
+  omit?: Prisma.CommunityCommentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityCommentInclude<ExtArgs> | null
+  where?: Prisma.CommunityCommentWhereInput
+  orderBy?: Prisma.CommunityCommentOrderByWithRelationInput | Prisma.CommunityCommentOrderByWithRelationInput[]
+  cursor?: Prisma.CommunityCommentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommunityCommentScalarFieldEnum | Prisma.CommunityCommentScalarFieldEnum[]
+}
+
+/**
+ * User.communityVotes
+ */
+export type User$communityVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommunityVote
+   */
+  select?: Prisma.CommunityVoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CommunityVote
+   */
+  omit?: Prisma.CommunityVoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityVoteInclude<ExtArgs> | null
+  where?: Prisma.CommunityVoteWhereInput
+  orderBy?: Prisma.CommunityVoteOrderByWithRelationInput | Prisma.CommunityVoteOrderByWithRelationInput[]
+  cursor?: Prisma.CommunityVoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommunityVoteScalarFieldEnum | Prisma.CommunityVoteScalarFieldEnum[]
 }
 
 /**

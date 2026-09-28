@@ -9,6 +9,7 @@ import {
     Headers,
     HttpCode,
     Param,
+    Patch,
     Post,
     Put,
     Query,
@@ -209,6 +210,137 @@ export class ApiGatewayController {
             accessToken: session.accessToken,
             user: session.user,
         };
+    }
+
+    // =========================================
+    // Community: news, feedback and proposals
+    // =========================================
+    //
+    // Reading is public. Writing needs a signed-in user; only admins
+    // (COMMUNITY_ADMIN_WALLETS) can publish news, set statuses and pin.
+
+    private readonly postLimiter = new RateLimiter(6, 10 * 60_000);
+    private readonly commentLimiter = new RateLimiter(30, 10 * 60_000);
+    private readonly voteLimiter = new RateLimiter(60, 60_000);
+
+    @Get('community/permissions')
+    async communityPermissions(@Headers('authorization') authorization?: string) {
+        const user = await this.getOptionalUser(authorization);
+        return this.gatewayService.communityPermissions(user?.id);
+    }
+
+    @Get('community/posts')
+    async listCommunityPosts(
+        @Headers('authorization') authorization: string | undefined,
+        @Query('kind') kind?: string,
+        @Query('sort') sort?: string,
+        @Query('status') status?: string,
+        @Query('offset') offset?: string,
+    ) {
+        const user = await this.getOptionalUser(authorization);
+        return this.gatewayService.listCommunityPosts({
+            kind,
+            sort,
+            status,
+            offset: offset ? Number(offset) : 0,
+            viewerId: user?.id,
+        });
+    }
+
+    @Get('community/posts/:id')
+    async getCommunityPost(
+        @Headers('authorization') authorization: string | undefined,
+        @Param('id') postId: string,
+    ) {
+        const user = await this.getOptionalUser(authorization);
+        return this.gatewayService.getCommunityPost(postId, user?.id);
+    }
+
+    @Post('community/posts')
+    async createCommunityPost(
+        @Headers('authorization') authorization: string,
+        @Body() body: { kind: string; title: string; body: string },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        this.postLimiter.consume(`post:${user.id}`);
+
+        return this.gatewayService.createCommunityPost({
+            userId: user.id,
+            kind: body?.kind,
+            title: body?.title,
+            body: body?.body,
+        });
+    }
+
+    @Patch('community/posts/:id')
+    async updateCommunityPost(
+        @Headers('authorization') authorization: string,
+        @Param('id') postId: string,
+        @Body() body: { title?: string; body?: string; status?: string; pinned?: boolean },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+
+        return this.gatewayService.updateCommunityPost({
+            userId: user.id,
+            postId,
+            title: body?.title,
+            body: body?.body,
+            status: body?.status,
+            pinned: body?.pinned,
+        });
+    }
+
+    @Delete('community/posts/:id')
+    async deleteCommunityPost(
+        @Headers('authorization') authorization: string,
+        @Param('id') postId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.deleteCommunityPost(user.id, postId);
+    }
+
+    @Post('community/posts/:id/comments')
+    async addCommunityComment(
+        @Headers('authorization') authorization: string,
+        @Param('id') postId: string,
+        @Body() body: { body: string },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        this.commentLimiter.consume(`comment:${user.id}`);
+
+        return this.gatewayService.addCommunityComment({ userId: user.id, postId, body: body?.body });
+    }
+
+    @Delete('community/comments/:id')
+    async deleteCommunityComment(
+        @Headers('authorization') authorization: string,
+        @Param('id') commentId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.deleteCommunityComment(user.id, commentId);
+    }
+
+    @Post('community/posts/:id/vote')
+    @HttpCode(200)
+    async toggleCommunityVote(
+        @Headers('authorization') authorization: string,
+        @Param('id') postId: string,
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        this.voteLimiter.consume(`vote:${user.id}`);
+
+        return this.gatewayService.toggleCommunityVote(user.id, postId);
+    }
+
+    /** The signed-in user if a valid token was sent; otherwise undefined. */
+    private async getOptionalUser(authorization?: string): Promise<{ id: string } | undefined> {
+        if (!authorization) return undefined;
+
+        try {
+            return await this.getUserFromAuthorizationHeader(authorization);
+        } catch {
+            return undefined;
+        }
     }
 
     // =========================================

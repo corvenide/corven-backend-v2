@@ -94,10 +94,91 @@ model User {
     walletChallenges WalletChallenge[]
     refreshTokens    RefreshToken[]
 
+    communityPosts    CommunityPost[]
+    communityComments CommunityComment[]
+    communityVotes    CommunityVote[]
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([walletAddress])
+}
+
+// ---------------------------------------------------------------------------
+// Community: news (admins only), feedback and proposals (any signed-in user)
+// ---------------------------------------------------------------------------
+
+enum CommunityPostKind {
+    NEWS
+    FEEDBACK
+    PROPOSAL
+}
+
+/// Where a feedback item or proposal stands. Only admins change it.
+enum CommunityPostStatus {
+    OPEN
+    PLANNED
+    IN_PROGRESS
+    DONE
+    DECLINED
+}
+
+model CommunityPost {
+    id String @id @default(uuid())
+
+    kind   CommunityPostKind
+    title  String
+    body   String
+    status CommunityPostStatus @default(OPEN)
+    pinned Boolean             @default(false)
+
+    authorId String
+    author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+    comments CommunityComment[]
+    votes    CommunityVote[]
+
+    // Kept in step with the comments and votes tables, so lists don't count rows.
+    voteCount    Int @default(0)
+    commentCount Int @default(0)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([kind, createdAt])
+    @@index([kind, voteCount])
+    @@index([authorId])
+}
+
+model CommunityComment {
+    id String @id @default(uuid())
+
+    postId String
+    post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    authorId String
+    author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+    body String
+
+    createdAt DateTime @default(now())
+
+    @@index([postId, createdAt])
+    @@index([authorId])
+}
+
+/// One upvote per user per post.
+model CommunityVote {
+    postId String
+    post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+
+    @@id([postId, userId])
+    @@index([userId])
 }
 
 model WalletChallenge {
@@ -425,3 +506,4 @@ model Address {
 
     cells Cell[]
 }
+

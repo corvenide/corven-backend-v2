@@ -45,6 +45,21 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model CommunityPost
+ * 
+ */
+export type CommunityPost = Prisma.CommunityPostModel
+/**
+ * Model CommunityComment
+ * 
+ */
+export type CommunityComment = Prisma.CommunityCommentModel
+/**
+ * Model CommunityVote
+ * One upvote per user per post.
+ */
+export type CommunityVote = Prisma.CommunityVoteModel
+/**
  * Model WalletChallenge
  * 
  */
