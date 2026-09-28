@@ -1,0 +1,119 @@
+# Production stack for one Lightsail instance: Caddy (HTTPS for the API and
+# the frontend), PostgreSQL, and the six backend services.
+#
+# Run from the repository root:
+#   docker compose -f deploy/docker-compose.yml up -d
+# Settings come from deploy/.env (copy deploy/.env.example).
+
+name: corven
+
+x-backend: &backend
+  image: corven-backend:latest
+  restart: unless-stopped
+  env_file: .env
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+  logging: &logging
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+x-docker-socket: &docker-socket
+  - /var/run/docker.sock:/var/run/docker.sock
+
+services:
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  # Applies pending Prisma migrations, then exits. Every service waits for it.
+  migrate:
+    image: corven-backend:latest
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    env_file: .env
+    command: ["node_modules/.bin/prisma", "migrate", "deploy"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  auth-service:
+    <<: *backend
+    environment:
+      SERVICE: auth-service
+      AUTH_SERVICE_HOST: 0.0.0.0
+
+  workspace-service:
+    <<: *backend
+    environment:
+      SERVICE: workspace-service
+      WORKSPACE_SERVICE_HOST: 0.0.0.0
+
+  # runtime, file and terminal services drive the workspace containers
+  # through the host's Docker daemon.
+  runtime-service:
+    <<: *backend
+    environment:
+      SERVICE: runtime-service
+      RUNTIME_SERVICE_HOST: 0.0.0.0
+    volumes: *docker-socket
+
+  file-service:
+    <<: *backend
+    environment:
+      SERVICE: file-service
+      FILE_SERVICE_HOST: 0.0.0.0
+    volumes: *docker-socket
+
+  terminal-service:
+    <<: *backend
+    environment:
+      SERVICE: terminal-service
+    volumes: *docker-socket
+
+  api-gateway:
+    <<: *backend
+    environment:
+      SERVICE: api-gateway
+
+  caddy:
+    image: public.ecr.aws/docker/library/caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+      WEB_DOMAIN: ${WEB_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${WEB_ROOT:-/opt/corven/web}:/srv/web:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api-gateway
+      - terminal-service
+    logging: *logging
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:

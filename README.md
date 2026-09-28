@@ -205,6 +205,17 @@ Defined in [`prisma/schema.prisma`](prisma/schema.prisma):
 - `Workspace`: owner, status (`PENDING`, `PROVISIONING`, `RUNNING`, `IDLE`, `STOPPED`, `FAILED`, `DELETED`), Docker network and volume names
 - `WorkspaceContainer`: one container per workspace and type (`IDE`, `CKB_NODE`, `FIBER_RUNTIME`, `PREVIEW`, `TEST_RUNNER`)
 
+## Deployment
+
+Production runs on an AWS Lightsail instance with Docker Compose and Caddy (automatic HTTPS). See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). In short:
+
+```bash
+bash deploy/setup-server.sh   # once per server
+bash deploy/deploy.sh         # every release
+```
+
+In production, set `CORS_ORIGINS` to the frontend origins (comma-separated). When it is unset, the gateway accepts any origin, which is only suitable for local development.
+
 ## Scripts
 
 | Command | Description |
@@ -219,7 +230,7 @@ Defined in [`prisma/schema.prisma`](prisma/schema.prisma):
 
 ## Related repositories
 
-- [lestonEth/corven-platform](https://github.com/lestonEth/corven-platform): the Corven IDE web frontend
+- [corvenide/corven-fronted](https://github.com/corvenide/corven-fronted): the Corven IDE web frontend
 
 ## License
 
