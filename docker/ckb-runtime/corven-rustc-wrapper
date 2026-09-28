@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# corven-rustc-wrapper: RUSTC_WRAPPER for workspace builds.
+#
+# Compiles through sccache, backed by
+#   level 0: a local disk cache in this container (read-write), and
+#   level 1: the host's shared cache (read-only; filled by Corven's trusted
+#            cache warmer, so one user's build can never poison another's),
+# when the shared cache is reachable. If it isn't, sccache runs with the
+# local cache only; if sccache can't start at all, rustc runs directly.
+# A cache problem never fails a build.
+
+port="${SCCACHE_SERVER_PORT:-4226}"
+
+server_up() {
+    (exec 3<>"/dev/tcp/127.0.0.1/${port}") 2>/dev/null
+}
+
+shared_cache_reachable() {
+    [ -n "${SCCACHE_WEBDAV_ENDPOINT:-}" ] || return 1
+    local code
+    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "${SCCACHE_WEBDAV_ENDPOINT%/}/" 2>/dev/null)"
+    [ -n "$code" ] && [ "$code" != "000" ]
+}
+
+if [ -z "${CORVEN_SCCACHE_OFF:-}" ] && command -v sccache >/dev/null 2>&1 && ! server_up; then
+    (
+        flock -w 30 9 || exit 0
+        server_up && exit 0
+
+        if [ -n "${SCCACHE_MULTILEVEL_CHAIN:-}" ] && shared_cache_reachable; then
+            sccache --start-server >/dev/null 2>&1
+        else
+            env -u SCCACHE_MULTILEVEL_CHAIN -u SCCACHE_WEBDAV_ENDPOINT -u SCCACHE_WEBDAV_RW_MODE \
+                sccache --start-server >/dev/null 2>&1
+        fi
+    ) 9>"/tmp/.corven-sccache-${port}.lock"
+fi
+
+if [ -z "${CORVEN_SCCACHE_OFF:-}" ] && server_up; then
+    exec sccache "$@"
+fi
+
+exec "$@"

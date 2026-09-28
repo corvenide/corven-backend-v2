@@ -1,133 +1,91 @@
-import {
-    Injectable,
-} from '@nestjs/common';
+// apps/auth-service/src/auth-service.service.ts
 
+import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
 
 import { PrismaService } from '@app/prisma';
 
 import * as bcrypt from 'bcryptjs';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import { ccc } from '@ckb-ccc/core';
 
+import {
+    clientForAddress,
+    parseSignature,
+    verifyWalletOwnership,
+} from './wallet-verification';
+
+export interface SessionMeta {
+    userAgent?: string;
+    ipAddress?: string;
+}
+
+interface UserRecord {
+    id: string;
+    email: string | null;
+    walletAddress: string | null;
+    role: string;
+    name: string;
+    authProvider: string;
+    createdAt: Date;
+}
+
+const CHALLENGE_TTL_MS = 5 * 60 * 1000;
+
+function unauthorized(message: string): RpcException {
+    return new RpcException({ statusCode: 401, message });
+}
+
+function badRequest(message: string): RpcException {
+    return new RpcException({ statusCode: 400, message });
+}
+
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
+    // Real bcrypt hash of a random value, used to equalise login timing.
+    private readonly dummyHash = bcrypt.hashSync(randomBytes(16).toString('hex'), 12);
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
     ) { }
 
-    async register(data: {
-        name: string;
-        email: string;
-        password: string;
-    }) {
-        const normalizedEmail =
-            data.email.trim().toLowerCase();
+    // ------------------------------------------------------------------
+    // Wallet authentication
+    // ------------------------------------------------------------------
 
-        const existingUser =
-            await this.prisma.user.findUnique({
-                where: {
-                    email: normalizedEmail,
-                },
-            });
-
-        if (existingUser) {
-            throw new RpcException(
-                'User already exists!',
-            );
-        }
-
-        const passwordHash = await bcrypt.hash(
-            data.password,
-            10,
-        );
-
-        const user = await this.prisma.user.create({
-            data: {
-                name: data.name.trim(),
-                email: normalizedEmail,
-                passwordHash,
-                authProvider: 'EMAIL',
-            },
-        });
-
-        return this.buildAuthResponse(user);
-    }
-
-    async login(data: {
-        email: string;
-        password: string;
-    }) {
-        const normalizedEmail =
-            data.email.trim().toLowerCase();
-
-        const user =
-            await this.prisma.user.findUnique({
-                where: {
-                    email: normalizedEmail,
-                },
-            });
-
-        if (!user || !user.passwordHash) {
-            throw new RpcException(
-                'Invalid credentials',
-            );
-        }
-
-        const isPasswordValid =
-            await bcrypt.compare(
-                data.password,
-                user.passwordHash,
-            );
-
-        if (!isPasswordValid) {
-            throw new RpcException(
-                'Invalid credentials',
-            );
-        }
-
-        return this.buildAuthResponse(user);
-    }
-
-    async createWalletChallenge(data: {
-        walletAddress: string;
-    }) {
-        const walletAddress =
-            data.walletAddress.trim();
+    async createWalletChallenge(data: { walletAddress: string }) {
+        const walletAddress = (data.walletAddress ?? '').trim();
 
         if (!walletAddress) {
-            throw new RpcException(
-                'Wallet address is required',
-            );
+            throw badRequest('Wallet address is required');
         }
 
-        await this.validateWalletAddress(
-            walletAddress,
-        );
+        await this.assertValidWalletAddress(walletAddress);
+
+        // Keep the table small: drop challenges that expired over an hour ago.
+        await this.prisma.walletChallenge.deleteMany({
+            where: { expiresAt: { lt: new Date(Date.now() - 60 * 60 * 1000) } },
+        });
 
         const nonce = randomBytes(32).toString('hex');
-        const expiresAt = new Date(
-            Date.now() + 5 * 60 * 1000,
-        );
+        const issuedAt = new Date();
+        const expiresAt = new Date(issuedAt.getTime() + CHALLENGE_TTL_MS);
 
         const message = this.buildWalletMessage({
             walletAddress,
             nonce,
+            issuedAt,
             expiresAt,
         });
 
-        const challenge =
-            await this.prisma.walletChallenge.create({
-                data: {
-                    walletAddress,
-                    nonce,
-                    message,
-                    expiresAt,
-                },
-            });
+        const challenge = await this.prisma.walletChallenge.create({
+            data: { walletAddress, nonce, message, expiresAt },
+        });
 
         return {
             challengeId: challenge.id,
@@ -141,239 +99,373 @@ export class AuthService {
         walletAddress: string;
         challengeId: string;
         signature: unknown;
+        meta?: SessionMeta;
     }) {
-        const walletAddress =
-            data.walletAddress.trim();
+        const walletAddress = (data.walletAddress ?? '').trim();
 
-        const challenge =
-            await this.prisma.walletChallenge.findUnique({
-                where: {
-                    id: data.challengeId,
-                },
-            });
-
-        if (!challenge) {
-            throw new RpcException(
-                'Wallet challenge not found',
-            );
+        if (!walletAddress || !data.challengeId) {
+            throw badRequest('Wallet address and challenge are required');
         }
 
-        if (challenge.walletAddress !== walletAddress) {
-            throw new RpcException(
-                'Wallet address does not match the challenge',
-            );
+        const signature = parseSignature(data.signature);
+
+        if (!signature) {
+            throw badRequest('Malformed wallet signature');
+        }
+
+        const challenge = await this.prisma.walletChallenge.findUnique({
+            where: { id: data.challengeId },
+        });
+
+        if (!challenge || challenge.walletAddress !== walletAddress) {
+            throw unauthorized('Sign-in request not found. Please try again.');
         }
 
         if (challenge.usedAt) {
-            throw new RpcException(
-                'Wallet challenge has already been used',
-            );
+            throw unauthorized('This sign-in request was already used. Please try again.');
         }
 
         if (challenge.expiresAt.getTime() < Date.now()) {
-            throw new RpcException(
-                'Wallet challenge has expired',
+            throw unauthorized('This sign-in request expired. Please try again.');
+        }
+
+        const verification = await verifyWalletOwnership({
+            message: challenge.message,
+            walletAddress,
+            signature,
+        });
+
+        if (!verification.ok) {
+            this.logger.warn(
+                `Wallet login rejected (${verification.reason}) for ${walletAddress}`,
+            );
+
+            throw unauthorized(
+                verification.reason === 'unsupported_signer'
+                    ? 'This wallet type is not supported for sign-in yet.'
+                    : 'The signature does not match this wallet.',
             );
         }
 
-        let signatureIsValid = false;
+        const user = await this.prisma.$transaction(async (tx) => {
+            // Atomically claim the challenge so it can only be used once,
+            // even with concurrent requests.
+            const claimed = await tx.walletChallenge.updateMany({
+                where: { id: challenge.id, usedAt: null },
+                data: { usedAt: new Date() },
+            });
 
-        try {
-            signatureIsValid =
-                await ccc.Signer.verifyMessage(
-                    challenge.message,
-                    data.signature as never,
-                );
-        } catch {
-            signatureIsValid = false;
-        }
-
-        if (!signatureIsValid) {
-            throw new RpcException(
-                'Invalid wallet signature',
-            );
-        }
-
-        const result =
-            await this.prisma.$transaction(
-                async (transaction) => {
-                    const currentChallenge =
-                        await transaction.walletChallenge.findUnique({
-                            where: {
-                                id: challenge.id,
-                            },
-                        });
-
-                    if (
-                        !currentChallenge ||
-                        currentChallenge.usedAt
-                    ) {
-                        throw new RpcException(
-                            'Wallet challenge has already been used',
-                        );
-                    }
-
-                    const existingUser =
-                        await transaction.user.findUnique({
-                            where: {
-                                walletAddress,
-                            },
-                        });
-
-                    const user =
-                        existingUser ??
-                        (await transaction.user.create({
-                            data: {
-                                name: this.walletDisplayName(
-                                    walletAddress,
-                                ),
-                                walletAddress,
-                                authProvider: 'CKB_WALLET',
-                            },
-                        }));
-
-                    await transaction.walletChallenge.update({
-                        where: {
-                            id: challenge.id,
-                        },
-                        data: {
-                            usedAt: new Date(),
-                            userId: user.id,
-                        },
-                    });
-
-                    return user;
-                },
-            );
-
-        return this.buildAuthResponse(result);
-    }
-
-    async verifyToken(token: string) {
-        try {
-            const payload =
-                await this.jwtService.verifyAsync(token, {
-                    secret:
-                        process.env.JWT_SECRET ||
-                        'fiberdev_secret',
-                });
-
-            const user =
-                await this.prisma.user.findUnique({
-                    where: {
-                        id: payload.sub,
-                    },
-                });
-
-            if (!user) {
-                throw new RpcException(
-                    'User not found',
-                );
+            if (claimed.count === 0) {
+                throw unauthorized('This sign-in request was already used. Please try again.');
             }
 
-            return {
-                valid: true,
-                user: this.sanitizeUser(user),
-            };
-        } catch {
-            throw new RpcException('Invalid token');
-        }
+            const existing = await tx.user.findUnique({
+                where: { walletAddress },
+            });
+
+            const account =
+                existing ??
+                (await tx.user.create({
+                    data: {
+                        name: this.walletDisplayName(walletAddress),
+                        walletAddress,
+                        authProvider: 'CKB_WALLET',
+                    },
+                }));
+
+            await tx.walletChallenge.update({
+                where: { id: challenge.id },
+                data: { userId: account.id },
+            });
+
+            return account;
+        });
+
+        return this.issueSession(user, data.meta);
     }
 
-    async getProfile(userId: string) {
-        const user =
-            await this.prisma.user.findUnique({
-                where: {
-                    id: userId,
+    // ------------------------------------------------------------------
+    // Email authentication (kept for API compatibility; not used by the UI)
+    // ------------------------------------------------------------------
+
+    async register(data: {
+        name: string;
+        email: string;
+        password: string;
+        meta?: SessionMeta;
+    }) {
+        const name = (data.name ?? '').trim();
+        const email = (data.email ?? '').trim().toLowerCase();
+        const password = data.password ?? '';
+
+        if (!name || name.length > 80) {
+            throw badRequest('Name is required (max 80 characters)');
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            throw badRequest('A valid email is required');
+        }
+
+        if (password.length < 8 || password.length > 128) {
+            throw badRequest('Password must be 8–128 characters');
+        }
+
+        const existing = await this.prisma.user.findUnique({ where: { email } });
+
+        if (existing) {
+            throw badRequest('An account with this email already exists');
+        }
+
+        const user = await this.prisma.user.create({
+            data: {
+                name,
+                email,
+                passwordHash: await bcrypt.hash(password, 12),
+                authProvider: 'EMAIL',
+            },
+        });
+
+        return this.issueSession(user, data.meta);
+    }
+
+    async login(data: { email: string; password: string; meta?: SessionMeta }) {
+        const email = (data.email ?? '').trim().toLowerCase();
+
+        const user = await this.prisma.user.findUnique({ where: { email } });
+
+        // Compare against a dummy hash when the user doesn't exist, so
+        // response timing doesn't reveal which emails are registered.
+        const hash = user?.passwordHash ?? this.dummyHash;
+
+        const ok = await bcrypt.compare(data.password ?? '', hash);
+
+        if (!user || !user.passwordHash || !ok) {
+            throw unauthorized('Invalid credentials');
+        }
+
+        return this.issueSession(user, data.meta);
+    }
+
+    // ------------------------------------------------------------------
+    // Sessions: access + rotating refresh tokens
+    // ------------------------------------------------------------------
+
+    async refresh(data: { refreshToken: string; meta?: SessionMeta }) {
+        if (!data.refreshToken) {
+            throw unauthorized('No session');
+        }
+
+        const tokenHash = this.hashToken(data.refreshToken);
+
+        const current = await this.prisma.refreshToken.findUnique({
+            where: { tokenHash },
+            include: { user: true },
+        });
+
+        if (!current) {
+            throw unauthorized('Session not found');
+        }
+
+        if (current.revokedAt) {
+            // A revoked token being presented again means it was copied.
+            // Kill every session descended from the same login.
+            await this.prisma.refreshToken.updateMany({
+                where: { familyId: current.familyId, revokedAt: null },
+                data: { revokedAt: new Date() },
+            });
+
+            this.logger.warn(
+                `Refresh token reuse detected for user ${current.userId}; family ${current.familyId} revoked`,
+            );
+
+            throw unauthorized('Session expired. Please sign in again.');
+        }
+
+        if (current.expiresAt.getTime() < Date.now()) {
+            throw unauthorized('Session expired. Please sign in again.');
+        }
+
+        const next = this.generateRefreshToken();
+
+        await this.prisma.$transaction(async (tx) => {
+            const created = await tx.refreshToken.create({
+                data: {
+                    userId: current.userId,
+                    familyId: current.familyId,
+                    tokenHash: this.hashToken(next.token),
+                    expiresAt: next.expiresAt,
+                    userAgent: data.meta?.userAgent?.slice(0, 500),
+                    ipAddress: data.meta?.ipAddress?.slice(0, 100),
                 },
             });
 
+            // Guard against two tabs refreshing with the same token at once:
+            // only one of them gets to revoke it.
+            const revoked = await tx.refreshToken.updateMany({
+                where: { id: current.id, revokedAt: null },
+                data: {
+                    revokedAt: new Date(),
+                    replacedById: created.id,
+                    lastUsedAt: new Date(),
+                },
+            });
+
+            if (revoked.count === 0) {
+                throw unauthorized('Session expired. Please sign in again.');
+            }
+        });
+
+        return {
+            accessToken: this.signAccessToken(current.user),
+            refreshToken: next.token,
+            refreshTokenExpiresAt: next.expiresAt,
+            user: this.sanitizeUser(current.user),
+        };
+    }
+
+    async logout(data: { refreshToken?: string }) {
+        if (!data.refreshToken) {
+            return { success: true };
+        }
+
+        const token = await this.prisma.refreshToken.findUnique({
+            where: { tokenHash: this.hashToken(data.refreshToken) },
+        });
+
+        if (token) {
+            await this.prisma.refreshToken.updateMany({
+                where: { familyId: token.familyId, revokedAt: null },
+                data: { revokedAt: new Date() },
+            });
+        }
+
+        return { success: true };
+    }
+
+    async logoutAll(data: { userId: string }) {
+        await this.prisma.refreshToken.updateMany({
+            where: { userId: data.userId, revokedAt: null },
+            data: { revokedAt: new Date() },
+        });
+
+        return { success: true };
+    }
+
+    async verifyToken(token: string) {
+        let payload: { sub?: string; typ?: string };
+
+        try {
+            payload = await this.jwtService.verifyAsync(token);
+        } catch {
+            throw unauthorized('Invalid token');
+        }
+
+        if (!payload.sub || payload.typ !== 'access') {
+            throw unauthorized('Invalid token');
+        }
+
+        const user = await this.prisma.user.findUnique({
+            where: { id: payload.sub },
+        });
+
         if (!user) {
-            throw new RpcException('User not found');
+            throw unauthorized('Invalid token');
+        }
+
+        return { valid: true, user: this.sanitizeUser(user) };
+    }
+
+    async getProfile(userId: string) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+        if (!user) {
+            throw new RpcException({ statusCode: 404, message: 'User not found' });
         }
 
         return this.sanitizeUser(user);
     }
 
-    private async validateWalletAddress(
-        walletAddress: string,
-    ) {
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
+    private async issueSession(user: UserRecord, meta?: SessionMeta) {
+        const refresh = this.generateRefreshToken();
+
+        await this.prisma.refreshToken.create({
+            data: {
+                userId: user.id,
+                familyId: randomUUID(),
+                tokenHash: this.hashToken(refresh.token),
+                expiresAt: refresh.expiresAt,
+                userAgent: meta?.userAgent?.slice(0, 500),
+                ipAddress: meta?.ipAddress?.slice(0, 100),
+            },
+        });
+
+        return {
+            accessToken: this.signAccessToken(user),
+            refreshToken: refresh.token,
+            refreshTokenExpiresAt: refresh.expiresAt,
+            user: this.sanitizeUser(user),
+        };
+    }
+
+    private signAccessToken(user: UserRecord): string {
+        return this.jwtService.sign({
+            sub: user.id,
+            typ: 'access',
+            authProvider: user.authProvider,
+        });
+    }
+
+    private generateRefreshToken() {
+        const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS) || 30;
+
+        return {
+            token: randomBytes(48).toString('base64url'),
+            expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+        };
+    }
+
+    private hashToken(token: string): string {
+        return createHash('sha256').update(token).digest('hex');
+    }
+
+    private async assertValidWalletAddress(walletAddress: string) {
         try {
-            const isMainnet =
-                walletAddress.startsWith('ckb1');
-
-            const client = isMainnet
-                ? new ccc.ClientPublicMainnet()
-                : new ccc.ClientPublicTestnet();
-
-            await ccc.Address.fromString(
-                walletAddress,
-                client,
-            );
+            await ccc.Address.fromString(walletAddress, clientForAddress(walletAddress));
         } catch {
-            throw new RpcException(
-                'Invalid CKB wallet address',
-            );
+            throw badRequest('Invalid CKB wallet address');
         }
     }
 
     private buildWalletMessage(input: {
         walletAddress: string;
         nonce: string;
+        issuedAt: Date;
         expiresAt: Date;
     }): string {
+        const origin = process.env.APP_ORIGIN || 'Corven';
+
         return [
-            'Corven Wallet Authentication',
+            `${origin} wants you to sign in with your CKB wallet.`,
             '',
-            'Sign this message to authenticate with Corven.',
-            'This action does not create a blockchain transaction or spend funds.',
+            'Signing this message proves you own this wallet.',
+            'It does not create a transaction or spend any funds.',
             '',
             `Wallet: ${input.walletAddress}`,
             `Nonce: ${input.nonce}`,
+            `Issued At: ${input.issuedAt.toISOString()}`,
             `Expires At: ${input.expiresAt.toISOString()}`,
         ].join('\n');
     }
 
-    private walletDisplayName(
-        walletAddress: string,
-    ): string {
+    private walletDisplayName(walletAddress: string): string {
         return `CKB User ${walletAddress.slice(-6)}`;
     }
 
-    private buildAuthResponse(user: {
-        id: string;
-        email: string | null;
-        walletAddress: string | null;
-        role: string;
-        name: string;
-        authProvider: string;
-        createdAt: Date;
-    }) {
-        const payload = {
-            sub: user.id,
-            email: user.email,
-            walletAddress: user.walletAddress,
-            authProvider: user.authProvider,
-        };
-
-        const accessToken =
-            this.jwtService.sign(payload);
-
-        return {
-            accessToken,
-            user: this.sanitizeUser(user),
-        };
-    }
-
-    private sanitizeUser(user: {
-        id: string;
-        email: string | null;
-        walletAddress: string | null;
-        role: string;
-        name: string;
-        authProvider: string;
-        createdAt: Date;
-    }) {
+    private sanitizeUser(user: UserRecord) {
         return {
             id: user.id,
             name: user.name,

@@ -5,10 +5,11 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom, timeout } from 'rxjs';
 
 import { PrismaService } from 'libs/prisma/src/prisma.service';
+import { DEFAULT_TEMPLATE_ID, findTemplate } from 'libs/prisma/src/workspace-templates';
 
 @Injectable()
 export class WorkspaceService {
@@ -24,11 +25,16 @@ export class WorkspaceService {
         name: string;
         templateId?: string;
     }) {
+        const templateId = data.templateId || DEFAULT_TEMPLATE_ID;
+        if (!findTemplate(templateId)) {
+            throw new RpcException(`Unknown project template: ${templateId}`);
+        }
+
         return this.prisma.workspace.create({
             data: {
                 name: data.name,
                 userId: data.userId,
-                templateId: data.templateId,
+                templateId,
                 status: 'PENDING',
             },
         });
@@ -83,7 +89,7 @@ export class WorkspaceService {
                         workspaceId,
                     },
                 )
-                .pipe(timeout(15 * 60 * 1000))
+                .pipe(timeout(30_000))
         );
     }
 

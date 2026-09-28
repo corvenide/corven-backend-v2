@@ -28,6 +28,7 @@ export type WorkspaceMinAggregateOutputType = {
   id: string | null
   name: string | null
   status: $Enums.WorkspaceStatus | null
+  hostId: string | null
   userId: string | null
   templateId: string | null
   runtimeNetwork: string | null
@@ -35,6 +36,10 @@ export type WorkspaceMinAggregateOutputType = {
   ckbDataVolume: string | null
   lastStartedAt: Date | null
   lastStoppedAt: Date | null
+  provisionStage: string | null
+  provisionError: string | null
+  lastActivityAt: Date | null
+  filesSnapshotAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -43,6 +48,7 @@ export type WorkspaceMaxAggregateOutputType = {
   id: string | null
   name: string | null
   status: $Enums.WorkspaceStatus | null
+  hostId: string | null
   userId: string | null
   templateId: string | null
   runtimeNetwork: string | null
@@ -50,6 +56,10 @@ export type WorkspaceMaxAggregateOutputType = {
   ckbDataVolume: string | null
   lastStartedAt: Date | null
   lastStoppedAt: Date | null
+  provisionStage: string | null
+  provisionError: string | null
+  lastActivityAt: Date | null
+  filesSnapshotAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +68,7 @@ export type WorkspaceCountAggregateOutputType = {
   id: number
   name: number
   status: number
+  hostId: number
   userId: number
   templateId: number
   runtimeNetwork: number
@@ -65,6 +76,10 @@ export type WorkspaceCountAggregateOutputType = {
   ckbDataVolume: number
   lastStartedAt: number
   lastStoppedAt: number
+  provisionStage: number
+  provisionError: number
+  lastActivityAt: number
+  filesSnapshotAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -75,6 +90,7 @@ export type WorkspaceMinAggregateInputType = {
   id?: true
   name?: true
   status?: true
+  hostId?: true
   userId?: true
   templateId?: true
   runtimeNetwork?: true
@@ -82,6 +98,10 @@ export type WorkspaceMinAggregateInputType = {
   ckbDataVolume?: true
   lastStartedAt?: true
   lastStoppedAt?: true
+  provisionStage?: true
+  provisionError?: true
+  lastActivityAt?: true
+  filesSnapshotAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -90,6 +110,7 @@ export type WorkspaceMaxAggregateInputType = {
   id?: true
   name?: true
   status?: true
+  hostId?: true
   userId?: true
   templateId?: true
   runtimeNetwork?: true
@@ -97,6 +118,10 @@ export type WorkspaceMaxAggregateInputType = {
   ckbDataVolume?: true
   lastStartedAt?: true
   lastStoppedAt?: true
+  provisionStage?: true
+  provisionError?: true
+  lastActivityAt?: true
+  filesSnapshotAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -105,6 +130,7 @@ export type WorkspaceCountAggregateInputType = {
   id?: true
   name?: true
   status?: true
+  hostId?: true
   userId?: true
   templateId?: true
   runtimeNetwork?: true
@@ -112,6 +138,10 @@ export type WorkspaceCountAggregateInputType = {
   ckbDataVolume?: true
   lastStartedAt?: true
   lastStoppedAt?: true
+  provisionStage?: true
+  provisionError?: true
+  lastActivityAt?: true
+  filesSnapshotAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -193,6 +223,7 @@ export type WorkspaceGroupByOutputType = {
   id: string
   name: string
   status: $Enums.WorkspaceStatus
+  hostId: string | null
   userId: string
   templateId: string | null
   runtimeNetwork: string | null
@@ -200,6 +231,10 @@ export type WorkspaceGroupByOutputType = {
   ckbDataVolume: string | null
   lastStartedAt: Date | null
   lastStoppedAt: Date | null
+  provisionStage: string | null
+  provisionError: string | null
+  lastActivityAt: Date | null
+  filesSnapshotAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: WorkspaceCountAggregateOutputType | null
@@ -229,6 +264,7 @@ export type WorkspaceWhereInput = {
   id?: Prisma.StringFilter<"Workspace"> | string
   name?: Prisma.StringFilter<"Workspace"> | string
   status?: Prisma.EnumWorkspaceStatusFilter<"Workspace"> | $Enums.WorkspaceStatus
+  hostId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   userId?: Prisma.StringFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   runtimeNetwork?: Prisma.StringNullableFilter<"Workspace"> | string | null
@@ -236,16 +272,24 @@ export type WorkspaceWhereInput = {
   ckbDataVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
   lastStartedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   lastStoppedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
+  provisionStage?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  provisionError?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
+  filesSnapshotAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
+  host?: Prisma.XOR<Prisma.HostNullableScalarRelationFilter, Prisma.HostWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   containers?: Prisma.WorkspaceContainerListRelationFilter
+  files?: Prisma.WorkspaceFileListRelationFilter
+  deployments?: Prisma.ContractDeploymentListRelationFilter
 }
 
 export type WorkspaceOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  hostId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrderInput | Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -253,10 +297,17 @@ export type WorkspaceOrderByWithRelationInput = {
   ckbDataVolume?: Prisma.SortOrderInput | Prisma.SortOrder
   lastStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastStoppedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  provisionStage?: Prisma.SortOrderInput | Prisma.SortOrder
+  provisionError?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  filesSnapshotAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  host?: Prisma.HostOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   containers?: Prisma.WorkspaceContainerOrderByRelationAggregateInput
+  files?: Prisma.WorkspaceFileOrderByRelationAggregateInput
+  deployments?: Prisma.ContractDeploymentOrderByRelationAggregateInput
 }
 
 export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
@@ -266,6 +317,7 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.WorkspaceWhereInput | Prisma.WorkspaceWhereInput[]
   name?: Prisma.StringFilter<"Workspace"> | string
   status?: Prisma.EnumWorkspaceStatusFilter<"Workspace"> | $Enums.WorkspaceStatus
+  hostId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   userId?: Prisma.StringFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   runtimeNetwork?: Prisma.StringNullableFilter<"Workspace"> | string | null
@@ -273,16 +325,24 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   ckbDataVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
   lastStartedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   lastStoppedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
+  provisionStage?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  provisionError?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
+  filesSnapshotAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
+  host?: Prisma.XOR<Prisma.HostNullableScalarRelationFilter, Prisma.HostWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   containers?: Prisma.WorkspaceContainerListRelationFilter
+  files?: Prisma.WorkspaceFileListRelationFilter
+  deployments?: Prisma.ContractDeploymentListRelationFilter
 }, "id">
 
 export type WorkspaceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  hostId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrderInput | Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -290,6 +350,10 @@ export type WorkspaceOrderByWithAggregationInput = {
   ckbDataVolume?: Prisma.SortOrderInput | Prisma.SortOrder
   lastStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastStoppedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  provisionStage?: Prisma.SortOrderInput | Prisma.SortOrder
+  provisionError?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  filesSnapshotAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.WorkspaceCountOrderByAggregateInput
@@ -304,6 +368,7 @@ export type WorkspaceScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
   name?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
   status?: Prisma.EnumWorkspaceStatusWithAggregatesFilter<"Workspace"> | $Enums.WorkspaceStatus
+  hostId?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   userId?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   runtimeNetwork?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
@@ -311,6 +376,10 @@ export type WorkspaceScalarWhereWithAggregatesInput = {
   ckbDataVolume?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   lastStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Workspace"> | Date | string | null
   lastStoppedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Workspace"> | Date | string | null
+  provisionStage?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
+  provisionError?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Workspace"> | Date | string | null
+  filesSnapshotAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Workspace"> | Date | string
 }
@@ -325,16 +394,24 @@ export type WorkspaceCreateInput = {
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  host?: Prisma.HostCreateNestedOneWithoutWorkspacesInput
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
   containers?: Prisma.WorkspaceContainerCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateInput = {
   id?: string
   name: string
   status?: $Enums.WorkspaceStatus
+  hostId?: string | null
   userId: string
   templateId?: string | null
   runtimeNetwork?: string | null
@@ -342,9 +419,15 @@ export type WorkspaceUncheckedCreateInput = {
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   containers?: Prisma.WorkspaceContainerUncheckedCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileUncheckedCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUpdateInput = {
@@ -357,16 +440,24 @@ export type WorkspaceUpdateInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.HostUpdateOneWithoutWorkspacesNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
   containers?: Prisma.WorkspaceContainerUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -374,15 +465,22 @@ export type WorkspaceUncheckedUpdateInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   containers?: Prisma.WorkspaceContainerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateManyInput = {
   id?: string
   name: string
   status?: $Enums.WorkspaceStatus
+  hostId?: string | null
   userId: string
   templateId?: string | null
   runtimeNetwork?: string | null
@@ -390,6 +488,10 @@ export type WorkspaceCreateManyInput = {
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -404,6 +506,10 @@ export type WorkspaceUpdateManyMutationInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -412,6 +518,7 @@ export type WorkspaceUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -419,6 +526,10 @@ export type WorkspaceUncheckedUpdateManyInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -437,6 +548,7 @@ export type WorkspaceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  hostId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrder
@@ -444,6 +556,10 @@ export type WorkspaceCountOrderByAggregateInput = {
   ckbDataVolume?: Prisma.SortOrder
   lastStartedAt?: Prisma.SortOrder
   lastStoppedAt?: Prisma.SortOrder
+  provisionStage?: Prisma.SortOrder
+  provisionError?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
+  filesSnapshotAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -452,6 +568,7 @@ export type WorkspaceMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  hostId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrder
@@ -459,6 +576,10 @@ export type WorkspaceMaxOrderByAggregateInput = {
   ckbDataVolume?: Prisma.SortOrder
   lastStartedAt?: Prisma.SortOrder
   lastStoppedAt?: Prisma.SortOrder
+  provisionStage?: Prisma.SortOrder
+  provisionError?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
+  filesSnapshotAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -467,6 +588,7 @@ export type WorkspaceMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  hostId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrder
@@ -474,6 +596,10 @@ export type WorkspaceMinOrderByAggregateInput = {
   ckbDataVolume?: Prisma.SortOrder
   lastStartedAt?: Prisma.SortOrder
   lastStoppedAt?: Prisma.SortOrder
+  provisionStage?: Prisma.SortOrder
+  provisionError?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
+  filesSnapshotAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -525,8 +651,78 @@ export type WorkspaceUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.WorkspaceScalarWhereInput | Prisma.WorkspaceScalarWhereInput[]
 }
 
+export type WorkspaceCreateNestedManyWithoutHostInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutHostInput, Prisma.WorkspaceUncheckedCreateWithoutHostInput> | Prisma.WorkspaceCreateWithoutHostInput[] | Prisma.WorkspaceUncheckedCreateWithoutHostInput[]
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutHostInput | Prisma.WorkspaceCreateOrConnectWithoutHostInput[]
+  createMany?: Prisma.WorkspaceCreateManyHostInputEnvelope
+  connect?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+}
+
+export type WorkspaceUncheckedCreateNestedManyWithoutHostInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutHostInput, Prisma.WorkspaceUncheckedCreateWithoutHostInput> | Prisma.WorkspaceCreateWithoutHostInput[] | Prisma.WorkspaceUncheckedCreateWithoutHostInput[]
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutHostInput | Prisma.WorkspaceCreateOrConnectWithoutHostInput[]
+  createMany?: Prisma.WorkspaceCreateManyHostInputEnvelope
+  connect?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+}
+
+export type WorkspaceUpdateManyWithoutHostNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutHostInput, Prisma.WorkspaceUncheckedCreateWithoutHostInput> | Prisma.WorkspaceCreateWithoutHostInput[] | Prisma.WorkspaceUncheckedCreateWithoutHostInput[]
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutHostInput | Prisma.WorkspaceCreateOrConnectWithoutHostInput[]
+  upsert?: Prisma.WorkspaceUpsertWithWhereUniqueWithoutHostInput | Prisma.WorkspaceUpsertWithWhereUniqueWithoutHostInput[]
+  createMany?: Prisma.WorkspaceCreateManyHostInputEnvelope
+  set?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  disconnect?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  delete?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  connect?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  update?: Prisma.WorkspaceUpdateWithWhereUniqueWithoutHostInput | Prisma.WorkspaceUpdateWithWhereUniqueWithoutHostInput[]
+  updateMany?: Prisma.WorkspaceUpdateManyWithWhereWithoutHostInput | Prisma.WorkspaceUpdateManyWithWhereWithoutHostInput[]
+  deleteMany?: Prisma.WorkspaceScalarWhereInput | Prisma.WorkspaceScalarWhereInput[]
+}
+
+export type WorkspaceUncheckedUpdateManyWithoutHostNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutHostInput, Prisma.WorkspaceUncheckedCreateWithoutHostInput> | Prisma.WorkspaceCreateWithoutHostInput[] | Prisma.WorkspaceUncheckedCreateWithoutHostInput[]
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutHostInput | Prisma.WorkspaceCreateOrConnectWithoutHostInput[]
+  upsert?: Prisma.WorkspaceUpsertWithWhereUniqueWithoutHostInput | Prisma.WorkspaceUpsertWithWhereUniqueWithoutHostInput[]
+  createMany?: Prisma.WorkspaceCreateManyHostInputEnvelope
+  set?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  disconnect?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  delete?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  connect?: Prisma.WorkspaceWhereUniqueInput | Prisma.WorkspaceWhereUniqueInput[]
+  update?: Prisma.WorkspaceUpdateWithWhereUniqueWithoutHostInput | Prisma.WorkspaceUpdateWithWhereUniqueWithoutHostInput[]
+  updateMany?: Prisma.WorkspaceUpdateManyWithWhereWithoutHostInput | Prisma.WorkspaceUpdateManyWithWhereWithoutHostInput[]
+  deleteMany?: Prisma.WorkspaceScalarWhereInput | Prisma.WorkspaceScalarWhereInput[]
+}
+
 export type EnumWorkspaceStatusFieldUpdateOperationsInput = {
   set?: $Enums.WorkspaceStatus
+}
+
+export type WorkspaceCreateNestedOneWithoutFilesInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutFilesInput, Prisma.WorkspaceUncheckedCreateWithoutFilesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutFilesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutFilesNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutFilesInput, Prisma.WorkspaceUncheckedCreateWithoutFilesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutFilesInput
+  upsert?: Prisma.WorkspaceUpsertWithoutFilesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutFilesInput, Prisma.WorkspaceUpdateWithoutFilesInput>, Prisma.WorkspaceUncheckedUpdateWithoutFilesInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutDeploymentsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutDeploymentsInput, Prisma.WorkspaceUncheckedCreateWithoutDeploymentsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutDeploymentsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutDeploymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutDeploymentsInput, Prisma.WorkspaceUncheckedCreateWithoutDeploymentsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutDeploymentsInput
+  upsert?: Prisma.WorkspaceUpsertWithoutDeploymentsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutDeploymentsInput, Prisma.WorkspaceUpdateWithoutDeploymentsInput>, Prisma.WorkspaceUncheckedUpdateWithoutDeploymentsInput>
 }
 
 export type WorkspaceCreateNestedOneWithoutContainersInput = {
@@ -553,24 +749,38 @@ export type WorkspaceCreateWithoutUserInput = {
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  host?: Prisma.HostCreateNestedOneWithoutWorkspacesInput
   containers?: Prisma.WorkspaceContainerCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutUserInput = {
   id?: string
   name: string
   status?: $Enums.WorkspaceStatus
+  hostId?: string | null
   templateId?: string | null
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   containers?: Prisma.WorkspaceContainerUncheckedCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileUncheckedCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutUserInput = {
@@ -606,6 +816,7 @@ export type WorkspaceScalarWhereInput = {
   id?: Prisma.StringFilter<"Workspace"> | string
   name?: Prisma.StringFilter<"Workspace"> | string
   status?: Prisma.EnumWorkspaceStatusFilter<"Workspace"> | $Enums.WorkspaceStatus
+  hostId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   userId?: Prisma.StringFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   runtimeNetwork?: Prisma.StringNullableFilter<"Workspace"> | string | null
@@ -613,8 +824,290 @@ export type WorkspaceScalarWhereInput = {
   ckbDataVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
   lastStartedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   lastStoppedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
+  provisionStage?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  provisionError?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
+  filesSnapshotAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
+}
+
+export type WorkspaceCreateWithoutHostInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
+  containers?: Prisma.WorkspaceContainerCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutHostInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  userId: string
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  containers?: Prisma.WorkspaceContainerUncheckedCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileUncheckedCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutHostInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutHostInput, Prisma.WorkspaceUncheckedCreateWithoutHostInput>
+}
+
+export type WorkspaceCreateManyHostInputEnvelope = {
+  data: Prisma.WorkspaceCreateManyHostInput | Prisma.WorkspaceCreateManyHostInput[]
+  skipDuplicates?: boolean
+}
+
+export type WorkspaceUpsertWithWhereUniqueWithoutHostInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutHostInput, Prisma.WorkspaceUncheckedUpdateWithoutHostInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutHostInput, Prisma.WorkspaceUncheckedCreateWithoutHostInput>
+}
+
+export type WorkspaceUpdateWithWhereUniqueWithoutHostInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutHostInput, Prisma.WorkspaceUncheckedUpdateWithoutHostInput>
+}
+
+export type WorkspaceUpdateManyWithWhereWithoutHostInput = {
+  where: Prisma.WorkspaceScalarWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateManyMutationInput, Prisma.WorkspaceUncheckedUpdateManyWithoutHostInput>
+}
+
+export type WorkspaceCreateWithoutFilesInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  host?: Prisma.HostCreateNestedOneWithoutWorkspacesInput
+  user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
+  containers?: Prisma.WorkspaceContainerCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutFilesInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  hostId?: string | null
+  userId: string
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  containers?: Prisma.WorkspaceContainerUncheckedCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutFilesInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutFilesInput, Prisma.WorkspaceUncheckedCreateWithoutFilesInput>
+}
+
+export type WorkspaceUpsertWithoutFilesInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutFilesInput, Prisma.WorkspaceUncheckedUpdateWithoutFilesInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutFilesInput, Prisma.WorkspaceUncheckedCreateWithoutFilesInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutFilesInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutFilesInput, Prisma.WorkspaceUncheckedUpdateWithoutFilesInput>
+}
+
+export type WorkspaceUpdateWithoutFilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.HostUpdateOneWithoutWorkspacesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
+  containers?: Prisma.WorkspaceContainerUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutFilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  containers?: Prisma.WorkspaceContainerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutDeploymentsInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  host?: Prisma.HostCreateNestedOneWithoutWorkspacesInput
+  user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
+  containers?: Prisma.WorkspaceContainerCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutDeploymentsInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  hostId?: string | null
+  userId: string
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  containers?: Prisma.WorkspaceContainerUncheckedCreateNestedManyWithoutWorkspaceInput
+  files?: Prisma.WorkspaceFileUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutDeploymentsInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutDeploymentsInput, Prisma.WorkspaceUncheckedCreateWithoutDeploymentsInput>
+}
+
+export type WorkspaceUpsertWithoutDeploymentsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutDeploymentsInput, Prisma.WorkspaceUncheckedUpdateWithoutDeploymentsInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutDeploymentsInput, Prisma.WorkspaceUncheckedCreateWithoutDeploymentsInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutDeploymentsInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutDeploymentsInput, Prisma.WorkspaceUncheckedUpdateWithoutDeploymentsInput>
+}
+
+export type WorkspaceUpdateWithoutDeploymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.HostUpdateOneWithoutWorkspacesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
+  containers?: Prisma.WorkspaceContainerUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutDeploymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  containers?: Prisma.WorkspaceContainerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutContainersInput = {
@@ -627,15 +1120,23 @@ export type WorkspaceCreateWithoutContainersInput = {
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  host?: Prisma.HostCreateNestedOneWithoutWorkspacesInput
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
+  files?: Prisma.WorkspaceFileCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutContainersInput = {
   id?: string
   name: string
   status?: $Enums.WorkspaceStatus
+  hostId?: string | null
   userId: string
   templateId?: string | null
   runtimeNetwork?: string | null
@@ -643,8 +1144,14 @@ export type WorkspaceUncheckedCreateWithoutContainersInput = {
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  files?: Prisma.WorkspaceFileUncheckedCreateNestedManyWithoutWorkspaceInput
+  deployments?: Prisma.ContractDeploymentUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutContainersInput = {
@@ -673,15 +1180,23 @@ export type WorkspaceUpdateWithoutContainersInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.HostUpdateOneWithoutWorkspacesNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
+  files?: Prisma.WorkspaceFileUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutContainersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -689,20 +1204,31 @@ export type WorkspaceUncheckedUpdateWithoutContainersInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  files?: Prisma.WorkspaceFileUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateManyUserInput = {
   id?: string
   name: string
   status?: $Enums.WorkspaceStatus
+  hostId?: string | null
   templateId?: string | null
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
   lastStartedAt?: Date | string | null
   lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -717,27 +1243,79 @@ export type WorkspaceUpdateWithoutUserInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.HostUpdateOneWithoutWorkspacesNestedInput
   containers?: Prisma.WorkspaceContainerUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   containers?: Prisma.WorkspaceContainerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WorkspaceCreateManyHostInput = {
+  id?: string
+  name: string
+  status?: $Enums.WorkspaceStatus
+  userId: string
+  templateId?: string | null
+  runtimeNetwork?: string | null
+  runtimeVolume?: string | null
+  ckbDataVolume?: string | null
+  lastStartedAt?: Date | string | null
+  lastStoppedAt?: Date | string | null
+  provisionStage?: string | null
+  provisionError?: string | null
+  lastActivityAt?: Date | string | null
+  filesSnapshotAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type WorkspaceUpdateWithoutHostInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
@@ -747,6 +1325,55 @@ export type WorkspaceUncheckedUpdateManyWithoutUserInput = {
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
+  containers?: Prisma.WorkspaceContainerUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutHostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  containers?: Prisma.WorkspaceContainerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  files?: Prisma.WorkspaceFileUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deployments?: Prisma.ContractDeploymentUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateManyWithoutHostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastStoppedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  provisionStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provisionError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  filesSnapshotAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -758,10 +1385,14 @@ export type WorkspaceUncheckedUpdateManyWithoutUserInput = {
 
 export type WorkspaceCountOutputType = {
   containers: number
+  files: number
+  deployments: number
 }
 
 export type WorkspaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   containers?: boolean | WorkspaceCountOutputTypeCountContainersArgs
+  files?: boolean | WorkspaceCountOutputTypeCountFilesArgs
+  deployments?: boolean | WorkspaceCountOutputTypeCountDeploymentsArgs
 }
 
 /**
@@ -781,11 +1412,26 @@ export type WorkspaceCountOutputTypeCountContainersArgs<ExtArgs extends runtime.
   where?: Prisma.WorkspaceContainerWhereInput
 }
 
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WorkspaceFileWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountDeploymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContractDeploymentWhereInput
+}
+
 
 export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   status?: boolean
+  hostId?: boolean
   userId?: boolean
   templateId?: boolean
   runtimeNetwork?: boolean
@@ -793,10 +1439,17 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   ckbDataVolume?: boolean
   lastStartedAt?: boolean
   lastStoppedAt?: boolean
+  provisionStage?: boolean
+  provisionError?: boolean
+  lastActivityAt?: boolean
+  filesSnapshotAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   containers?: boolean | Prisma.Workspace$containersArgs<ExtArgs>
+  files?: boolean | Prisma.Workspace$filesArgs<ExtArgs>
+  deployments?: boolean | Prisma.Workspace$deploymentsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workspace"]>
 
@@ -804,6 +1457,7 @@ export type WorkspaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   name?: boolean
   status?: boolean
+  hostId?: boolean
   userId?: boolean
   templateId?: boolean
   runtimeNetwork?: boolean
@@ -811,8 +1465,13 @@ export type WorkspaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ckbDataVolume?: boolean
   lastStartedAt?: boolean
   lastStoppedAt?: boolean
+  provisionStage?: boolean
+  provisionError?: boolean
+  lastActivityAt?: boolean
+  filesSnapshotAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workspace"]>
 
@@ -820,6 +1479,7 @@ export type WorkspaceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   name?: boolean
   status?: boolean
+  hostId?: boolean
   userId?: boolean
   templateId?: boolean
   runtimeNetwork?: boolean
@@ -827,8 +1487,13 @@ export type WorkspaceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ckbDataVolume?: boolean
   lastStartedAt?: boolean
   lastStoppedAt?: boolean
+  provisionStage?: boolean
+  provisionError?: boolean
+  lastActivityAt?: boolean
+  filesSnapshotAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workspace"]>
 
@@ -836,6 +1501,7 @@ export type WorkspaceSelectScalar = {
   id?: boolean
   name?: boolean
   status?: boolean
+  hostId?: boolean
   userId?: boolean
   templateId?: boolean
   runtimeNetwork?: boolean
@@ -843,33 +1509,51 @@ export type WorkspaceSelectScalar = {
   ckbDataVolume?: boolean
   lastStartedAt?: boolean
   lastStoppedAt?: boolean
+  provisionStage?: boolean
+  provisionError?: boolean
+  lastActivityAt?: boolean
+  filesSnapshotAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "status" | "userId" | "templateId" | "runtimeNetwork" | "runtimeVolume" | "ckbDataVolume" | "lastStartedAt" | "lastStoppedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
+export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "status" | "hostId" | "userId" | "templateId" | "runtimeNetwork" | "runtimeVolume" | "ckbDataVolume" | "lastStartedAt" | "lastStoppedAt" | "provisionStage" | "provisionError" | "lastActivityAt" | "filesSnapshotAt" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
 export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   containers?: boolean | Prisma.Workspace$containersArgs<ExtArgs>
+  files?: boolean | Prisma.Workspace$filesArgs<ExtArgs>
+  deployments?: boolean | Prisma.Workspace$deploymentsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WorkspaceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type WorkspaceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Workspace"
   objects: {
+    host: Prisma.$HostPayload<ExtArgs> | null
     user: Prisma.$UserPayload<ExtArgs>
     containers: Prisma.$WorkspaceContainerPayload<ExtArgs>[]
+    files: Prisma.$WorkspaceFilePayload<ExtArgs>[]
+    deployments: Prisma.$ContractDeploymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     status: $Enums.WorkspaceStatus
+    /**
+     * Host the workspace's containers and volumes live on. Assigned on
+     * first start and kept (volumes are local to a host). Null = the
+     * default host, for workspaces created before multi-host support.
+     */
+    hostId: string | null
     userId: string
     templateId: string | null
     runtimeNetwork: string | null
@@ -877,6 +1561,24 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     ckbDataVolume: string | null
     lastStartedAt: Date | null
     lastStoppedAt: Date | null
+    /**
+     * Current step while status is PROVISIONING (preparing | starting | project).
+     */
+    provisionStage: string | null
+    /**
+     * Why the last start failed, shown to the user.
+     */
+    provisionError: string | null
+    /**
+     * Last sign of use (open IDE tab, terminal input, file edits, builds).
+     * Running workspaces idle for too long are stopped automatically.
+     */
+    lastActivityAt: Date | null
+    /**
+     * When the source-file copy in WorkspaceFile was last refreshed from
+     * the container. Null until the workspace has run once.
+     */
+    filesSnapshotAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["workspace"]>
@@ -1273,8 +1975,11 @@ readonly fields: WorkspaceFieldRefs;
  */
 export interface Prisma__WorkspaceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  host<T extends Prisma.Workspace$hostArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$hostArgs<ExtArgs>>): Prisma.Prisma__HostClient<runtime.Types.Result.GetResult<Prisma.$HostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   containers<T extends Prisma.Workspace$containersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$containersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspaceContainerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  files<T extends Prisma.Workspace$filesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$filesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspaceFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deployments<T extends Prisma.Workspace$deploymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$deploymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContractDeploymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1307,6 +2012,7 @@ export interface WorkspaceFieldRefs {
   readonly id: Prisma.FieldRef<"Workspace", 'String'>
   readonly name: Prisma.FieldRef<"Workspace", 'String'>
   readonly status: Prisma.FieldRef<"Workspace", 'WorkspaceStatus'>
+  readonly hostId: Prisma.FieldRef<"Workspace", 'String'>
   readonly userId: Prisma.FieldRef<"Workspace", 'String'>
   readonly templateId: Prisma.FieldRef<"Workspace", 'String'>
   readonly runtimeNetwork: Prisma.FieldRef<"Workspace", 'String'>
@@ -1314,6 +2020,10 @@ export interface WorkspaceFieldRefs {
   readonly ckbDataVolume: Prisma.FieldRef<"Workspace", 'String'>
   readonly lastStartedAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly lastStoppedAt: Prisma.FieldRef<"Workspace", 'DateTime'>
+  readonly provisionStage: Prisma.FieldRef<"Workspace", 'String'>
+  readonly provisionError: Prisma.FieldRef<"Workspace", 'String'>
+  readonly lastActivityAt: Prisma.FieldRef<"Workspace", 'DateTime'>
+  readonly filesSnapshotAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Workspace", 'DateTime'>
 }
@@ -1717,6 +2427,25 @@ export type WorkspaceDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * Workspace.host
+ */
+export type Workspace$hostArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Host
+   */
+  select?: Prisma.HostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Host
+   */
+  omit?: Prisma.HostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HostInclude<ExtArgs> | null
+  where?: Prisma.HostWhereInput
+}
+
+/**
  * Workspace.containers
  */
 export type Workspace$containersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1738,6 +2467,54 @@ export type Workspace$containersArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.WorkspaceContainerScalarFieldEnum | Prisma.WorkspaceContainerScalarFieldEnum[]
+}
+
+/**
+ * Workspace.files
+ */
+export type Workspace$filesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkspaceFile
+   */
+  select?: Prisma.WorkspaceFileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkspaceFile
+   */
+  omit?: Prisma.WorkspaceFileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkspaceFileInclude<ExtArgs> | null
+  where?: Prisma.WorkspaceFileWhereInput
+  orderBy?: Prisma.WorkspaceFileOrderByWithRelationInput | Prisma.WorkspaceFileOrderByWithRelationInput[]
+  cursor?: Prisma.WorkspaceFileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WorkspaceFileScalarFieldEnum | Prisma.WorkspaceFileScalarFieldEnum[]
+}
+
+/**
+ * Workspace.deployments
+ */
+export type Workspace$deploymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContractDeployment
+   */
+  select?: Prisma.ContractDeploymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContractDeployment
+   */
+  omit?: Prisma.ContractDeploymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContractDeploymentInclude<ExtArgs> | null
+  where?: Prisma.ContractDeploymentWhereInput
+  orderBy?: Prisma.ContractDeploymentOrderByWithRelationInput | Prisma.ContractDeploymentOrderByWithRelationInput[]
+  cursor?: Prisma.ContractDeploymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContractDeploymentScalarFieldEnum | Prisma.ContractDeploymentScalarFieldEnum[]
 }
 
 /**

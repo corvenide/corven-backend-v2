@@ -87,7 +87,7 @@ export class TerminalService {
             );
         }
 
-        const container = this.dockerService.getContainer(
+        const container = await this.dockerService.getContainer(
             runtimeContainer.containerId,
         );
 
@@ -99,7 +99,7 @@ export class TerminalService {
             );
         }
 
-        const exec = await container.exec({
+        const exec = await this.dockerService.createExec(runtimeContainer.containerId, {
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
