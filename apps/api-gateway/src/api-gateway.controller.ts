@@ -22,6 +22,7 @@ import type { Request, Response } from 'express';
 import { findTemplate, WORKSPACE_TEMPLATES } from 'libs/prisma/src/workspace-templates';
 
 import { ApiGatewayService } from './api-gateway.service';
+import { createPreviewToken } from './preview-proxy';
 import {
     assertTrustedOrigin,
     clearRefreshCookie,
@@ -475,6 +476,39 @@ export class ApiGatewayController {
             user.id,
             workspaceId,
         );
+    }
+
+    /**
+     * Opens a preview of a dev server running in the workspace. Returns a
+     * signed URL path (relative to the API root) the IDE puts in an iframe.
+     */
+    @Post('workspaces/:id/preview')
+    @HttpCode(200)
+    async openPreview(
+        @Headers('authorization')
+        authorization: string,
+
+        @Param('id')
+        workspaceId: string,
+
+        @Body()
+        body: { port?: number },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const port = Number(body?.port);
+
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+            throw new BadRequestException('port must be a number between 1 and 65535');
+        }
+
+        // Fails with a helpful message if the port isn't previewable or the
+        // workspace isn't running.
+        await this.gatewayService.resolvePreview(user.id, workspaceId, port);
+
+        return {
+            port,
+            path: `preview/${createPreviewToken(user.id, workspaceId, port)}/`,
+        };
     }
 
     /** Starts the workspace's CKB devnet (devnets start on demand). */

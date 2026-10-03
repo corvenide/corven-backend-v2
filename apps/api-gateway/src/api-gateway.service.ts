@@ -195,6 +195,19 @@ export class ApiGatewayService {
         );
     }
 
+    resolvePreview(
+        userId: string,
+        workspaceId: string,
+        port: number,
+    ) {
+        return this.send(
+            this.runtimeClient,
+            'runtime.preview.resolve',
+            { userId, workspaceId, port },
+            10_000,
+        );
+    }
+
     startDevnet(
         userId: string,
         workspaceId: string,

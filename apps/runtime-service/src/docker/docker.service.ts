@@ -27,6 +27,8 @@ export interface CreateContainerOptions {
     environment?: string[];
 
     exposedPorts?: string[];
+    /** Host interface published ports bind to (default 127.0.0.1). */
+    bindIp?: string;
     binds?: string[];
 
     workingDirectory?: string;
@@ -430,6 +432,7 @@ export class DockerClient {
                     [
                         {
                             HostIp:
+                                options.bindIp ??
                                 '127.0.0.1',
 
                             // Docker automatically

@@ -120,6 +120,11 @@ export class RuntimeServiceController {
         return this.runtimeService.startWorkspace(payload);
     }
 
+    @MessagePattern({ cmd: 'runtime.preview.resolve' })
+    resolvePreview(@Payload() payload: WorkspaceStatusPayload & { port: number }) {
+        return this.runtimeService.resolvePreview(payload);
+    }
+
     @MessagePattern({
         cmd: 'runtime.heartbeat',
     })

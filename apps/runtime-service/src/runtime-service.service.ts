@@ -70,6 +70,17 @@ const SNAPSHOT_INTERVAL_MS = 3 * 60 * 1000;
 const STOP_SNAPSHOT_TIMEOUT_MS = 20 * 1000;
 
 /** Names of containers created for a workspace: fiberdev-<workspace id>-<role>. */
+/**
+ * Container ports published to the host so a dev server running in the
+ * workspace can be previewed in the IDE. Override with PREVIEW_PORTS
+ * (comma separated). Containers created before this existed need a fresh
+ * runtime to get the bindings.
+ */
+export const PREVIEW_PORTS: number[] = (process.env.PREVIEW_PORTS || '3000,3001,4173,5000,5173,8000,8080,8888')
+    .split(',')
+    .map((port) => Number(port.trim()))
+    .filter((port) => Number.isInteger(port) && port > 0 && port < 65536);
+
 const WORKSPACE_CONTAINER_NAME = /^fiberdev-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})-(runtime|ckb)$/;
 
 /** Thrown when a workspace is stopped or deleted while it is starting. */
@@ -1129,6 +1140,50 @@ export class RuntimeServiceService implements OnModuleInit, OnModuleDestroy {
         });
     }
 
+    /**
+     * Where the preview proxy can reach a dev server listening on `port`
+     * inside the workspace's runtime container.
+     */
+    async resolvePreview(payload: { workspaceId: string; userId: string; port: number }) {
+        const port = Number(payload.port);
+
+        if (!PREVIEW_PORTS.includes(port)) {
+            throw new RpcException(
+                `Port ${payload.port} can't be previewed. Run your server on one of: ${PREVIEW_PORTS.join(', ')}`,
+            );
+        }
+
+        const workspace = await this.getWorkspace(payload.workspaceId, payload.userId);
+
+        if (workspace.status !== WorkspaceStatus.RUNNING) {
+            throw new RpcException('Start the workspace to preview it');
+        }
+
+        const runtime = workspace.containers.find((c) => c.type === RuntimeContainerType.FIBER_RUNTIME);
+        if (!runtime) throw new RpcException('The workspace has no runtime container');
+
+        const docker = this.clientFor(workspace);
+        const published = await docker.getContainerPort(runtime.containerId, port).catch(() => null);
+
+        if (!published?.hostPort) {
+            throw new RpcException(
+                `Port ${port} isn't published on this workspace's runtime. Restart the workspace to pick up preview ports.`,
+            );
+        }
+
+        const endpoint = this.docker.registry.config(workspace.hostId ?? this.docker.registry.defaultHostId).endpoint;
+        let host = '127.0.0.1';
+        if (!endpoint.startsWith('unix://') && endpoint !== 'default') {
+            try {
+                host = new URL(endpoint).hostname;
+            } catch {
+                /* keep loopback */
+            }
+        }
+
+        return { host, port: published.hostPort };
+    }
+
     async getWorkspaceStatus(
         payload: WorkspaceStatusPayload,
     ) {
@@ -1666,6 +1721,10 @@ export class RuntimeServiceService implements OnModuleInit, OnModuleDestroy {
             image: this.runtimeImage,
             networkName: options.networkName,
             command: ['sh', '-c', 'while true; do sleep 3600; done'],
+            // Dev servers started in the terminal listen on these ports; the
+            // preview proxy reaches them through the published host ports.
+            exposedPorts: PREVIEW_PORTS.map((port) => `${port}/tcp`),
+            bindIp: process.env.PREVIEW_BIND_IP || undefined,
             workingDirectory: '/workspace',
             binds: [`${options.workspaceVolume}:/workspace`],
             environment: [
