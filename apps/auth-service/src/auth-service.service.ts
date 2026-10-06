@@ -16,6 +16,12 @@ import {
     parseSignature,
     verifyWalletOwnership,
 } from './wallet-verification';
+import { WalletService } from './wallets/wallet.service';
+import {
+    GoogleVerificationError,
+    verifyGoogleCredential,
+    type GoogleIdentity,
+} from './google-verification';
 
 export interface SessionMeta {
     userAgent?: string;
@@ -52,6 +58,7 @@ export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
+        private readonly wallets?: WalletService,
     ) { }
 
     // ------------------------------------------------------------------
@@ -182,6 +189,89 @@ export class AuthService {
         });
 
         return this.issueSession(user, data.meta);
+    }
+
+    // ------------------------------------------------------------------
+    // Google authentication
+    // ------------------------------------------------------------------
+
+    /**
+     * Signs in with a Google ID token from Google Identity Services.
+     *
+     * The account is found by Google account id; the first sign-in creates
+     * it. Google accounts are never merged into an existing account with
+     * the same email: email/password sign-up doesn't verify emails, so
+     * someone could register a victim's address first and keep access
+     * after the victim later signed in with Google.
+     */
+    async googleLogin(data: { credential: string; meta?: SessionMeta }) {
+        let identity: GoogleIdentity;
+
+        try {
+            identity = await verifyGoogleCredential(data.credential);
+        } catch (error) {
+            const reason = error instanceof GoogleVerificationError ? error.reason : 'invalid_token';
+
+            if (reason === 'not_configured') {
+                throw new RpcException({ statusCode: 503, message: 'Google sign-in is not set up on this server.' });
+            }
+
+            this.logger.warn(`Google login rejected (${reason})`);
+
+            throw unauthorized(
+                reason === 'email_not_verified'
+                    ? 'Your Google account email is not verified.'
+                    : 'Google sign-in failed. Please try again.',
+            );
+        }
+
+        let user: UserRecord;
+
+        try {
+            user = await this.findOrCreateGoogleUser(identity);
+        } catch (error) {
+            // Two first-time sign-ins racing: the other one created the user.
+            if ((error as { code?: string })?.code !== 'P2002') throw error;
+
+            const existing = await this.prisma.user.findUnique({ where: { googleId: identity.sub } });
+            if (!existing) {
+                throw new RpcException({ statusCode: 409, message: 'An account with this email already exists.' });
+            }
+            user = existing;
+        }
+
+        // Google users get Corven-held testnet and mainnet wallets. Best effort:
+        // a failure here mustn't block sign-in (the wallet page retries).
+        await this.wallets?.ensureWallets(user.id).catch((error) =>
+            this.logger.error(`Creating wallets for ${user.id} failed: ${error instanceof Error ? error.message : error}`),
+        );
+
+        return this.issueSession(user, data.meta);
+    }
+
+    private async findOrCreateGoogleUser(identity: GoogleIdentity): Promise<UserRecord> {
+        return this.prisma.$transaction(async (tx) => {
+            const linked = await tx.user.findUnique({ where: { googleId: identity.sub } });
+            if (linked) return linked;
+
+            const byEmail = await tx.user.findUnique({ where: { email: identity.email } });
+
+            if (byEmail) {
+                throw new RpcException({
+                    statusCode: 409,
+                    message: 'An account with this email already exists. Sign in the way you did before.',
+                });
+            }
+
+            return tx.user.create({
+                data: {
+                    name: identity.name ?? identity.email.split('@')[0],
+                    email: identity.email,
+                    googleId: identity.sub,
+                    authProvider: 'GOOGLE',
+                },
+            });
+        });
     }
 
     // ------------------------------------------------------------------

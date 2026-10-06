@@ -2,6 +2,8 @@
 
 import {
     BadRequestException,
+    ConflictException,
+    HttpException,
     ForbiddenException,
     GatewayTimeoutException,
     Inject,
@@ -68,6 +70,30 @@ export class ApiGatewayService {
         // Signature verification can call out to public CKB nodes for
         // known-script lookups, so allow a little longer than default.
         return this.sendToAuthService<AuthSession>('auth.wallet.login', data, 15_000);
+    }
+
+    googleLogin(data: { credential: string; meta: SessionMeta }) {
+        // Verifying the ID token may fetch Google's signing keys.
+        return this.sendToAuthService<AuthSession>('auth.google.login', data, 15_000);
+    }
+
+    // ---- Corven wallets (Google users)
+
+    listWallets(userId: string) {
+        // Reads balances from public CKB nodes.
+        return this.sendToAuthService('wallet.list', { userId }, 20_000);
+    }
+
+    walletTransfer(userId: string, body: Record<string, unknown>) {
+        return this.sendToAuthService('wallet.transfer', { network: body.network, to: body.to, amountCkb: body.amountCkb, confirmation: body.confirmation, userId }, 60_000);
+    }
+
+    walletSignTestnet(userId: string, transaction: unknown) {
+        return this.sendToAuthService('wallet.sign-testnet', { userId, transaction }, 30_000);
+    }
+
+    walletExport(userId: string, body: Record<string, unknown>) {
+        return this.sendToAuthService('wallet.export', { network: body.network, confirmation: body.confirmation, userId }, 15_000);
     }
 
     register(data: { name: string; email: string; password: string; meta: SessionMeta }) {
@@ -693,7 +719,9 @@ export class ApiGatewayService {
 
         // Community calls report "not allowed" and "not found" precisely, so
         // the page can show them instead of treating them as a lost session.
-        if (command.startsWith('community.')) {
+        if (statusCode === 429) return new HttpException(message, 429);
+
+        if (command.startsWith('community.') || command.startsWith('wallet.')) {
             if (statusCode === 403) return new ForbiddenException(message);
             if (statusCode === 404) return new NotFoundException(message);
         }
@@ -709,6 +737,9 @@ export class ApiGatewayService {
                 message,
             );
         }
+
+        if (statusCode === 409) return new ConflictException(message);
+        if (statusCode === 503) return new ServiceUnavailableException(message);
 
         if (
             source?.code === 'ECONNREFUSED' ||

@@ -53,6 +53,7 @@ enum DeployNetwork {
 enum AuthProvider {
     EMAIL
     CKB_WALLET
+    GOOGLE
 }
 
 enum CellStatus {
@@ -86,6 +87,8 @@ model User {
     passwordHash String?
 
     walletAddress String?      @unique
+    /// Google account id (the ID token's `sub`), for Google sign-in.
+    googleId      String?      @unique
     authProvider  AuthProvider @default(EMAIL)
 
     role UserRole @default(USER)
@@ -97,6 +100,9 @@ model User {
     communityPosts    CommunityPost[]
     communityComments CommunityComment[]
     communityVotes    CommunityVote[]
+
+    wallets         UserWallet[]
+    walletTransfers WalletTransfer[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -507,3 +513,60 @@ model Address {
     cells Cell[]
 }
 
+
+enum WalletNetwork {
+    TESTNET
+    MAINNET
+}
+
+/// A CKB wallet Corven holds for a user who signed in with Google (one per
+/// network). The private key is encrypted with a per-wallet data key, which
+/// is itself encrypted with WALLET_ENCRYPTION_KEY (see apps/auth-service
+/// wallets/wallet-vault.ts). Neither key is ever stored in plain text.
+model UserWallet {
+    id String @id @default(uuid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    network   WalletNetwork
+    address   String
+    /// Compressed secp256k1 public key (0x…), safe to share.
+    publicKey String
+
+    /// AES-256-GCM: base64(iv | tag | ciphertext) of the private key.
+    encryptedKey   String
+    /// AES-256-GCM: base64(iv | tag | ciphertext) of the data key, under the master key.
+    wrappedDataKey String
+    /// Which master key wrapped the data key (for rotation).
+    keyVersion     Int    @default(1)
+
+    exportedAt DateTime?
+    createdAt  DateTime  @default(now())
+
+    transfers WalletTransfer[]
+
+    @@unique([userId, network])
+    @@index([address])
+}
+
+/// CKB sent from a Corven wallet, for history and the mainnet daily limit.
+model WalletTransfer {
+    id String @id @default(uuid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    walletId String
+    wallet   UserWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+    network   WalletNetwork
+    toAddress String
+    /// Shannons, as a decimal string.
+    amount    String
+    txHash    String
+
+    createdAt DateTime @default(now())
+
+    @@index([userId, network, createdAt])
+}

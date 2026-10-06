@@ -11,6 +11,8 @@ import { AuthService } from './auth-service.service';
 import { CommunityAdmins } from './community/community-admins';
 import { CommunityController } from './community/community.controller';
 import { CommunityService } from './community/community.service';
+import { WalletController } from './wallets/wallet.controller';
+import { WalletService } from './wallets/wallet.service';
 
 @Module({
     imports: [
@@ -43,11 +45,12 @@ import { CommunityService } from './community/community.service';
             },
         }),
     ],
-    controllers: [AuthServiceController, CommunityController],
+    controllers: [AuthServiceController, CommunityController, WalletController],
     providers: [
         AuthService,
         PrismaService,
         CommunityService,
+        WalletService,
         // Reads COMMUNITY_ADMIN_WALLETS.
         { provide: CommunityAdmins, useFactory: () => new CommunityAdmins() },
     ],

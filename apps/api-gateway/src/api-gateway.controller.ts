@@ -79,6 +79,81 @@ export class ApiGatewayController {
         return this.startSession(res, session);
     }
 
+    /** Signs in with the ID token Google Identity Services gives the browser. */
+    @Post('auth/google')
+    async googleLogin(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+        @Body() body: { credential?: unknown },
+    ) {
+        assertTrustedOrigin(req);
+        this.authLimiter.consume(`login:${req.ip}`);
+
+        const session = await this.gatewayService.googleLogin({
+            credential: typeof body?.credential === 'string' ? body.credential : '',
+            meta: sessionMeta(req),
+        });
+
+        return this.startSession(res, session);
+    }
+
+    // =========================================
+    // Corven wallets (Google users)
+    // =========================================
+
+    private readonly walletLimiter = new RateLimiter(10, 60_000);
+
+    /** The user's Corven-held testnet and mainnet wallets, with balances. */
+    @Get('wallet')
+    async listWallets(@Headers('authorization') authorization: string) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        return this.gatewayService.listWallets(user.id);
+    }
+
+    /** Sends CKB. Mainnet needs `confirmation`: a fresh Google ID token. */
+    @Post('wallet/transfer')
+    @HttpCode(200)
+    async walletTransfer(
+        @Req() req: Request,
+        @Headers('authorization') authorization: string,
+        @Body() body: Record<string, unknown>,
+    ) {
+        assertTrustedOrigin(req);
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        this.walletLimiter.consume(`transfer:${user.id}`);
+        return this.gatewayService.walletTransfer(user.id, body ?? {});
+    }
+
+    /** Signs a browser-built testnet transaction (contract deploys) with the testnet wallet. */
+    @Post('wallet/sign-testnet')
+    @HttpCode(200)
+    async walletSignTestnet(
+        @Req() req: Request,
+        @Headers('authorization') authorization: string,
+        @Body() body: { transaction?: unknown },
+    ) {
+        assertTrustedOrigin(req);
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        this.walletLimiter.consume(`sign:${user.id}`);
+        return this.gatewayService.walletSignTestnet(user.id, body?.transaction);
+    }
+
+    /** Returns a wallet's private key. Needs a fresh Google confirmation. */
+    @Post('wallet/export')
+    @HttpCode(200)
+    async walletExport(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+        @Headers('authorization') authorization: string,
+        @Body() body: Record<string, unknown>,
+    ) {
+        assertTrustedOrigin(req);
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+        this.walletLimiter.consume(`export:${user.id}`);
+        res.setHeader('Cache-Control', 'no-store');
+        return this.gatewayService.walletExport(user.id, body ?? {});
+    }
+
     @Post('auth/register')
     async register(
         @Req() req: Request,

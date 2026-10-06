@@ -27,6 +27,11 @@ export class AuthServiceController {
         return this.authService.walletLogin(data);
     }
 
+    @MessagePattern({ cmd: 'auth.google.login' })
+    googleLogin(@Payload() data: { credential: string; meta?: SessionMeta }) {
+        return this.authService.googleLogin(data);
+    }
+
     @MessagePattern({ cmd: 'auth.register' })
     register(
         @Payload()
