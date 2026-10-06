@@ -477,6 +477,23 @@ export type EnumScriptKindWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumScriptKindFilter<$PrismaModel>
 }
 
+export type EnumWalletNetworkFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletNetwork | Prisma.EnumWalletNetworkFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel> | $Enums.WalletNetwork
+}
+
+export type EnumWalletNetworkWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletNetwork | Prisma.EnumWalletNetworkFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletNetworkWithAggregatesFilter<$PrismaModel> | $Enums.WalletNetwork
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -951,6 +968,23 @@ export type NestedEnumScriptKindWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumScriptKindFilter<$PrismaModel>
   _max?: Prisma.NestedEnumScriptKindFilter<$PrismaModel>
+}
+
+export type NestedEnumWalletNetworkFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletNetwork | Prisma.EnumWalletNetworkFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel> | $Enums.WalletNetwork
+}
+
+export type NestedEnumWalletNetworkWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletNetwork | Prisma.EnumWalletNetworkFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletNetwork[] | Prisma.ListEnumWalletNetworkFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletNetworkWithAggregatesFilter<$PrismaModel> | $Enums.WalletNetwork
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
 }
 
 

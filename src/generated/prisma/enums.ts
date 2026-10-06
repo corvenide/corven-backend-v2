@@ -71,7 +71,8 @@ export type DeployNetwork = (typeof DeployNetwork)[keyof typeof DeployNetwork]
 
 export const AuthProvider = {
   EMAIL: 'EMAIL',
-  CKB_WALLET: 'CKB_WALLET'
+  CKB_WALLET: 'CKB_WALLET',
+  GOOGLE: 'GOOGLE'
 } as const
 
 export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
@@ -130,3 +131,11 @@ export const CommunityPostStatus = {
 } as const
 
 export type CommunityPostStatus = (typeof CommunityPostStatus)[keyof typeof CommunityPostStatus]
+
+
+export const WalletNetwork = {
+  TESTNET: 'TESTNET',
+  MAINNET: 'MAINNET'
+} as const
+
+export type WalletNetwork = (typeof WalletNetwork)[keyof typeof WalletNetwork]

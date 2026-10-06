@@ -106,3 +106,16 @@ export type Script = Prisma.ScriptModel
  * 
  */
 export type Address = Prisma.AddressModel
+/**
+ * Model UserWallet
+ * A CKB wallet Corven holds for a user who signed in with Google (one per
+ * network). The private key is encrypted with a per-wallet data key, which
+ * is itself encrypted with WALLET_ENCRYPTION_KEY (see apps/auth-service
+ * wallets/wallet-vault.ts). Neither key is ever stored in plain text.
+ */
+export type UserWallet = Prisma.UserWalletModel
+/**
+ * Model WalletTransfer
+ * CKB sent from a Corven wallet, for history and the mainnet daily limit.
+ */
+export type WalletTransfer = Prisma.WalletTransferModel

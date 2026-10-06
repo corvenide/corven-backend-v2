@@ -66,7 +66,9 @@ export const ModelName = {
   Transaction: 'Transaction',
   Cell: 'Cell',
   Script: 'Script',
-  Address: 'Address'
+  Address: 'Address',
+  UserWallet: 'UserWallet',
+  WalletTransfer: 'WalletTransfer'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -91,6 +93,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
   walletAddress: 'walletAddress',
+  googleId: 'googleId',
   authProvider: 'authProvider',
   role: 'role',
   createdAt: 'createdAt',
@@ -333,6 +336,36 @@ export const AddressScalarFieldEnum = {
 } as const
 
 export type AddressScalarFieldEnum = (typeof AddressScalarFieldEnum)[keyof typeof AddressScalarFieldEnum]
+
+
+export const UserWalletScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  network: 'network',
+  address: 'address',
+  publicKey: 'publicKey',
+  encryptedKey: 'encryptedKey',
+  wrappedDataKey: 'wrappedDataKey',
+  keyVersion: 'keyVersion',
+  exportedAt: 'exportedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type UserWalletScalarFieldEnum = (typeof UserWalletScalarFieldEnum)[keyof typeof UserWalletScalarFieldEnum]
+
+
+export const WalletTransferScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  walletId: 'walletId',
+  network: 'network',
+  toAddress: 'toAddress',
+  amount: 'amount',
+  txHash: 'txHash',
+  createdAt: 'createdAt'
+} as const
+
+export type WalletTransferScalarFieldEnum = (typeof WalletTransferScalarFieldEnum)[keyof typeof WalletTransferScalarFieldEnum]
 
 
 export const SortOrder = {

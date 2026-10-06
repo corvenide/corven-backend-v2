@@ -399,7 +399,9 @@ export const ModelName = {
   Transaction: 'Transaction',
   Cell: 'Cell',
   Script: 'Script',
-  Address: 'Address'
+  Address: 'Address',
+  UserWallet: 'UserWallet',
+  WalletTransfer: 'WalletTransfer'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "communityPost" | "communityComment" | "communityVote" | "walletChallenge" | "refreshToken" | "host" | "workspace" | "workspaceFile" | "contractDeployment" | "workspaceContainer" | "block" | "transaction" | "cell" | "script" | "address"
+    modelProps: "user" | "communityPost" | "communityComment" | "communityVote" | "walletChallenge" | "refreshToken" | "host" | "workspace" | "workspaceFile" | "contractDeployment" | "workspaceContainer" | "block" | "transaction" | "cell" | "script" | "address" | "userWallet" | "walletTransfer"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1603,6 +1605,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserWallet: {
+      payload: Prisma.$UserWalletPayload<ExtArgs>
+      fields: Prisma.UserWalletFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserWalletFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserWalletFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>
+        }
+        findFirst: {
+          args: Prisma.UserWalletFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserWalletFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>
+        }
+        findMany: {
+          args: Prisma.UserWalletFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>[]
+        }
+        create: {
+          args: Prisma.UserWalletCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>
+        }
+        createMany: {
+          args: Prisma.UserWalletCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserWalletCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>[]
+        }
+        delete: {
+          args: Prisma.UserWalletDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>
+        }
+        update: {
+          args: Prisma.UserWalletUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserWalletDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserWalletUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserWalletUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserWalletUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserWalletPayload>
+        }
+        aggregate: {
+          args: Prisma.UserWalletAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserWallet>
+        }
+        groupBy: {
+          args: Prisma.UserWalletGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserWalletGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserWalletCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserWalletCountAggregateOutputType> | number
+        }
+      }
+    }
+    WalletTransfer: {
+      payload: Prisma.$WalletTransferPayload<ExtArgs>
+      fields: Prisma.WalletTransferFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WalletTransferFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WalletTransferFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>
+        }
+        findFirst: {
+          args: Prisma.WalletTransferFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WalletTransferFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>
+        }
+        findMany: {
+          args: Prisma.WalletTransferFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>[]
+        }
+        create: {
+          args: Prisma.WalletTransferCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>
+        }
+        createMany: {
+          args: Prisma.WalletTransferCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WalletTransferCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>[]
+        }
+        delete: {
+          args: Prisma.WalletTransferDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>
+        }
+        update: {
+          args: Prisma.WalletTransferUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>
+        }
+        deleteMany: {
+          args: Prisma.WalletTransferDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WalletTransferUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WalletTransferUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>[]
+        }
+        upsert: {
+          args: Prisma.WalletTransferUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WalletTransferPayload>
+        }
+        aggregate: {
+          args: Prisma.WalletTransferAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWalletTransfer>
+        }
+        groupBy: {
+          args: Prisma.WalletTransferGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WalletTransferGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WalletTransferCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WalletTransferCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1648,6 +1798,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
   walletAddress: 'walletAddress',
+  googleId: 'googleId',
   authProvider: 'authProvider',
   role: 'role',
   createdAt: 'createdAt',
@@ -1890,6 +2041,36 @@ export const AddressScalarFieldEnum = {
 } as const
 
 export type AddressScalarFieldEnum = (typeof AddressScalarFieldEnum)[keyof typeof AddressScalarFieldEnum]
+
+
+export const UserWalletScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  network: 'network',
+  address: 'address',
+  publicKey: 'publicKey',
+  encryptedKey: 'encryptedKey',
+  wrappedDataKey: 'wrappedDataKey',
+  keyVersion: 'keyVersion',
+  exportedAt: 'exportedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type UserWalletScalarFieldEnum = (typeof UserWalletScalarFieldEnum)[keyof typeof UserWalletScalarFieldEnum]
+
+
+export const WalletTransferScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  walletId: 'walletId',
+  network: 'network',
+  toAddress: 'toAddress',
+  amount: 'amount',
+  txHash: 'txHash',
+  createdAt: 'createdAt'
+} as const
+
+export type WalletTransferScalarFieldEnum = (typeof WalletTransferScalarFieldEnum)[keyof typeof WalletTransferScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2168,6 +2349,20 @@ export type ListEnumScriptKindFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'WalletNetwork'
+ */
+export type EnumWalletNetworkFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WalletNetwork'>
+    
+
+
+/**
+ * Reference to a field of type 'WalletNetwork[]'
+ */
+export type ListEnumWalletNetworkFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WalletNetwork[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2306,6 +2501,8 @@ export type GlobalOmitConfig = {
   cell?: Prisma.CellOmit
   script?: Prisma.ScriptOmit
   address?: Prisma.AddressOmit
+  userWallet?: Prisma.UserWalletOmit
+  walletTransfer?: Prisma.WalletTransferOmit
 }
 
 /* Types for Logging */
