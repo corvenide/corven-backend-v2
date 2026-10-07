@@ -75,7 +75,10 @@ export const ModelName = {
   ConnectPasskey: 'ConnectPasskey',
   ConnectSession: 'ConnectSession',
   ConnectWallet: 'ConnectWallet',
-  ConnectSignature: 'ConnectSignature'
+  ConnectSignature: 'ConnectSignature',
+  ConnectAppMember: 'ConnectAppMember',
+  ConnectAppInvite: 'ConnectAppInvite',
+  ConnectEvent: 'ConnectEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -383,6 +386,7 @@ export const ConnectAppScalarFieldEnum = {
   loginMethods: 'loginMethods',
   mainnetEnabled: 'mainnetEnabled',
   logoUrl: 'logoUrl',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -478,6 +482,45 @@ export const ConnectSignatureScalarFieldEnum = {
 } as const
 
 export type ConnectSignatureScalarFieldEnum = (typeof ConnectSignatureScalarFieldEnum)[keyof typeof ConnectSignatureScalarFieldEnum]
+
+
+export const ConnectAppMemberScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  userId: 'userId',
+  role: 'role',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectAppMemberScalarFieldEnum = (typeof ConnectAppMemberScalarFieldEnum)[keyof typeof ConnectAppMemberScalarFieldEnum]
+
+
+export const ConnectAppInviteScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  email: 'email',
+  role: 'role',
+  tokenHash: 'tokenHash',
+  invitedById: 'invitedById',
+  acceptedById: 'acceptedById',
+  acceptedAt: 'acceptedAt',
+  revokedAt: 'revokedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectAppInviteScalarFieldEnum = (typeof ConnectAppInviteScalarFieldEnum)[keyof typeof ConnectAppInviteScalarFieldEnum]
+
+
+export const ConnectEventScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  kind: 'kind',
+  method: 'method',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectEventScalarFieldEnum = (typeof ConnectEventScalarFieldEnum)[keyof typeof ConnectEventScalarFieldEnum]
 
 
 export const SortOrder = {

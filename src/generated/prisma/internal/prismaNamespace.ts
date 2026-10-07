@@ -421,7 +421,10 @@ export const ModelName = {
   ConnectPasskey: 'ConnectPasskey',
   ConnectSession: 'ConnectSession',
   ConnectWallet: 'ConnectWallet',
-  ConnectSignature: 'ConnectSignature'
+  ConnectSignature: 'ConnectSignature',
+  ConnectAppMember: 'ConnectAppMember',
+  ConnectAppInvite: 'ConnectAppInvite',
+  ConnectEvent: 'ConnectEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -437,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "communityPost" | "communityComment" | "communityVote" | "walletChallenge" | "refreshToken" | "host" | "workspace" | "workspaceFile" | "contractDeployment" | "workspaceContainer" | "block" | "transaction" | "cell" | "script" | "address" | "userWallet" | "walletTransfer" | "connectApp" | "connectUser" | "connectIdentity" | "connectPasskey" | "connectSession" | "connectWallet" | "connectSignature"
+    modelProps: "user" | "communityPost" | "communityComment" | "communityVote" | "walletChallenge" | "refreshToken" | "host" | "workspace" | "workspaceFile" | "contractDeployment" | "workspaceContainer" | "block" | "transaction" | "cell" | "script" | "address" | "userWallet" | "walletTransfer" | "connectApp" | "connectUser" | "connectIdentity" | "connectPasskey" | "connectSession" | "connectWallet" | "connectSignature" | "connectAppMember" | "connectAppInvite" | "connectEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2291,6 +2294,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ConnectAppMember: {
+      payload: Prisma.$ConnectAppMemberPayload<ExtArgs>
+      fields: Prisma.ConnectAppMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectAppMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectAppMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectAppMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectAppMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectAppMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectAppMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectAppMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectAppMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectAppMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>
+        }
+        update: {
+          args: Prisma.ConnectAppMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectAppMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectAppMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectAppMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectAppMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectAppMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectAppMember>
+        }
+        groupBy: {
+          args: Prisma.ConnectAppMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectAppMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectAppMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectAppMemberCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectAppInvite: {
+      payload: Prisma.$ConnectAppInvitePayload<ExtArgs>
+      fields: Prisma.ConnectAppInviteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectAppInviteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectAppInviteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectAppInviteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectAppInviteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>
+        }
+        findMany: {
+          args: Prisma.ConnectAppInviteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>[]
+        }
+        create: {
+          args: Prisma.ConnectAppInviteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>
+        }
+        createMany: {
+          args: Prisma.ConnectAppInviteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectAppInviteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectAppInviteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>
+        }
+        update: {
+          args: Prisma.ConnectAppInviteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectAppInviteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectAppInviteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectAppInviteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectAppInviteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppInvitePayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectAppInviteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectAppInvite>
+        }
+        groupBy: {
+          args: Prisma.ConnectAppInviteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectAppInviteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectAppInviteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectAppInviteCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectEvent: {
+      payload: Prisma.$ConnectEventPayload<ExtArgs>
+      fields: Prisma.ConnectEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>
+        }
+        update: {
+          args: Prisma.ConnectEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectEventPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectEvent>
+        }
+        groupBy: {
+          args: Prisma.ConnectEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2619,6 +2844,7 @@ export const ConnectAppScalarFieldEnum = {
   loginMethods: 'loginMethods',
   mainnetEnabled: 'mainnetEnabled',
   logoUrl: 'logoUrl',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2714,6 +2940,45 @@ export const ConnectSignatureScalarFieldEnum = {
 } as const
 
 export type ConnectSignatureScalarFieldEnum = (typeof ConnectSignatureScalarFieldEnum)[keyof typeof ConnectSignatureScalarFieldEnum]
+
+
+export const ConnectAppMemberScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  userId: 'userId',
+  role: 'role',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectAppMemberScalarFieldEnum = (typeof ConnectAppMemberScalarFieldEnum)[keyof typeof ConnectAppMemberScalarFieldEnum]
+
+
+export const ConnectAppInviteScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  email: 'email',
+  role: 'role',
+  tokenHash: 'tokenHash',
+  invitedById: 'invitedById',
+  acceptedById: 'acceptedById',
+  acceptedAt: 'acceptedAt',
+  revokedAt: 'revokedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectAppInviteScalarFieldEnum = (typeof ConnectAppInviteScalarFieldEnum)[keyof typeof ConnectAppInviteScalarFieldEnum]
+
+
+export const ConnectEventScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  kind: 'kind',
+  method: 'method',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectEventScalarFieldEnum = (typeof ConnectEventScalarFieldEnum)[keyof typeof ConnectEventScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3020,6 +3285,34 @@ export type ListEnumConnectIdentityKindFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'ConnectAppRole'
+ */
+export type EnumConnectAppRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConnectAppRole'>
+    
+
+
+/**
+ * Reference to a field of type 'ConnectAppRole[]'
+ */
+export type ListEnumConnectAppRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConnectAppRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ConnectEventKind'
+ */
+export type EnumConnectEventKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConnectEventKind'>
+    
+
+
+/**
+ * Reference to a field of type 'ConnectEventKind[]'
+ */
+export type ListEnumConnectEventKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConnectEventKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -3208,6 +3501,9 @@ export type GlobalOmitConfig = {
   connectSession?: Prisma.ConnectSessionOmit
   connectWallet?: Prisma.ConnectWalletOmit
   connectSignature?: Prisma.ConnectSignatureOmit
+  connectAppMember?: Prisma.ConnectAppMemberOmit
+  connectAppInvite?: Prisma.ConnectAppInviteOmit
+  connectEvent?: Prisma.ConnectEventOmit
 }
 
 /* Types for Logging */

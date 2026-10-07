@@ -160,3 +160,19 @@ export type ConnectWallet = Prisma.ConnectWalletModel
  * daily limit. `outflow` is CKB that leaves the wallet, in shannons.
  */
 export type ConnectSignature = Prisma.ConnectSignatureModel
+/**
+ * Model ConnectAppMember
+ * A Corven IDE account that manages a Connect app in the dashboard.
+ * `userId` is the IDE User id (kept as a plain id so Connect stays separate).
+ */
+export type ConnectAppMember = Prisma.ConnectAppMemberModel
+/**
+ * Model ConnectAppInvite
+ * An invite link to join an app's team (token stored hashed, 7 days).
+ */
+export type ConnectAppInvite = Prisma.ConnectAppInviteModel
+/**
+ * Model ConnectEvent
+ * Usage events for the dashboard's stats. `method` is e.g. PHONE, GOOGLE, sms, TESTNET.
+ */
+export type ConnectEvent = Prisma.ConnectEventModel

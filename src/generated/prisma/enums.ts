@@ -149,3 +149,22 @@ export const ConnectIdentityKind = {
 } as const
 
 export type ConnectIdentityKind = (typeof ConnectIdentityKind)[keyof typeof ConnectIdentityKind]
+
+
+export const ConnectAppRole = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  VIEWER: 'VIEWER'
+} as const
+
+export type ConnectAppRole = (typeof ConnectAppRole)[keyof typeof ConnectAppRole]
+
+
+export const ConnectEventKind = {
+  SIGN_UP: 'SIGN_UP',
+  SIGN_IN: 'SIGN_IN',
+  CODE_SENT: 'CODE_SENT',
+  TX_SIGNED: 'TX_SIGNED'
+} as const
+
+export type ConnectEventKind = (typeof ConnectEventKind)[keyof typeof ConnectEventKind]

@@ -31,6 +31,7 @@ export type ConnectAppMinAggregateOutputType = {
   googleClientId: string | null
   mainnetEnabled: boolean | null
   logoUrl: string | null
+  createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -41,6 +42,7 @@ export type ConnectAppMaxAggregateOutputType = {
   googleClientId: string | null
   mainnetEnabled: boolean | null
   logoUrl: string | null
+  createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +55,7 @@ export type ConnectAppCountAggregateOutputType = {
   loginMethods: number
   mainnetEnabled: number
   logoUrl: number
+  createdById: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -65,6 +68,7 @@ export type ConnectAppMinAggregateInputType = {
   googleClientId?: true
   mainnetEnabled?: true
   logoUrl?: true
+  createdById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -75,6 +79,7 @@ export type ConnectAppMaxAggregateInputType = {
   googleClientId?: true
   mainnetEnabled?: true
   logoUrl?: true
+  createdById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +92,7 @@ export type ConnectAppCountAggregateInputType = {
   loginMethods?: true
   mainnetEnabled?: true
   logoUrl?: true
+  createdById?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +178,7 @@ export type ConnectAppGroupByOutputType = {
   loginMethods: string[]
   mainnetEnabled: boolean
   logoUrl: string | null
+  createdById: string | null
   createdAt: Date
   updatedAt: Date
   _count: ConnectAppCountAggregateOutputType | null
@@ -205,9 +212,13 @@ export type ConnectAppWhereInput = {
   loginMethods?: Prisma.StringNullableListFilter<"ConnectApp">
   mainnetEnabled?: Prisma.BoolFilter<"ConnectApp"> | boolean
   logoUrl?: Prisma.StringNullableFilter<"ConnectApp"> | string | null
+  createdById?: Prisma.StringNullableFilter<"ConnectApp"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ConnectApp"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConnectApp"> | Date | string
   users?: Prisma.ConnectUserListRelationFilter
+  members?: Prisma.ConnectAppMemberListRelationFilter
+  invites?: Prisma.ConnectAppInviteListRelationFilter
+  events?: Prisma.ConnectEventListRelationFilter
 }
 
 export type ConnectAppOrderByWithRelationInput = {
@@ -218,9 +229,13 @@ export type ConnectAppOrderByWithRelationInput = {
   loginMethods?: Prisma.SortOrder
   mainnetEnabled?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   users?: Prisma.ConnectUserOrderByRelationAggregateInput
+  members?: Prisma.ConnectAppMemberOrderByRelationAggregateInput
+  invites?: Prisma.ConnectAppInviteOrderByRelationAggregateInput
+  events?: Prisma.ConnectEventOrderByRelationAggregateInput
 }
 
 export type ConnectAppWhereUniqueInput = Prisma.AtLeast<{
@@ -234,9 +249,13 @@ export type ConnectAppWhereUniqueInput = Prisma.AtLeast<{
   loginMethods?: Prisma.StringNullableListFilter<"ConnectApp">
   mainnetEnabled?: Prisma.BoolFilter<"ConnectApp"> | boolean
   logoUrl?: Prisma.StringNullableFilter<"ConnectApp"> | string | null
+  createdById?: Prisma.StringNullableFilter<"ConnectApp"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ConnectApp"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConnectApp"> | Date | string
   users?: Prisma.ConnectUserListRelationFilter
+  members?: Prisma.ConnectAppMemberListRelationFilter
+  invites?: Prisma.ConnectAppInviteListRelationFilter
+  events?: Prisma.ConnectEventListRelationFilter
 }, "id">
 
 export type ConnectAppOrderByWithAggregationInput = {
@@ -247,6 +266,7 @@ export type ConnectAppOrderByWithAggregationInput = {
   loginMethods?: Prisma.SortOrder
   mainnetEnabled?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConnectAppCountOrderByAggregateInput
@@ -265,6 +285,7 @@ export type ConnectAppScalarWhereWithAggregatesInput = {
   loginMethods?: Prisma.StringNullableListFilter<"ConnectApp">
   mainnetEnabled?: Prisma.BoolWithAggregatesFilter<"ConnectApp"> | boolean
   logoUrl?: Prisma.StringNullableWithAggregatesFilter<"ConnectApp"> | string | null
+  createdById?: Prisma.StringNullableWithAggregatesFilter<"ConnectApp"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConnectApp"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ConnectApp"> | Date | string
 }
@@ -277,9 +298,13 @@ export type ConnectAppCreateInput = {
   loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
   mainnetEnabled?: boolean
   logoUrl?: string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ConnectUserCreateNestedManyWithoutAppInput
+  members?: Prisma.ConnectAppMemberCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventCreateNestedManyWithoutAppInput
 }
 
 export type ConnectAppUncheckedCreateInput = {
@@ -290,9 +315,13 @@ export type ConnectAppUncheckedCreateInput = {
   loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
   mainnetEnabled?: boolean
   logoUrl?: string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.ConnectUserUncheckedCreateNestedManyWithoutAppInput
+  members?: Prisma.ConnectAppMemberUncheckedCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteUncheckedCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventUncheckedCreateNestedManyWithoutAppInput
 }
 
 export type ConnectAppUpdateInput = {
@@ -303,9 +332,13 @@ export type ConnectAppUpdateInput = {
   loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
   mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ConnectUserUpdateManyWithoutAppNestedInput
+  members?: Prisma.ConnectAppMemberUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUpdateManyWithoutAppNestedInput
 }
 
 export type ConnectAppUncheckedUpdateInput = {
@@ -316,9 +349,13 @@ export type ConnectAppUncheckedUpdateInput = {
   loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
   mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.ConnectUserUncheckedUpdateManyWithoutAppNestedInput
+  members?: Prisma.ConnectAppMemberUncheckedUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUncheckedUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUncheckedUpdateManyWithoutAppNestedInput
 }
 
 export type ConnectAppCreateManyInput = {
@@ -329,6 +366,7 @@ export type ConnectAppCreateManyInput = {
   loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
   mainnetEnabled?: boolean
   logoUrl?: string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -341,6 +379,7 @@ export type ConnectAppUpdateManyMutationInput = {
   loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
   mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -353,6 +392,7 @@ export type ConnectAppUncheckedUpdateManyInput = {
   loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
   mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -373,6 +413,7 @@ export type ConnectAppCountOrderByAggregateInput = {
   loginMethods?: Prisma.SortOrder
   mainnetEnabled?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -383,6 +424,7 @@ export type ConnectAppMaxOrderByAggregateInput = {
   googleClientId?: Prisma.SortOrder
   mainnetEnabled?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -393,6 +435,7 @@ export type ConnectAppMinOrderByAggregateInput = {
   googleClientId?: Prisma.SortOrder
   mainnetEnabled?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -434,6 +477,48 @@ export type ConnectAppUpdateOneRequiredWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectAppUpdateToOneWithWhereWithoutUsersInput, Prisma.ConnectAppUpdateWithoutUsersInput>, Prisma.ConnectAppUncheckedUpdateWithoutUsersInput>
 }
 
+export type ConnectAppCreateNestedOneWithoutMembersInput = {
+  create?: Prisma.XOR<Prisma.ConnectAppCreateWithoutMembersInput, Prisma.ConnectAppUncheckedCreateWithoutMembersInput>
+  connectOrCreate?: Prisma.ConnectAppCreateOrConnectWithoutMembersInput
+  connect?: Prisma.ConnectAppWhereUniqueInput
+}
+
+export type ConnectAppUpdateOneRequiredWithoutMembersNestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectAppCreateWithoutMembersInput, Prisma.ConnectAppUncheckedCreateWithoutMembersInput>
+  connectOrCreate?: Prisma.ConnectAppCreateOrConnectWithoutMembersInput
+  upsert?: Prisma.ConnectAppUpsertWithoutMembersInput
+  connect?: Prisma.ConnectAppWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectAppUpdateToOneWithWhereWithoutMembersInput, Prisma.ConnectAppUpdateWithoutMembersInput>, Prisma.ConnectAppUncheckedUpdateWithoutMembersInput>
+}
+
+export type ConnectAppCreateNestedOneWithoutInvitesInput = {
+  create?: Prisma.XOR<Prisma.ConnectAppCreateWithoutInvitesInput, Prisma.ConnectAppUncheckedCreateWithoutInvitesInput>
+  connectOrCreate?: Prisma.ConnectAppCreateOrConnectWithoutInvitesInput
+  connect?: Prisma.ConnectAppWhereUniqueInput
+}
+
+export type ConnectAppUpdateOneRequiredWithoutInvitesNestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectAppCreateWithoutInvitesInput, Prisma.ConnectAppUncheckedCreateWithoutInvitesInput>
+  connectOrCreate?: Prisma.ConnectAppCreateOrConnectWithoutInvitesInput
+  upsert?: Prisma.ConnectAppUpsertWithoutInvitesInput
+  connect?: Prisma.ConnectAppWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectAppUpdateToOneWithWhereWithoutInvitesInput, Prisma.ConnectAppUpdateWithoutInvitesInput>, Prisma.ConnectAppUncheckedUpdateWithoutInvitesInput>
+}
+
+export type ConnectAppCreateNestedOneWithoutEventsInput = {
+  create?: Prisma.XOR<Prisma.ConnectAppCreateWithoutEventsInput, Prisma.ConnectAppUncheckedCreateWithoutEventsInput>
+  connectOrCreate?: Prisma.ConnectAppCreateOrConnectWithoutEventsInput
+  connect?: Prisma.ConnectAppWhereUniqueInput
+}
+
+export type ConnectAppUpdateOneRequiredWithoutEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectAppCreateWithoutEventsInput, Prisma.ConnectAppUncheckedCreateWithoutEventsInput>
+  connectOrCreate?: Prisma.ConnectAppCreateOrConnectWithoutEventsInput
+  upsert?: Prisma.ConnectAppUpsertWithoutEventsInput
+  connect?: Prisma.ConnectAppWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectAppUpdateToOneWithWhereWithoutEventsInput, Prisma.ConnectAppUpdateWithoutEventsInput>, Prisma.ConnectAppUncheckedUpdateWithoutEventsInput>
+}
+
 export type ConnectAppCreateWithoutUsersInput = {
   id: string
   name: string
@@ -442,8 +527,12 @@ export type ConnectAppCreateWithoutUsersInput = {
   loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
   mainnetEnabled?: boolean
   logoUrl?: string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  members?: Prisma.ConnectAppMemberCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventCreateNestedManyWithoutAppInput
 }
 
 export type ConnectAppUncheckedCreateWithoutUsersInput = {
@@ -454,8 +543,12 @@ export type ConnectAppUncheckedCreateWithoutUsersInput = {
   loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
   mainnetEnabled?: boolean
   logoUrl?: string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  members?: Prisma.ConnectAppMemberUncheckedCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteUncheckedCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventUncheckedCreateNestedManyWithoutAppInput
 }
 
 export type ConnectAppCreateOrConnectWithoutUsersInput = {
@@ -482,8 +575,12 @@ export type ConnectAppUpdateWithoutUsersInput = {
   loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
   mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.ConnectAppMemberUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUpdateManyWithoutAppNestedInput
 }
 
 export type ConnectAppUncheckedUpdateWithoutUsersInput = {
@@ -494,8 +591,252 @@ export type ConnectAppUncheckedUpdateWithoutUsersInput = {
   loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
   mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.ConnectAppMemberUncheckedUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUncheckedUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUncheckedUpdateManyWithoutAppNestedInput
+}
+
+export type ConnectAppCreateWithoutMembersInput = {
+  id: string
+  name: string
+  allowedOrigins?: Prisma.ConnectAppCreateallowedOriginsInput | string[]
+  googleClientId?: string | null
+  loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
+  mainnetEnabled?: boolean
+  logoUrl?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ConnectUserCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventCreateNestedManyWithoutAppInput
+}
+
+export type ConnectAppUncheckedCreateWithoutMembersInput = {
+  id: string
+  name: string
+  allowedOrigins?: Prisma.ConnectAppCreateallowedOriginsInput | string[]
+  googleClientId?: string | null
+  loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
+  mainnetEnabled?: boolean
+  logoUrl?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ConnectUserUncheckedCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteUncheckedCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventUncheckedCreateNestedManyWithoutAppInput
+}
+
+export type ConnectAppCreateOrConnectWithoutMembersInput = {
+  where: Prisma.ConnectAppWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectAppCreateWithoutMembersInput, Prisma.ConnectAppUncheckedCreateWithoutMembersInput>
+}
+
+export type ConnectAppUpsertWithoutMembersInput = {
+  update: Prisma.XOR<Prisma.ConnectAppUpdateWithoutMembersInput, Prisma.ConnectAppUncheckedUpdateWithoutMembersInput>
+  create: Prisma.XOR<Prisma.ConnectAppCreateWithoutMembersInput, Prisma.ConnectAppUncheckedCreateWithoutMembersInput>
+  where?: Prisma.ConnectAppWhereInput
+}
+
+export type ConnectAppUpdateToOneWithWhereWithoutMembersInput = {
+  where?: Prisma.ConnectAppWhereInput
+  data: Prisma.XOR<Prisma.ConnectAppUpdateWithoutMembersInput, Prisma.ConnectAppUncheckedUpdateWithoutMembersInput>
+}
+
+export type ConnectAppUpdateWithoutMembersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  allowedOrigins?: Prisma.ConnectAppUpdateallowedOriginsInput | string[]
+  googleClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
+  mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ConnectUserUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUpdateManyWithoutAppNestedInput
+}
+
+export type ConnectAppUncheckedUpdateWithoutMembersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  allowedOrigins?: Prisma.ConnectAppUpdateallowedOriginsInput | string[]
+  googleClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
+  mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ConnectUserUncheckedUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUncheckedUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUncheckedUpdateManyWithoutAppNestedInput
+}
+
+export type ConnectAppCreateWithoutInvitesInput = {
+  id: string
+  name: string
+  allowedOrigins?: Prisma.ConnectAppCreateallowedOriginsInput | string[]
+  googleClientId?: string | null
+  loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
+  mainnetEnabled?: boolean
+  logoUrl?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ConnectUserCreateNestedManyWithoutAppInput
+  members?: Prisma.ConnectAppMemberCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventCreateNestedManyWithoutAppInput
+}
+
+export type ConnectAppUncheckedCreateWithoutInvitesInput = {
+  id: string
+  name: string
+  allowedOrigins?: Prisma.ConnectAppCreateallowedOriginsInput | string[]
+  googleClientId?: string | null
+  loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
+  mainnetEnabled?: boolean
+  logoUrl?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ConnectUserUncheckedCreateNestedManyWithoutAppInput
+  members?: Prisma.ConnectAppMemberUncheckedCreateNestedManyWithoutAppInput
+  events?: Prisma.ConnectEventUncheckedCreateNestedManyWithoutAppInput
+}
+
+export type ConnectAppCreateOrConnectWithoutInvitesInput = {
+  where: Prisma.ConnectAppWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectAppCreateWithoutInvitesInput, Prisma.ConnectAppUncheckedCreateWithoutInvitesInput>
+}
+
+export type ConnectAppUpsertWithoutInvitesInput = {
+  update: Prisma.XOR<Prisma.ConnectAppUpdateWithoutInvitesInput, Prisma.ConnectAppUncheckedUpdateWithoutInvitesInput>
+  create: Prisma.XOR<Prisma.ConnectAppCreateWithoutInvitesInput, Prisma.ConnectAppUncheckedCreateWithoutInvitesInput>
+  where?: Prisma.ConnectAppWhereInput
+}
+
+export type ConnectAppUpdateToOneWithWhereWithoutInvitesInput = {
+  where?: Prisma.ConnectAppWhereInput
+  data: Prisma.XOR<Prisma.ConnectAppUpdateWithoutInvitesInput, Prisma.ConnectAppUncheckedUpdateWithoutInvitesInput>
+}
+
+export type ConnectAppUpdateWithoutInvitesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  allowedOrigins?: Prisma.ConnectAppUpdateallowedOriginsInput | string[]
+  googleClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
+  mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ConnectUserUpdateManyWithoutAppNestedInput
+  members?: Prisma.ConnectAppMemberUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUpdateManyWithoutAppNestedInput
+}
+
+export type ConnectAppUncheckedUpdateWithoutInvitesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  allowedOrigins?: Prisma.ConnectAppUpdateallowedOriginsInput | string[]
+  googleClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
+  mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ConnectUserUncheckedUpdateManyWithoutAppNestedInput
+  members?: Prisma.ConnectAppMemberUncheckedUpdateManyWithoutAppNestedInput
+  events?: Prisma.ConnectEventUncheckedUpdateManyWithoutAppNestedInput
+}
+
+export type ConnectAppCreateWithoutEventsInput = {
+  id: string
+  name: string
+  allowedOrigins?: Prisma.ConnectAppCreateallowedOriginsInput | string[]
+  googleClientId?: string | null
+  loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
+  mainnetEnabled?: boolean
+  logoUrl?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ConnectUserCreateNestedManyWithoutAppInput
+  members?: Prisma.ConnectAppMemberCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteCreateNestedManyWithoutAppInput
+}
+
+export type ConnectAppUncheckedCreateWithoutEventsInput = {
+  id: string
+  name: string
+  allowedOrigins?: Prisma.ConnectAppCreateallowedOriginsInput | string[]
+  googleClientId?: string | null
+  loginMethods?: Prisma.ConnectAppCreateloginMethodsInput | string[]
+  mainnetEnabled?: boolean
+  logoUrl?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.ConnectUserUncheckedCreateNestedManyWithoutAppInput
+  members?: Prisma.ConnectAppMemberUncheckedCreateNestedManyWithoutAppInput
+  invites?: Prisma.ConnectAppInviteUncheckedCreateNestedManyWithoutAppInput
+}
+
+export type ConnectAppCreateOrConnectWithoutEventsInput = {
+  where: Prisma.ConnectAppWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectAppCreateWithoutEventsInput, Prisma.ConnectAppUncheckedCreateWithoutEventsInput>
+}
+
+export type ConnectAppUpsertWithoutEventsInput = {
+  update: Prisma.XOR<Prisma.ConnectAppUpdateWithoutEventsInput, Prisma.ConnectAppUncheckedUpdateWithoutEventsInput>
+  create: Prisma.XOR<Prisma.ConnectAppCreateWithoutEventsInput, Prisma.ConnectAppUncheckedCreateWithoutEventsInput>
+  where?: Prisma.ConnectAppWhereInput
+}
+
+export type ConnectAppUpdateToOneWithWhereWithoutEventsInput = {
+  where?: Prisma.ConnectAppWhereInput
+  data: Prisma.XOR<Prisma.ConnectAppUpdateWithoutEventsInput, Prisma.ConnectAppUncheckedUpdateWithoutEventsInput>
+}
+
+export type ConnectAppUpdateWithoutEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  allowedOrigins?: Prisma.ConnectAppUpdateallowedOriginsInput | string[]
+  googleClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
+  mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ConnectUserUpdateManyWithoutAppNestedInput
+  members?: Prisma.ConnectAppMemberUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUpdateManyWithoutAppNestedInput
+}
+
+export type ConnectAppUncheckedUpdateWithoutEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  allowedOrigins?: Prisma.ConnectAppUpdateallowedOriginsInput | string[]
+  googleClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethods?: Prisma.ConnectAppUpdateloginMethodsInput | string[]
+  mainnetEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.ConnectUserUncheckedUpdateManyWithoutAppNestedInput
+  members?: Prisma.ConnectAppMemberUncheckedUpdateManyWithoutAppNestedInput
+  invites?: Prisma.ConnectAppInviteUncheckedUpdateManyWithoutAppNestedInput
 }
 
 
@@ -505,10 +846,16 @@ export type ConnectAppUncheckedUpdateWithoutUsersInput = {
 
 export type ConnectAppCountOutputType = {
   users: number
+  members: number
+  invites: number
+  events: number
 }
 
 export type ConnectAppCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | ConnectAppCountOutputTypeCountUsersArgs
+  members?: boolean | ConnectAppCountOutputTypeCountMembersArgs
+  invites?: boolean | ConnectAppCountOutputTypeCountInvitesArgs
+  events?: boolean | ConnectAppCountOutputTypeCountEventsArgs
 }
 
 /**
@@ -528,6 +875,27 @@ export type ConnectAppCountOutputTypeCountUsersArgs<ExtArgs extends runtime.Type
   where?: Prisma.ConnectUserWhereInput
 }
 
+/**
+ * ConnectAppCountOutputType without action
+ */
+export type ConnectAppCountOutputTypeCountMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConnectAppMemberWhereInput
+}
+
+/**
+ * ConnectAppCountOutputType without action
+ */
+export type ConnectAppCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConnectAppInviteWhereInput
+}
+
+/**
+ * ConnectAppCountOutputType without action
+ */
+export type ConnectAppCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConnectEventWhereInput
+}
+
 
 export type ConnectAppSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -537,9 +905,13 @@ export type ConnectAppSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   loginMethods?: boolean
   mainnetEnabled?: boolean
   logoUrl?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   users?: boolean | Prisma.ConnectApp$usersArgs<ExtArgs>
+  members?: boolean | Prisma.ConnectApp$membersArgs<ExtArgs>
+  invites?: boolean | Prisma.ConnectApp$invitesArgs<ExtArgs>
+  events?: boolean | Prisma.ConnectApp$eventsArgs<ExtArgs>
   _count?: boolean | Prisma.ConnectAppCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["connectApp"]>
 
@@ -551,6 +923,7 @@ export type ConnectAppSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   loginMethods?: boolean
   mainnetEnabled?: boolean
   logoUrl?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["connectApp"]>
@@ -563,6 +936,7 @@ export type ConnectAppSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   loginMethods?: boolean
   mainnetEnabled?: boolean
   logoUrl?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["connectApp"]>
@@ -575,13 +949,17 @@ export type ConnectAppSelectScalar = {
   loginMethods?: boolean
   mainnetEnabled?: boolean
   logoUrl?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConnectAppOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "allowedOrigins" | "googleClientId" | "loginMethods" | "mainnetEnabled" | "logoUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["connectApp"]>
+export type ConnectAppOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "allowedOrigins" | "googleClientId" | "loginMethods" | "mainnetEnabled" | "logoUrl" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["connectApp"]>
 export type ConnectAppInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.ConnectApp$usersArgs<ExtArgs>
+  members?: boolean | Prisma.ConnectApp$membersArgs<ExtArgs>
+  invites?: boolean | Prisma.ConnectApp$invitesArgs<ExtArgs>
+  events?: boolean | Prisma.ConnectApp$eventsArgs<ExtArgs>
   _count?: boolean | Prisma.ConnectAppCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ConnectAppIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -591,6 +969,9 @@ export type $ConnectAppPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "ConnectApp"
   objects: {
     users: Prisma.$ConnectUserPayload<ExtArgs>[]
+    members: Prisma.$ConnectAppMemberPayload<ExtArgs>[]
+    invites: Prisma.$ConnectAppInvitePayload<ExtArgs>[]
+    events: Prisma.$ConnectEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -612,6 +993,10 @@ export type $ConnectAppPayload<ExtArgs extends runtime.Types.Extensions.Internal
      */
     mainnetEnabled: boolean
     logoUrl: string | null
+    /**
+     * Corven IDE user who created it (dashboard); null for admin-created apps.
+     */
+    createdById: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["connectApp"]>
@@ -1009,6 +1394,9 @@ readonly fields: ConnectAppFieldRefs;
 export interface Prisma__ConnectAppClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   users<T extends Prisma.ConnectApp$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConnectApp$usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  members<T extends Prisma.ConnectApp$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConnectApp$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectAppMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invites<T extends Prisma.ConnectApp$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConnectApp$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectAppInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  events<T extends Prisma.ConnectApp$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConnectApp$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1045,6 +1433,7 @@ export interface ConnectAppFieldRefs {
   readonly loginMethods: Prisma.FieldRef<"ConnectApp", 'String[]'>
   readonly mainnetEnabled: Prisma.FieldRef<"ConnectApp", 'Boolean'>
   readonly logoUrl: Prisma.FieldRef<"ConnectApp", 'String'>
+  readonly createdById: Prisma.FieldRef<"ConnectApp", 'String'>
   readonly createdAt: Prisma.FieldRef<"ConnectApp", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ConnectApp", 'DateTime'>
 }
@@ -1461,6 +1850,78 @@ export type ConnectApp$usersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ConnectUserScalarFieldEnum | Prisma.ConnectUserScalarFieldEnum[]
+}
+
+/**
+ * ConnectApp.members
+ */
+export type ConnectApp$membersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConnectAppMember
+   */
+  select?: Prisma.ConnectAppMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConnectAppMember
+   */
+  omit?: Prisma.ConnectAppMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectAppMemberInclude<ExtArgs> | null
+  where?: Prisma.ConnectAppMemberWhereInput
+  orderBy?: Prisma.ConnectAppMemberOrderByWithRelationInput | Prisma.ConnectAppMemberOrderByWithRelationInput[]
+  cursor?: Prisma.ConnectAppMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConnectAppMemberScalarFieldEnum | Prisma.ConnectAppMemberScalarFieldEnum[]
+}
+
+/**
+ * ConnectApp.invites
+ */
+export type ConnectApp$invitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConnectAppInvite
+   */
+  select?: Prisma.ConnectAppInviteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConnectAppInvite
+   */
+  omit?: Prisma.ConnectAppInviteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectAppInviteInclude<ExtArgs> | null
+  where?: Prisma.ConnectAppInviteWhereInput
+  orderBy?: Prisma.ConnectAppInviteOrderByWithRelationInput | Prisma.ConnectAppInviteOrderByWithRelationInput[]
+  cursor?: Prisma.ConnectAppInviteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConnectAppInviteScalarFieldEnum | Prisma.ConnectAppInviteScalarFieldEnum[]
+}
+
+/**
+ * ConnectApp.events
+ */
+export type ConnectApp$eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConnectEvent
+   */
+  select?: Prisma.ConnectEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConnectEvent
+   */
+  omit?: Prisma.ConnectEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectEventInclude<ExtArgs> | null
+  where?: Prisma.ConnectEventWhereInput
+  orderBy?: Prisma.ConnectEventOrderByWithRelationInput | Prisma.ConnectEventOrderByWithRelationInput[]
+  cursor?: Prisma.ConnectEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConnectEventScalarFieldEnum | Prisma.ConnectEventScalarFieldEnum[]
 }
 
 /**

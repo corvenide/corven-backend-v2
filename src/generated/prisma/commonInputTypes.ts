@@ -511,6 +511,40 @@ export type EnumConnectIdentityKindWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
 }
 
+export type EnumConnectAppRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectAppRole | Prisma.EnumConnectAppRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectAppRoleFilter<$PrismaModel> | $Enums.ConnectAppRole
+}
+
+export type EnumConnectAppRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectAppRole | Prisma.EnumConnectAppRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectAppRoleWithAggregatesFilter<$PrismaModel> | $Enums.ConnectAppRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConnectAppRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConnectAppRoleFilter<$PrismaModel>
+}
+
+export type EnumConnectEventKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectEventKind | Prisma.EnumConnectEventKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectEventKindFilter<$PrismaModel> | $Enums.ConnectEventKind
+}
+
+export type EnumConnectEventKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectEventKind | Prisma.EnumConnectEventKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectEventKindWithAggregatesFilter<$PrismaModel> | $Enums.ConnectEventKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConnectEventKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConnectEventKindFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -1019,6 +1053,40 @@ export type NestedEnumConnectIdentityKindWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
   _max?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
+}
+
+export type NestedEnumConnectAppRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectAppRole | Prisma.EnumConnectAppRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectAppRoleFilter<$PrismaModel> | $Enums.ConnectAppRole
+}
+
+export type NestedEnumConnectAppRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectAppRole | Prisma.EnumConnectAppRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectAppRole[] | Prisma.ListEnumConnectAppRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectAppRoleWithAggregatesFilter<$PrismaModel> | $Enums.ConnectAppRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConnectAppRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConnectAppRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumConnectEventKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectEventKind | Prisma.EnumConnectEventKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectEventKindFilter<$PrismaModel> | $Enums.ConnectEventKind
+}
+
+export type NestedEnumConnectEventKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectEventKind | Prisma.EnumConnectEventKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectEventKind[] | Prisma.ListEnumConnectEventKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectEventKindWithAggregatesFilter<$PrismaModel> | $Enums.ConnectEventKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConnectEventKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConnectEventKindFilter<$PrismaModel>
 }
 
 
