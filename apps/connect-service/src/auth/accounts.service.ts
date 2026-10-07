@@ -26,6 +26,7 @@ import type { LoginMethod } from '../http/app-registry.service';
 import type { ConnectRequestContext } from '../http/app.guard';
 import { fail } from '../http/errors';
 import { RateLimiter } from '../http/rate-limiter';
+import { EventsService } from '../events/events.service';
 import { WalletsService } from '../wallets/wallets.service';
 import { maskEmail, maskPhone, normalizeEmail, normalizePhone } from './destinations';
 import { googleClientIdFor, verifyGoogleIdToken } from './google';
@@ -58,6 +59,7 @@ export class AccountsService {
         private readonly prisma: PrismaService,
         private readonly tokens: TokensService,
         private readonly wallets: WalletsService,
+        private readonly events: EventsService,
         @Inject(OTP_PROVIDER) private readonly otp: OtpProvider,
     ) { }
 
@@ -84,6 +86,7 @@ export class AccountsService {
         this.sendPerIp.consume(`send:${ctx.app.id}:${ctx.ip}`);
         this.sendPerDestination.consume(`send:${ctx.app.id}:${destination}`);
         await this.otp.send(destination, channel, { appName: ctx.app.name, purpose: 'sign-in' });
+        this.events.record(ctx.app.id, 'CODE_SENT', channel);
 
         return {
             sent: true,
@@ -266,7 +269,7 @@ export class AccountsService {
         this.loginsPerIp.consume(`login:${ctx.ip}`);
         const challenge = this.tokens.consumeChallenge(body.challengeToken, ctx.app.id, 'login');
         const passkey = await this.verifyPasskey(ctx, challenge, body.response);
-        return this.session(ctx, passkey.userId, false);
+        return this.session(ctx, passkey.userId, false, 'PASSKEY');
     }
 
     // ------------------------------------------------------------- step-up
@@ -278,6 +281,7 @@ export class AccountsService {
 
         this.sendPerDestination.consume(`send:${ctx.app.id}:${identity.value}`);
         await this.otp.send(identity.value, channel, { appName: ctx.app.name, purpose: 'confirm' });
+        this.events.record(ctx.app.id, 'CODE_SENT', channel);
         return { sent: true, channel, to: identity.kind === 'EMAIL' ? maskEmail(identity.value) : maskPhone(identity.value) };
     }
 
@@ -336,14 +340,14 @@ export class AccountsService {
                     data: { appId, userId: currentUserId, kind: identity.kind, value: identity.value, label: identity.label ?? null },
                 });
             }
-            return this.session(ctx, currentUserId, false);
+            return this.session(ctx, currentUserId, false, identity.kind, true);
         }
 
         if (existing) {
             if (identity.label && identity.label !== existing.label) {
                 await this.prisma.connectIdentity.update({ where: { id: existing.id }, data: { label: identity.label } });
             }
-            return this.session(ctx, existing.userId, false);
+            return this.session(ctx, existing.userId, false, identity.kind);
         }
 
         let userId: string;
@@ -364,14 +368,15 @@ export class AccountsService {
             const row = await this.prisma.connectIdentity.findUniqueOrThrow({
                 where: { appId_kind_value: { appId, kind: identity.kind, value: identity.value } },
             });
-            return this.session(ctx, row.userId, false);
+            return this.session(ctx, row.userId, false, identity.kind);
         }
 
         this.logger.log(`New Connect user ${userId} in app ${appId} (${identity.kind})`);
-        return this.session(ctx, userId, true);
+        return this.session(ctx, userId, true, identity.kind);
     }
 
-    private async session(ctx: ConnectRequestContext, userId: string, isNewUser: boolean) {
+    private async session(ctx: ConnectRequestContext, userId: string, isNewUser: boolean, method: string, linking = false) {
+        if (!linking) this.events.record(ctx.app.id, isNewUser ? 'SIGN_UP' : 'SIGN_IN', method);
         await this.wallets.ensureWallets(userId);
         await this.prisma.connectUser.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
         const { id: _id, ...tokens } = await this.tokens.issueSession(userId, ctx);

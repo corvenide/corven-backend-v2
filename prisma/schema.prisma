@@ -603,7 +603,13 @@ model ConnectApp {
 
     logoUrl String?
 
-    users ConnectUser[]
+    /// Corven IDE user who created it (dashboard); null for admin-created apps.
+    createdById String?
+
+    users   ConnectUser[]
+    members ConnectAppMember[]
+    invites ConnectAppInvite[]
+    events  ConnectEvent[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -746,4 +752,74 @@ model ConnectSignature {
     createdAt DateTime @default(now())
 
     @@index([userId, network, createdAt])
+}
+
+enum ConnectAppRole {
+    /// Everything, including team roles, mainnet and deleting the app.
+    OWNER
+    /// Settings, users and inviting admins/viewers.
+    ADMIN
+    /// Read-only.
+    VIEWER
+}
+
+/// A Corven IDE account that manages a Connect app in the dashboard.
+/// `userId` is the IDE User id (kept as a plain id so Connect stays separate).
+model ConnectAppMember {
+    id String @id @default(uuid())
+
+    appId String
+    app   ConnectApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+    userId String
+    role   ConnectAppRole
+
+    createdAt DateTime @default(now())
+
+    @@unique([appId, userId])
+    @@index([userId])
+}
+
+/// An invite link to join an app's team (token stored hashed, 7 days).
+model ConnectAppInvite {
+    id String @id @default(uuid())
+
+    appId String
+    app   ConnectApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+    email     String?
+    role      ConnectAppRole
+    tokenHash String         @unique
+
+    invitedById  String
+    acceptedById String?
+    acceptedAt   DateTime?
+    revokedAt    DateTime?
+    expiresAt    DateTime
+
+    createdAt DateTime @default(now())
+
+    @@index([appId])
+}
+
+enum ConnectEventKind {
+    SIGN_UP
+    SIGN_IN
+    CODE_SENT
+    TX_SIGNED
+}
+
+/// Usage events for the dashboard's stats. `method` is e.g. PHONE, GOOGLE, sms, TESTNET.
+model ConnectEvent {
+    id String @id @default(uuid())
+
+    appId String
+    app   ConnectApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+    kind   ConnectEventKind
+    method String?
+
+    createdAt DateTime @default(now())
+
+    @@index([appId, createdAt])
 }

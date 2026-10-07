@@ -1,7 +1,8 @@
 // apps/connect-service/src/http/cors.ts
 //
 // CORS for Connect is per app: a page may call the API only if some app
-// lists its origin. Requests carry no cookies (the SDK sends a bearer
+// lists its origin. Corven IDE's own origins (CORS_ORIGINS) are allowed too,
+// for the Connect dashboard that lives in the IDE. Requests carry no cookies (the SDK sends a bearer
 // token), so credentials stay off. The app guard then checks that the
 // origin belongs to the app named in the request.
 
@@ -18,8 +19,11 @@ export function connectCors(registry: AppRegistry) {
 
         res.setHeader('Vary', 'Origin');
 
+        const ideOrigins = (process.env.CORS_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+
         registry
             .isKnownOrigin(origin)
+            .then((known) => known || ideOrigins.includes(origin))
             .then((known) => {
                 if (known) {
                     res.setHeader('Access-Control-Allow-Origin', origin);

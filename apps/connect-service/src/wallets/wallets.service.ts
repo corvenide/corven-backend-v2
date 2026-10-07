@@ -25,6 +25,7 @@ import { mainnetDailyLimitCkb } from '../config';
 import type { ConnectRequestContext } from '../http/app.guard';
 import { fail } from '../http/errors';
 import { TokensService } from '../auth/tokens.service';
+import { EventsService } from '../events/events.service';
 import { masterKeyFromEnv, Vault, type SealedKey } from './vault';
 
 export type Network = 'TESTNET' | 'MAINNET';
@@ -61,6 +62,7 @@ export class WalletsService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly tokens: TokensService,
+        private readonly events: EventsService,
     ) { }
 
     get enabled(): boolean {
@@ -206,6 +208,7 @@ export class WalletsService {
         await this.prisma.connectSignature.create({
             data: { userId, walletId: wallet.id, network, txHash, outflow: outflow.toString(), origin: ctx.origin },
         });
+        this.events.record(ctx.app.id, 'TX_SIGNED', network);
         this.logger.log(`Signed ${network} tx ${txHash} for ${userId} (${formatCkb(outflow)} CKB out)`);
 
         return { transaction: JSON.parse(ccc.stringify(signed)), txHash, outflow: outflow.toString() };

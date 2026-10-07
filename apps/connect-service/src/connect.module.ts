@@ -13,6 +13,10 @@ import { TokensService } from './auth/tokens.service';
 import { UserGuard } from './auth/user.guard';
 import { connectJwtSecret } from './config';
 import { ConnectController, HealthController } from './connect.controller';
+import { DashboardController } from './dashboard/dashboard.controller';
+import { DashboardService } from './dashboard/dashboard.service';
+import { IdeUserGuard } from './dashboard/ide-user.guard';
+import { EventsService } from './events/events.service';
 import { AppGuard } from './http/app.guard';
 import { AppRegistry } from './http/app-registry.service';
 import { WalletsService } from './wallets/wallets.service';
@@ -24,7 +28,7 @@ import { WalletsService } from './wallets/wallets.service';
             useFactory: () => ({ secret: connectJwtSecret(), signOptions: { issuer: 'corven-connect' }, verifyOptions: { issuer: 'corven-connect' } }),
         }),
     ],
-    controllers: [HealthController, ConnectController, AdminController],
+    controllers: [HealthController, ConnectController, AdminController, DashboardController],
     providers: [
         PrismaService,
         AppRegistry,
@@ -34,6 +38,9 @@ import { WalletsService } from './wallets/wallets.service';
         TokensService,
         WalletsService,
         AccountsService,
+        EventsService,
+        DashboardService,
+        IdeUserGuard,
         { provide: OTP_PROVIDER, useFactory: () => otpProviderFromEnv() },
     ],
 })
