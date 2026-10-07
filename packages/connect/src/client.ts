@@ -24,6 +24,7 @@ import type {
     StepUpPurpose,
     StepUpToken,
     User,
+    WalletSigner,
     WalletsResponse,
 } from './types';
 
@@ -57,6 +58,7 @@ export class CorvenConnect {
     private configCache: Promise<AppConfig> | null = null;
     private initPromise: Promise<AuthState> | null = null;
     private approvalHandler: ApprovalHandler | null = null;
+    private external: { signer: WalletSigner; address: string; walletName: string } | null = null;
 
     constructor(options: CorvenConnectOptions) {
         if (!options?.appId) throw new Error('Corven Connect: appId is required.');
@@ -132,6 +134,47 @@ export class CorvenConnect {
         return session;
     }
 
+    /**
+     * Signs in with a wallet the user already has. Pass a CCC signer on CKB
+     * testnet (its address is the user's id). The wallet signs a message;
+     * nothing is sent on chain. With `link: true` (signed in), adds the
+     * wallet to the account instead.
+     */
+    async loginWithSigner(signer: WalletSigner, options: { walletName?: string; link?: boolean } = {}): Promise<Session> {
+        const address = await signer.getRecommendedAddress();
+        const { message, challengeToken } = await this.request<{ message: string; challengeToken: string }>(
+            'POST',
+            '/auth/wallet/challenge',
+            { address },
+        );
+        const signature = await walletSign(signer, message);
+        const session = await this.request<Session>(
+            'POST',
+            '/auth/wallet/verify',
+            { challengeToken, signature, walletName: options.walletName },
+            { auth: options.link === true },
+        );
+        this.external = { signer, address, walletName: options.walletName ?? 'Wallet' };
+        this.signedIn(session);
+        return session;
+    }
+
+    /** The user's own wallet connected in this page (after loginWithSigner or useExternalSigner). */
+    get externalWallet(): { signer: WalletSigner; address: string; walletName: string } | null {
+        return this.external;
+    }
+
+    /** Uses an already-connected wallet signer (e.g. reconnected after a reload) for this session. */
+    async useExternalSigner(signer: WalletSigner, walletName = 'Wallet'): Promise<void> {
+        const address = await signer.getRecommendedAddress();
+        const user = this.user;
+        if (user && !user.identities.some((i) => i.kind === 'WALLET' && i.value === address)) {
+            throw new CorvenConnectError('That wallet isn\'t linked to this account.', 0, 'wrong_account');
+        }
+        this.external = { signer, address, walletName };
+        if (user) this.setState({ status: 'signed-in', user });
+    }
+
     /** Signs in with a passkey added earlier (on this site). */
     async loginWithPasskey(): Promise<Session> {
         const { options, challengeToken } = await this.request<{ options: any; challengeToken: string }>('POST', '/auth/passkey/options');
@@ -186,6 +229,19 @@ export class CorvenConnect {
         proof: { method: 'PHONE' | 'EMAIL'; code: string } | { method: 'GOOGLE'; credential: string },
     ): Promise<StepUpToken> {
         return this.request('POST', '/step-up/verify', { purpose, ...proof }, { auth: true });
+    }
+
+    /** Confirms a sensitive action by signing a message with one of the user's linked wallets. */
+    async stepUpWithSigner(purpose: StepUpPurpose, signer: WalletSigner): Promise<StepUpToken> {
+        const address = await signer.getRecommendedAddress();
+        const { message, challengeToken } = await this.request<{ message: string; challengeToken: string }>(
+            'POST',
+            '/step-up/wallet/challenge',
+            { address },
+            { auth: true },
+        );
+        const signature = await walletSign(signer, message);
+        return this.request('POST', '/step-up/verify', { purpose, method: 'WALLET' as StepUpMethod, challengeToken, signature }, { auth: true });
     }
 
     async stepUpWithPasskey(purpose: StepUpPurpose): Promise<StepUpToken> {
@@ -294,6 +350,7 @@ export class CorvenConnect {
 
     private signedOut(): void {
         this.access = null;
+        this.external = null;
         this.storage.remove(this.storageKey);
         this.setState({ status: 'signed-out', user: null });
     }
@@ -317,6 +374,17 @@ export class CorvenConnect {
 
 export function createCorvenConnect(options: CorvenConnectOptions): CorvenConnect {
     return new CorvenConnect(options);
+}
+
+async function walletSign(signer: WalletSigner, message: string) {
+    try {
+        const { signature, identity, signType } = await signer.signMessage(message);
+        return { signature, identity, signType };
+    } catch (error) {
+        const text = error instanceof Error ? error.message : String(error);
+        if (/reject|denied|cancel|closed/i.test(text)) throw new CorvenConnectError('You cancelled the request in your wallet.', 0, 'user_rejected');
+        throw new CorvenConnectError(`Your wallet couldn't sign: ${text}`, 0, 'wallet_failed');
+    }
 }
 
 async function webauthn<T>(run: () => Promise<T>): Promise<T> {

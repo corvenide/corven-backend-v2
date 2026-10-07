@@ -5,6 +5,7 @@ React apps.
 
 ```
 npm install @corven/connect-react @ckb-ccc/core
+npm install @ckb-ccc/ccc   # optional: "Connect a wallet" (JoyID, MetaMask, UniSat, OKX…)
 ```
 
 ```tsx
@@ -56,8 +57,13 @@ function Pay() {
 ### `useCorvenConnect()`
 
 `ready`, `authenticated`, `user`, `config`, `login()`, `openWallet()`,
-`closeModal()`, `logout()`, `getSigner(network)`, `client` (the
-`@corven/connect` client).
+`closeModal()`, `logout()`, `getSigner(network)`, `externalWallet`,
+`reconnectWallet()`, `client` (the `@corven/connect` client).
+
+People who signed in with their own wallet (`user.embeddedWallets === false`)
+sign with it: `getSigner('TESTNET')` returns that wallet's CCC signer and the
+wallet shows its own prompt. After a page reload the SDK reconnects it
+quietly when the wallet allows; otherwise the wallet screen offers "Reconnect".
 
 Signing a mainnet transaction asks the user to confirm with a code,
 passkey or Google first. `UserRejectedError` is thrown when they reject.

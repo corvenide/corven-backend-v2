@@ -2,10 +2,10 @@
 // /connect/v1 API of the Corven backend (apps/connect-service).
 
 export type Network = 'TESTNET' | 'MAINNET';
-export type LoginMethod = 'PHONE' | 'EMAIL' | 'GOOGLE' | 'PASSKEY';
+export type LoginMethod = 'PHONE' | 'EMAIL' | 'GOOGLE' | 'PASSKEY' | 'WALLET';
 export type PhoneChannel = 'sms' | 'whatsapp' | 'call';
 export type StepUpPurpose = 'sign' | 'export';
-export type StepUpMethod = 'PHONE' | 'EMAIL' | 'GOOGLE' | 'PASSKEY';
+export type StepUpMethod = 'PHONE' | 'EMAIL' | 'GOOGLE' | 'PASSKEY' | 'WALLET';
 
 export interface AppConfig {
     appId: string;
@@ -19,9 +19,11 @@ export interface AppConfig {
 
 export interface Identity {
     id: string;
-    kind: 'PHONE' | 'EMAIL' | 'GOOGLE';
-    /** Phone (E.164), email, or the Google account's email. */
+    kind: 'PHONE' | 'EMAIL' | 'GOOGLE' | 'WALLET';
+    /** Phone (E.164), email, the Google account's email, or the wallet's CKB testnet address. */
     value: string | null;
+    /** The wallet's name (e.g. "JoyID Passkey"), for wallets. */
+    label: string | null;
     verifiedAt: string;
 }
 
@@ -45,6 +47,11 @@ export interface User {
     id: string;
     appId: string;
     displayName: string | null;
+    /**
+     * False when the user signed up with their own wallet: they sign with it
+     * and Corven holds no keys for them (`wallets` is empty).
+     */
+    embeddedWallets: boolean;
     identities: Identity[];
     passkeys: Passkey[];
     wallets: WalletAddress[];
@@ -117,3 +124,13 @@ export interface SignApproval {
 }
 
 export type ApprovalHandler = (request: SignRequest) => Promise<SignApproval>;
+
+/**
+ * The parts of a CCC signer (`ccc.Signer`) that wallet sign-in needs. Any
+ * signer from CCC works: JoyID, MetaMask and other EVM wallets, UniSat,
+ * OKX, Xverse, UTXO Global, Rei, Nostr...
+ */
+export interface WalletSigner {
+    getRecommendedAddress(): Promise<string>;
+    signMessage(message: string): Promise<{ signature: string; identity: string; signType: string }>;
+}

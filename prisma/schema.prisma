@@ -582,6 +582,8 @@ enum ConnectIdentityKind {
     PHONE
     EMAIL
     GOOGLE
+    /// A CKB address of a wallet the person already has (JoyID, UniSat, MetaMask...).
+    WALLET
 }
 
 /// An app that embeds Corven Connect. Its id is the public app id the SDK
@@ -594,8 +596,8 @@ model ConnectApp {
     allowedOrigins String[]
     /// Google OAuth client id whose authorized origins include the app's pages.
     googleClientId String?
-    /// Sign-in methods offered: PHONE, EMAIL, GOOGLE, PASSKEY.
-    loginMethods   String[] @default(["PHONE", "EMAIL", "GOOGLE", "PASSKEY"])
+    /// Sign-in methods offered: PHONE, EMAIL, GOOGLE, PASSKEY, WALLET.
+    loginMethods   String[] @default(["PHONE", "EMAIL", "GOOGLE", "PASSKEY", "WALLET"])
     /// Mainnet wallets can sign only when this is on.
     mainnetEnabled Boolean  @default(false)
 
@@ -616,6 +618,9 @@ model ConnectUser {
     app   ConnectApp @relation(fields: [appId], references: [id], onDelete: Cascade)
 
     displayName String?
+    /// False for people who signed up with their own wallet: they sign with
+    /// it, so Corven holds no keys for them.
+    embeddedWallets Boolean @default(true)
 
     identities ConnectIdentity[]
     passkeys   ConnectPasskey[]
@@ -630,8 +635,8 @@ model ConnectUser {
     @@index([appId])
 }
 
-/// A verified way to sign in: phone number (E.164), email (lowercase) or
-/// Google account id (`sub`). Unique per app.
+/// A verified way to sign in: phone number (E.164), email (lowercase),
+/// Google account id (`sub`) or wallet address. Unique per app.
 model ConnectIdentity {
     id String @id @default(uuid())
 
@@ -641,7 +646,7 @@ model ConnectIdentity {
 
     kind  ConnectIdentityKind
     value String
-    /// Email shown for a Google identity.
+    /// Email shown for a Google identity; wallet name for a wallet.
     label String?
 
     verifiedAt DateTime @default(now())

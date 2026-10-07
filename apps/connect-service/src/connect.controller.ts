@@ -50,6 +50,20 @@ export class ConnectController {
         return this.accounts.google(ctx, auth, body ?? {});
     }
 
+    /** Body: { address } (the wallet's testnet address). */
+    @Post('auth/wallet/challenge')
+    @HttpCode(200)
+    walletChallenge(@Ctx() ctx: ConnectRequestContext, @Body() body: any) {
+        return this.accounts.walletChallenge(ctx, body ?? {});
+    }
+
+    /** Body: { challengeToken, signature, walletName? }. With a bearer token, links the wallet instead. */
+    @Post('auth/wallet/verify')
+    @HttpCode(200)
+    walletLogin(@Ctx() ctx: ConnectRequestContext, @Headers('authorization') auth: string, @Body() body: any) {
+        return this.accounts.walletLogin(ctx, auth, body ?? {});
+    }
+
     @Post('auth/passkey/options')
     @HttpCode(200)
     passkeyLoginOptions(@Ctx() ctx: ConnectRequestContext) {
@@ -142,7 +156,15 @@ export class ConnectController {
         return this.accounts.passkeyAuthOptions(ctx, userId);
     }
 
-    /** Body: { purpose: sign|export, method, code | credential | response+challengeToken }. */
+    /** Body: { address }: a message for one of the user's wallets to sign. */
+    @Post('step-up/wallet/challenge')
+    @HttpCode(200)
+    @UseGuards(UserGuard)
+    stepUpWalletChallenge(@Ctx() ctx: ConnectRequestContext, @UserId() userId: string, @Body() body: any) {
+        return this.accounts.walletStepUpChallenge(ctx, userId, body ?? {});
+    }
+
+    /** Body: { purpose: sign|export, method, code | credential | response+challengeToken | signature+challengeToken }. */
     @Post('step-up/verify')
     @HttpCode(200)
     @UseGuards(UserGuard)

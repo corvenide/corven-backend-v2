@@ -23,7 +23,7 @@ import type { ConnectRequestContext } from '../http/app.guard';
 import { fail } from '../http/errors';
 
 export type StepUpPurpose = 'sign' | 'export';
-export type ChallengePurpose = 'register' | 'login' | 'step-up';
+export type ChallengePurpose = 'register' | 'login' | 'step-up' | 'wallet' | 'wallet-step-up';
 
 export interface SessionTokens {
     accessToken: string;
@@ -168,16 +168,16 @@ export class TokensService {
 
     // ------------------------------------------------------------- challenges
 
-    challengeToken(data: { challenge: string; purpose: ChallengePurpose; appId: string; userId?: string; rpId: string }) {
+    challengeToken(data: { challenge: string; purpose: ChallengePurpose; appId: string; userId?: string; rpId: string; address?: string }) {
         return this.jwt.sign(
-            { typ: 'connect-challenge', challenge: data.challenge, purpose: data.purpose, rpId: data.rpId },
+            { typ: 'connect-challenge', challenge: data.challenge, purpose: data.purpose, rpId: data.rpId, address: data.address },
             { audience: data.appId, subject: data.userId ?? 'anonymous', expiresIn: CHALLENGE_TTL_S, jwtid: randomUUID() },
         );
     }
 
     consumeChallenge(token: unknown, appId: string, purpose: ChallengePurpose) {
         if (typeof token !== 'string') throw fail(400, 'Missing passkey challenge. Try again.', 'invalid_challenge');
-        let payload: { sub: string; challenge: string; purpose: string; rpId: string; jti?: string; exp?: number };
+        let payload: { sub: string; challenge: string; purpose: string; rpId: string; address?: string; jti?: string; exp?: number };
         try {
             payload = this.verify(token, 'connect-challenge', appId);
         } catch {
@@ -185,7 +185,12 @@ export class TokensService {
         }
         if (payload.purpose !== purpose) throw fail(400, 'Wrong passkey request. Try again.', 'invalid_challenge');
         this.spend(payload.jti, payload.exp, 'invalid_challenge');
-        return { challenge: payload.challenge, rpId: payload.rpId, userId: payload.sub === 'anonymous' ? null : payload.sub };
+        return {
+            challenge: payload.challenge,
+            rpId: payload.rpId,
+            address: payload.address ?? null,
+            userId: payload.sub === 'anonymous' ? null : payload.sub,
+        };
     }
 
     // ---------------------------------------------------------------- helpers

@@ -1,7 +1,7 @@
 # Corven Connect
 
-Sign-in (phone, email, Google, passkeys) with an embedded CKB wallet, for
-other apps. Like Privy, built for CKB and for phone-first users.
+Sign-in (phone, email, Google, passkeys, or a wallet people already have)
+with an embedded CKB wallet, for other apps. Like Privy, built for CKB and for phone-first users.
 
 It lives in this backend but is kept apart from Corven IDE:
 
@@ -52,12 +52,25 @@ curl -X POST https://staging-api.corvanide.space/connect/v1/admin/apps \
 ```
 
 Returns `{ "id": "app_…" }`, the app id for the SDK. Other fields:
-`loginMethods` (any of `PHONE`, `EMAIL`, `GOOGLE`, `PASSKEY`), `logoUrl`,
+`loginMethods` (any of `PHONE`, `EMAIL`, `GOOGLE`, `PASSKEY`, `WALLET`), `logoUrl`,
 `mainnetEnabled` (default false). Change them with
 `PATCH /connect/v1/admin/apps/:id`; list with `GET /connect/v1/admin/apps`.
 
 Google: the app's own OAuth client must list the app's pages under
 Authorized JavaScript origins. `CONNECT_GOOGLE_CLIENT_ID` is a fallback.
+
+## Sign in with an existing wallet
+
+`WALLET` lets people use a wallet they already have, through CCC: JoyID,
+MetaMask and other EVM wallets, UniSat, OKX, Xverse, UTXO Global, Rei,
+Nostr. The wallet signs a one-time message (no transaction, no fee). The
+server checks the signature and that the signing key controls the claimed
+CKB testnet address, which becomes the user's id.
+
+People who sign up this way get **no embedded wallet**: they sign with their
+own wallet, which shows its own approval prompt, and Corven holds no keys for
+them. Signed-in users can also link a wallet as one more way to sign in.
+In the React SDK this needs `@ckb-ccc/ccc` installed in the app.
 
 ## Security model
 
@@ -89,6 +102,9 @@ obligations. Move `CONNECT_WALLET_ENCRYPTION_KEY` to a KMS before mainnet use.
 | POST | /auth/code/verify | `{phone or email, code}` | session; with bearer: links |
 | POST | /auth/google | `{credential}` | session; with bearer: links |
 | POST | /auth/passkey/options | | then /auth/passkey/verify `{response, challengeToken}` |
+| POST | /auth/wallet/challenge | `{address}` (testnet) | message to sign |
+| POST | /auth/wallet/verify | `{challengeToken, signature, walletName?}` | session; with bearer: links |
+| POST | /step-up/wallet/challenge | `{address}` | message for a linked wallet |
 | POST | /auth/refresh | `{refreshToken}` | rotates |
 | POST | /auth/logout | `{refreshToken}` | |
 | GET/PATCH | /me | `{displayName}` | bearer |

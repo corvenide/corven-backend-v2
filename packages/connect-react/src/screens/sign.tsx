@@ -9,7 +9,7 @@ import * as Icon from '../icons';
 import { useConnectContext } from '../provider';
 import { ErrorText, Header, Spinner, maskPhone, useAction } from '../ui';
 
-type Method = 'PASSKEY' | 'PHONE' | 'EMAIL' | 'GOOGLE';
+type Method = 'PASSKEY' | 'PHONE' | 'EMAIL' | 'GOOGLE' | 'WALLET';
 
 /** Re-verify with a passkey, a code to the user's phone/email, or Google. Calls onToken with a step-up token. */
 export function StepUp({ purpose, onToken, compact }: { purpose: StepUpPurpose; onToken: (token: string) => void; compact?: boolean }) {
@@ -25,8 +25,10 @@ export function StepUp({ purpose, onToken, compact }: { purpose: StepUpPurpose; 
         const email = user?.identities.find((i) => i.kind === 'EMAIL');
         if (email?.value) list.push({ method: 'EMAIL', label: 'Email code', detail: email.value });
         if (user?.identities.some((i) => i.kind === 'GOOGLE') && config?.googleClientId) list.push({ method: 'GOOGLE', label: 'Google' });
+        const ext = connect.externalWallet;
+        if (ext && user?.identities.some((i) => i.kind === 'WALLET' && i.value === ext.address)) list.push({ method: 'WALLET', label: 'Wallet', detail: ext.walletName });
         return list;
-    }, [user, config, host]);
+    }, [user, config, host, connect]);
 
     const [method, setMethod] = useState<Method | null>(available[0]?.method ?? null);
     const [sentTo, setSentTo] = useState<string | null>(null);
@@ -134,6 +136,18 @@ export function StepUp({ purpose, onToken, compact }: { purpose: StepUpPurpose; 
                             </button>
                         </form>
                     ))}
+
+                {method === 'WALLET' && connect.externalWallet && (
+                    <button
+                        type="button"
+                        className="cc-btn cc-btn-secondary"
+                        style={{ height: 44 }}
+                        disabled={busy !== null}
+                        onClick={() => void run('wallet', async () => finish((await connect.stepUpWithSigner(purpose, connect.externalWallet!.signer)).stepUpToken))}
+                    >
+                        {busy ? <Spinner /> : <Icon.Wallet size={16} />} Sign with {connect.externalWallet.walletName}
+                    </button>
+                )}
 
                 {method === 'GOOGLE' && config?.googleClientId && (
                     <GoogleButton

@@ -71,6 +71,9 @@ const CSS = `
 .cc-copy{margin-top:14px;width:100%;height:40px;padding:0 12px;border-radius:11px;background:var(--cc-bg);color:var(--cc-muted);gap:8px;border:1px solid var(--cc-border);display:flex;align-items:center}
 .cc-copy:hover{border-color:var(--cc-border-strong)}
 .cc-copy-wide{margin-top:10px;height:46px}
+.cc-wallet-row{width:100%;display:flex;align-items:center;gap:12px;padding:10px 4px;border:0;background:transparent;color:var(--cc-text);border-radius:12px;font-family:inherit}
+.cc-wallet-row:hover:not(:disabled){background:var(--cc-surface)}
+.cc-section-label{font-size:12px;color:var(--cc-faint);margin:6px 0 2px;text-transform:uppercase;letter-spacing:.06em}
 .cc-connect-btn{height:42px;padding:0 16px;border-radius:12px;border:0;font:600 14px ${FONT};display:inline-flex;align-items:center;gap:8px;cursor:pointer}
 @keyframes cc-spin{to{transform:rotate(360deg)}}
 @keyframes cc-fade{from{opacity:0}}

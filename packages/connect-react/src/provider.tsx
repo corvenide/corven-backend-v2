@@ -26,12 +26,14 @@ import {
     type User,
 } from '@corven/connect';
 
+import { findRememberedSigner, rememberedWallet, rememberWallet } from './external-wallets';
 import { Modal } from './modal';
 import { injectStyles } from './styles';
 import { tokens, type ThemeMode, type Tokens } from './theme';
 
 export type View =
     | { screen: 'main'; link?: boolean }
+    | { screen: 'wallets'; link?: boolean }
     | { screen: 'code'; to: { phone: string; channel?: 'sms' | 'whatsapp' | 'call' } | { email: string }; sent: CodeSent; link?: boolean }
     | { screen: 'creating' }
     | { screen: 'wallet'; tab?: 'activity' | 'logins' }
@@ -135,6 +137,28 @@ export function CorvenConnectProvider(props: CorvenConnectProviderProps) {
             .catch((e: Error) => setConfigError(e.message));
     }, [connect]);
 
+    // After a reload, reconnect the wallet the user signed in with, if the
+    // wallet still has it connected (no prompt). Otherwise the wallet screen
+    // offers to reconnect.
+    useEffect(() => {
+        if (state.status !== 'signed-in' || connect.externalWallet || !config) return;
+        const stored = rememberedWallet(connect.appId);
+        if (!stored || !state.user.identities.some((i) => i.kind === 'WALLET')) return;
+        let cancelled = false;
+        findRememberedSigner({ name: config.name, icon: config.logoUrl }, stored, { connect: false })
+            .then((signer) => {
+                if (signer && !cancelled) return connect.useExternalSigner(signer, stored.wallet);
+            })
+            .catch(() => undefined);
+        return () => {
+            cancelled = true;
+        };
+    }, [connect, state, config]);
+
+    useEffect(() => {
+        if (state.status === 'signed-out') rememberWallet(connect.appId, null);
+    }, [connect, state.status]);
+
     // Every signature from this app goes through the approval screen.
     useEffect(() => {
         connect.setApprovalHandler(
@@ -163,7 +187,8 @@ export function CorvenConnectProvider(props: CorvenConnectProviderProps) {
             if (user) onLoginRef.current?.(user, { isNewUser });
             setView((current) => {
                 if (current && 'link' in current && current.link) return { screen: 'wallet', tab: 'logins' };
-                return isNewUser ? { screen: 'creating' } : null;
+                // Wallet sign-ups get no embedded wallet, so there's nothing to create.
+                return isNewUser && user?.embeddedWallets !== false ? { screen: 'creating' } : null;
             });
         },
         [connect],
@@ -198,8 +223,22 @@ export function useCorvenConnect() {
         openWallet: () => modal.setView({ screen: 'wallet' }),
         closeModal: modal.close,
         logout: () => connect.logout(),
-        /** A ccc signer for the user's wallet; signing shows the approval screen. */
-        getSigner: (network: Network = 'TESTNET'): CorvenConnectSigner => connect.getSigner(network, clients[network]),
+        /**
+         * A ccc signer for the user's wallet. Embedded wallets show Corven's
+         * approval screen; people's own wallets show their wallet's prompt.
+         */
+        getSigner: (network: Network = 'TESTNET'): ccc.Signer => connect.getSigner(network, clients[network]),
+        /** The user's own wallet (JoyID, MetaMask...) when they signed in with one and it's connected. */
+        externalWallet: connect.externalWallet,
+        /** Asks the user's own wallet to connect again (e.g. after a reload). Returns true when connected. */
+        reconnectWallet: async (): Promise<boolean> => {
+            const stored = rememberedWallet(connect.appId);
+            if (!stored || !config) return false;
+            const signer = await findRememberedSigner({ name: config.name, icon: config.logoUrl }, stored, { connect: true, timeoutMs: 5000 });
+            if (!signer) return false;
+            await connect.useExternalSigner(signer, stored.wallet);
+            return true;
+        },
         /** The underlying @corven/connect client. */
         client: connect,
     };

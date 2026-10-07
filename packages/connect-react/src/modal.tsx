@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useConnectContext } from './provider';
 import { CodeScreen, CreatingScreen, MainScreen } from './screens/auth';
 import { SignScreen } from './screens/sign';
+import { WalletsScreen } from './screens/wallets';
 import { ExportScreen, ReceiveScreen, SendScreen, WalletScreen } from './screens/wallet';
 import { cssVars } from './theme';
 
@@ -38,6 +39,8 @@ export function Modal() {
         switch (view.screen) {
             case 'main':
                 return <MainScreen link={view.link} />;
+            case 'wallets':
+                return <WalletsScreen link={view.link} />;
             case 'code':
                 return <CodeScreen view={view} />;
             case 'creating':

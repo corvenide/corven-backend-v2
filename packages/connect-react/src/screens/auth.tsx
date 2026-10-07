@@ -240,6 +240,25 @@ export function MainScreen({ link }: { link?: boolean }) {
                         </>
                     )}
 
+                    {methods.includes('WALLET') && (
+                        <button
+                            type="button"
+                            className="cc-btn cc-btn-secondary"
+                            style={{ marginTop: 10, height: 48, position: 'relative' }}
+                            onClick={() => modal.setView({ screen: 'wallets', link })}
+                            disabled={busy !== null}
+                        >
+                            <Icon.Wallet />
+                            {link ? 'Link a wallet' : 'Connect a wallet'}
+                            <span style={{ fontSize: 12, color: 'var(--cc-faint)', fontWeight: 400 }}>JoyID, MetaMask, UniSat…</span>
+                            {previous === 'wallet' && !link && (
+                                <span style={{ position: 'absolute', top: -9, right: 10, padding: '2px 8px', borderRadius: 999, background: 'var(--cc-accent)', color: 'var(--cc-accent-text)', fontSize: 11, fontWeight: 600 }}>
+                                    Last used
+                                </span>
+                            )}
+                        </button>
+                    )}
+
                     {methods.includes('PASSKEY') && !link && typeof window !== 'undefined' && 'PublicKeyCredential' in window && (
                         <button type="button" className="cc-btn cc-btn-secondary" style={{ marginTop: 10, height: 48 }} onClick={passkey} disabled={busy !== null}>
                             {busy === 'passkey' ? <Spinner /> : <Icon.Passkey />}

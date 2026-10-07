@@ -29,16 +29,45 @@ function useWallets() {
     return { data, error, reload: load };
 }
 
+/** Balance of the user's own wallet, read through its CCC signer. */
+function useExternalBalance(signer: any | null) {
+    const [balance, setBalance] = useState<bigint | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    useEffect(() => {
+        if (!signer) return;
+        let cancelled = false;
+        signer.getBalance().then(
+            (b: bigint) => !cancelled && setBalance(b),
+            (e: unknown) => !cancelled && setError(messageOf(e)),
+        );
+        return () => {
+            cancelled = true;
+        };
+    }, [signer]);
+    return { balance, error };
+}
+
+/** The address people see and receive to: their own wallet's, or the embedded one. */
+export function ownAddress(user: { embeddedWallets: boolean; identities: { kind: string; value: string | null }[]; wallets: { network: string; address: string }[] }, network: Network, external: { address: string } | null): string {
+    if (!user.embeddedWallets) return external?.address ?? user.identities.find((i) => i.kind === 'WALLET')?.value ?? '';
+    return user.wallets.find((w) => w.network === network)?.address ?? '';
+}
+
 function displayName(user: NonNullable<ReturnType<typeof useConnectContext>['state']['user']>): { name: string; detail: string } {
     const phone = user.identities.find((i) => i.kind === 'PHONE')?.value;
     const email = user.identities.find((i) => i.kind === 'EMAIL' || i.kind === 'GOOGLE')?.value;
-    const name = user.displayName ?? email?.split('@')[0] ?? (phone ? 'My wallet' : 'My wallet');
-    return { name, detail: phone ? maskPhone(phone) : (email ?? '') };
+    const wallet = user.identities.find((i) => i.kind === 'WALLET');
+    const name = user.displayName ?? email?.split('@')[0] ?? (!phone && wallet ? (wallet.label ?? 'My wallet') : 'My wallet');
+    return { name, detail: phone ? maskPhone(phone) : (email ?? (wallet?.value ? shortAddress(wallet.value, 10, 6) : '')) };
 }
 
 export function WalletScreen({ initialTab }: { initialTab?: 'activity' | 'logins' }) {
     const { state, config, modal, connect } = useConnectContext();
-    const [tab, setTab] = useState<'activity' | 'logins'>(initialTab ?? 'activity');
+    const external = state.user?.embeddedWallets === false;
+    const [tab, setTab] = useState<'activity' | 'logins'>(external ? 'logins' : (initialTab ?? 'activity'));
+    const ext = connect.externalWallet;
+    const extBalance = useExternalBalance(external ? (ext?.signer ?? null) : null);
+    const [reconnecting, setReconnecting] = useState<string | null>(null);
     const [network, setNetworkState] = useState<Network>(config?.networks.includes(selectedNetwork) ? selectedNetwork : 'TESTNET');
     const { data, error, reload } = useWallets();
     const user = state.user;
@@ -48,9 +77,24 @@ export function WalletScreen({ initialTab }: { initialTab?: 'activity' | 'logins
         selectedNetwork = n;
         setNetworkState(n);
     };
-    const networks = config?.networks ?? ['TESTNET'];
+    const networks = external ? (['TESTNET'] as Network[]) : (config?.networks ?? ['TESTNET']);
     const wallet = data?.wallets.find((w) => w.network === network);
-    const address = wallet?.address ?? user.wallets.find((w) => w.network === network)?.address ?? '';
+    const address = ownAddress(user, network, ext);
+    const balance = external ? (extBalance.balance === null ? null : extBalance.balance.toString()) : (wallet?.balance ?? null);
+    const balanceSettled = external ? extBalance.balance !== null || extBalance.error !== null || !ext : !!(data || error);
+    const reconnect = async () => {
+        setReconnecting('');
+        try {
+            const { findRememberedSigner, rememberedWallet } = await import('../external-wallets');
+            const stored = rememberedWallet(connect.appId);
+            const signer = stored && config ? await findRememberedSigner({ name: config.name, icon: config.logoUrl }, stored, { connect: true, timeoutMs: 5000 }) : null;
+            if (!signer) throw new Error('Couldn’t reach your wallet. Open it and try again, or sign out and back in.');
+            await connect.useExternalSigner(signer, stored!.wallet);
+            setReconnecting(null);
+        } catch (e) {
+            setReconnecting(messageOf(e));
+        }
+    };
     const { name, detail } = displayName(user);
     const activity = (data?.activity ?? []).filter((a) => a.network === network);
 
@@ -101,16 +145,22 @@ export function WalletScreen({ initialTab }: { initialTab?: 'activity' | 'logins
                     )}
                 </div>
                 <div className="cc-row" style={{ marginTop: 8, gap: 8, alignItems: 'baseline' }} data-testid="cc-balance">
-                    {wallet?.balance != null ? (
-                        <span style={{ fontSize: 40, fontWeight: 600, letterSpacing: '-0.035em' }}>{formatCkb(wallet.balance)}</span>
-                    ) : data || error ? (
+                    {balance != null ? (
+                        <span style={{ fontSize: 40, fontWeight: 600, letterSpacing: '-0.035em' }}>{formatCkb(balance)}</span>
+                    ) : balanceSettled ? (
                         <span style={{ fontSize: 40, fontWeight: 600, letterSpacing: '-0.035em', color: 'var(--cc-faint)' }}>—</span>
                     ) : (
                         <span className="cc-skel" style={{ width: 170, height: 38, borderRadius: 10, margin: '4px 0' }} />
                     )}
                     <span style={{ fontSize: 17, color: 'var(--cc-muted)', fontWeight: 500 }}>CKB</span>
                 </div>
-                {network === 'TESTNET' && <div style={{ fontSize: 12.5, color: 'var(--cc-faint)', marginTop: 2 }}>Testnet CKB has no value.</div>}
+                {external ? (
+                    <div style={{ fontSize: 12.5, color: 'var(--cc-faint)', marginTop: 2 }}>
+                        {ext ? `Your own wallet: ${ext.walletName}. It asks you to approve each transaction.` : 'Your own wallet isn’t connected in this tab.'}
+                    </div>
+                ) : (
+                    network === 'TESTNET' && <div style={{ fontSize: 12.5, color: 'var(--cc-faint)', marginTop: 2 }}>Testnet CKB has no value.</div>
+                )}
                 <CopyButton value={address} label="Copy address" className="cc-field cc-copy">
                     <span className="cc-mono" style={{ flex: 1, textAlign: 'left', fontSize: 13, color: 'var(--cc-muted)' }}>
                         {shortAddress(address)}
@@ -118,8 +168,17 @@ export function WalletScreen({ initialTab }: { initialTab?: 'activity' | 'logins
                 </CopyButton>
             </div>
 
-            <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
-                <button type="button" className="cc-action cc-action-primary" onClick={() => modal.setView({ screen: 'send' })}>
+            {external && !ext && (
+                <>
+                    <button type="button" className="cc-btn cc-btn-primary" style={{ marginTop: 10, height: 46 }} onClick={() => void reconnect()} disabled={reconnecting === ''}>
+                        {reconnecting === '' ? <Spinner /> : <Icon.Wallet />} Reconnect your wallet
+                    </button>
+                    {reconnecting && <ErrorText error={reconnecting} />}
+                </>
+            )}
+
+            <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: `repeat(${external ? 3 : 4}, minmax(0, 1fr))`, gap: 8 }}>
+                <button type="button" className="cc-action cc-action-primary" disabled={external && !ext} onClick={() => modal.setView({ screen: 'send' })}>
                     <Icon.Send />
                     Send
                 </button>
@@ -138,16 +197,20 @@ export function WalletScreen({ initialTab }: { initialTab?: 'activity' | 'logins
                         Top up
                     </button>
                 )}
-                <button type="button" className="cc-action" onClick={() => modal.setView({ screen: 'export' })}>
-                    <Icon.Key />
-                    Export
-                </button>
+                {!external && (
+                    <button type="button" className="cc-action" onClick={() => modal.setView({ screen: 'export' })}>
+                        <Icon.Key />
+                        Export
+                    </button>
+                )}
             </div>
 
             <div role="tablist" className="cc-utabs" style={{ marginTop: 18 }}>
-                <button type="button" role="tab" className="cc-utab" aria-selected={tab === 'activity'} onClick={() => setTab('activity')}>
-                    Activity
-                </button>
+                {!external && (
+                    <button type="button" role="tab" className="cc-utab" aria-selected={tab === 'activity'} onClick={() => setTab('activity')}>
+                        Activity
+                    </button>
+                )}
                 <button type="button" role="tab" className="cc-utab" aria-selected={tab === 'logins'} onClick={() => setTab('logins')}>
                     Sign-in methods
                 </button>
@@ -215,18 +278,20 @@ function LoginsTab() {
     const has = (kind: string) => user.identities.some((i) => i.kind === kind);
     const methods = config?.loginMethods ?? [];
 
-    const label: Record<string, string> = { PHONE: 'Phone', EMAIL: 'Email', GOOGLE: 'Google' };
+    const label: Record<string, string> = { PHONE: 'Phone', EMAIL: 'Email', GOOGLE: 'Google', WALLET: 'Wallet' };
 
     return (
         <>
             <ul className="cc-list">
                 {user.identities.map((i) => (
                     <li key={i.id}>
-                        <span className="cc-tile">{i.kind === 'PHONE' ? <Icon.Phone size={16} /> : i.kind === 'GOOGLE' ? <Icon.GoogleG /> : <Icon.Mail size={16} />}</span>
+                        <span className="cc-tile">
+                            {i.kind === 'PHONE' ? <Icon.Phone size={16} /> : i.kind === 'GOOGLE' ? <Icon.GoogleG /> : i.kind === 'WALLET' ? <Icon.Wallet size={16} /> : <Icon.Mail size={16} />}
+                        </span>
                         <span style={{ flex: 1, minWidth: 0 }}>
-                            <span style={{ display: 'block', fontSize: 14 }}>{label[i.kind]}</span>
+                            <span style={{ display: 'block', fontSize: 14 }}>{i.kind === 'WALLET' ? (i.label ?? 'Wallet') : label[i.kind]}</span>
                             <span className="cc-mono" style={{ fontSize: 12, color: 'var(--cc-faint)' }}>
-                                {i.kind === 'PHONE' && i.value ? maskPhone(i.value) : i.value}
+                                {i.kind === 'PHONE' && i.value ? maskPhone(i.value) : i.kind === 'WALLET' && i.value ? shortAddress(i.value, 12, 6) : i.value}
                             </span>
                         </span>
                         {total > 1 && (
@@ -267,6 +332,11 @@ function LoginsTab() {
                         <Icon.Plus size={14} /> Link {[!has('PHONE') && methods.includes('PHONE') && 'phone', !has('EMAIL') && methods.includes('EMAIL') && 'email', !has('GOOGLE') && methods.includes('GOOGLE') && config?.googleClientId && 'Google'].filter(Boolean).join(' / ')}
                     </button>
                 )}
+                {methods.includes('WALLET') && (
+                    <button type="button" className="cc-pill" style={{ fontFamily: 'inherit', height: 32 }} onClick={() => modal.setView({ screen: 'wallets', link: true })}>
+                        <Icon.Plus size={14} /> Link a wallet
+                    </button>
+                )}
             </div>
             <ErrorText error={error} />
         </>
@@ -275,7 +345,8 @@ function LoginsTab() {
 
 export function SendScreen() {
     const { connect, modal, clients, config } = useConnectContext();
-    const [network] = useState<Network>(config?.networks.includes(selectedNetwork) ? selectedNetwork : 'TESTNET');
+    const { state } = useConnectContext();
+    const [network] = useState<Network>(state.user?.embeddedWallets === false ? 'TESTNET' : config?.networks.includes(selectedNetwork) ? selectedNetwork : 'TESTNET');
     const [to, setTo] = useState('');
     const [amount, setAmount] = useState('');
     const [txHash, setTxHash] = useState<string | null>(null);
@@ -285,7 +356,7 @@ export function SendScreen() {
 
     const send = () =>
         run('send', async () => {
-            const signer = connect.getSigner(network, clients[network]);
+            const signer = connect.getSigner(network, state.user?.embeddedWallets === false ? undefined : clients[network]);
             const { script } = await ccc.Address.fromString(to.trim(), signer.client);
             const tx = ccc.Transaction.from({ outputs: [{ lock: script, capacity: ccc.fixedPointFrom(amount.trim()) }], outputsData: ['0x'] });
             try {
@@ -374,9 +445,9 @@ export function SendScreen() {
 }
 
 export function ReceiveScreen() {
-    const { state, modal, config } = useConnectContext();
-    const network: Network = config?.networks.includes(selectedNetwork) ? selectedNetwork : 'TESTNET';
-    const address = state.user?.wallets.find((w) => w.network === network)?.address ?? '';
+    const { state, modal, config, connect } = useConnectContext();
+    const network: Network = state.user?.embeddedWallets === false ? 'TESTNET' : config?.networks.includes(selectedNetwork) ? selectedNetwork : 'TESTNET';
+    const address = state.user ? ownAddress(state.user, network, connect.externalWallet) : '';
 
     return (
         <>

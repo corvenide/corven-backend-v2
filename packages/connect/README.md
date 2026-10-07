@@ -17,6 +17,7 @@ connect.subscribe((state) => console.log(state.status, state.user));
 ```
 
 Other methods: `loginWithGoogle(idToken)`, `loginWithPasskey()`,
+`loginWithSigner(cccSigner, { walletName })` (a wallet the user already has),
 `addPasskey()`, `logout()`, `me()`, `getWallets()`,
 `sendStepUpCode()` / `verifyStepUp()` / `stepUpWithPasskey()`,
 `signTransaction()`, `exportPrivateKey()`, `getAccessToken()`,

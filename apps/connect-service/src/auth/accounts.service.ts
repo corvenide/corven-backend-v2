@@ -8,8 +8,11 @@
 //   - known, signed in as someone else -> refused; identities never move
 //     between users silently.
 // Passkeys can only be added by a signed-in user, then used to sign in.
+// People who sign up with their own wallet (JoyID, MetaMask...) sign with
+// that wallet: Corven creates no embedded wallet and holds no keys for them.
 
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
 import {
     generateAuthenticationOptions,
     generateRegistrationOptions,
@@ -28,8 +31,9 @@ import { maskEmail, maskPhone, normalizeEmail, normalizePhone } from './destinat
 import { googleClientIdFor, verifyGoogleIdToken } from './google';
 import { OTP_PROVIDER, type OtpChannel, type OtpProvider } from './otp';
 import { TokensService, type StepUpPurpose } from './tokens.service';
+import { normalizeWalletAddress, verifyWalletSignature, walletMessage } from './wallet-signature';
 
-type Kind = 'PHONE' | 'EMAIL' | 'GOOGLE';
+type Kind = 'PHONE' | 'EMAIL' | 'GOOGLE' | 'WALLET';
 
 interface VerifiedIdentity {
     kind: Kind;
@@ -139,6 +143,41 @@ export class AccountsService {
         return this.view(userId);
     }
 
+    // ------------------------------------------------------------- wallets
+
+    /** A message for the wallet to sign. Body: { address } (testnet). */
+    async walletChallenge(ctx: ConnectRequestContext, body: { address?: unknown }) {
+        this.requireMethod(ctx, 'WALLET');
+        this.loginsPerIp.consume(`login:${ctx.ip}`);
+        const address = await normalizeWalletAddress(body.address);
+        const host = hostOf(ctx);
+        const message = walletMessage({ host, appName: ctx.app.name, address, nonce: randomBytes(16).toString('hex'), purpose: 'sign-in' });
+        const challengeToken = this.tokens.challengeToken({ challenge: message, purpose: 'wallet', appId: ctx.app.id, rpId: host, address });
+        return { message, challengeToken };
+    }
+
+    /** Body: { challengeToken, signature: { signature, identity, signType }, walletName? }. With a bearer token: links the wallet. */
+    async walletLogin(ctx: ConnectRequestContext, authorization: unknown, body: { challengeToken?: unknown; signature?: unknown; walletName?: unknown }) {
+        this.requireMethod(ctx, 'WALLET');
+        const challenge = this.tokens.consumeChallenge(body.challengeToken, ctx.app.id, 'wallet');
+        if (challenge.rpId !== hostOf(ctx) || !challenge.address) throw fail(400, 'That sign-in request was for another site.', 'invalid_challenge');
+
+        await verifyWalletSignature(challenge.challenge, challenge.address, body.signature);
+        const walletName = typeof body.walletName === 'string' && body.walletName.trim() ? body.walletName.trim().slice(0, 40) : 'Wallet';
+        return this.signIn(ctx, authorization, { kind: 'WALLET', value: challenge.address, label: walletName });
+    }
+
+    /** A message for one of the user's own wallets to sign, to confirm a sensitive action. */
+    async walletStepUpChallenge(ctx: ConnectRequestContext, userId: string, body: { address?: unknown }) {
+        const address = await normalizeWalletAddress(body.address);
+        const owns = await this.prisma.connectIdentity.findFirst({ where: { userId, kind: 'WALLET', value: address } });
+        if (!owns) throw fail(400, 'That wallet isn\'t linked to this account.', 'wrong_account');
+        const host = hostOf(ctx);
+        const message = walletMessage({ host, appName: ctx.app.name, address, nonce: randomBytes(16).toString('hex'), purpose: 'confirm' });
+        const challengeToken = this.tokens.challengeToken({ challenge: message, purpose: 'wallet-step-up', appId: ctx.app.id, userId, rpId: host, address });
+        return { message, challengeToken };
+    }
+
     // ------------------------------------------------------------- passkeys
 
     async passkeyRegisterOptions(ctx: ConnectRequestContext, userId: string) {
@@ -245,7 +284,7 @@ export class AccountsService {
     async stepUpVerify(
         ctx: ConnectRequestContext,
         userId: string,
-        body: { method?: unknown; purpose?: unknown; code?: unknown; credential?: unknown; response?: any; challengeToken?: unknown },
+        body: { method?: unknown; purpose?: unknown; code?: unknown; credential?: unknown; response?: any; challengeToken?: unknown; signature?: unknown },
     ) {
         const purpose = body.purpose === 'export' ? 'export' : body.purpose === 'sign' ? 'sign' : null;
         if (!purpose) throw fail(400, 'purpose must be sign or export.', 'invalid_purpose');
@@ -264,8 +303,14 @@ export class AccountsService {
             if (challenge.userId !== userId) throw fail(401, 'That passkey request was for someone else.', 'invalid_challenge');
             const passkey = await this.verifyPasskey(ctx, challenge, body.response);
             if (passkey.userId !== userId) throw fail(401, 'Use a passkey of this account.', 'wrong_account');
+        } else if (method === 'WALLET') {
+            const challenge = this.tokens.consumeChallenge(body.challengeToken, ctx.app.id, 'wallet-step-up');
+            if (challenge.userId !== userId || !challenge.address || challenge.rpId !== hostOf(ctx)) {
+                throw fail(401, 'That wallet request was for someone else.', 'invalid_challenge');
+            }
+            await verifyWalletSignature(challenge.challenge, challenge.address, body.signature);
         } else {
-            throw fail(400, 'method must be PHONE, EMAIL, GOOGLE or PASSKEY.', 'invalid_method');
+            throw fail(400, 'method must be PHONE, EMAIL, GOOGLE, PASSKEY or WALLET.', 'invalid_method');
         }
 
         return this.tokens.stepUpToken(userId, ctx.app.id, purpose as StepUpPurpose, method);
@@ -304,7 +349,10 @@ export class AccountsService {
         let userId: string;
         try {
             userId = await this.prisma.$transaction(async (tx) => {
-                const user = await tx.connectUser.create({ data: { appId, displayName: identity.displayName ?? null } });
+                const user = await tx.connectUser.create({
+                    // Wallet sign-ups sign with their own wallet: no embedded wallet.
+                    data: { appId, displayName: identity.displayName ?? null, embeddedWallets: identity.kind !== 'WALLET' },
+                });
                 await tx.connectIdentity.create({
                     data: { appId, userId: user.id, kind: identity.kind, value: identity.value, label: identity.label ?? null },
                 });
@@ -344,11 +392,15 @@ export class AccountsService {
             id: user.id,
             appId: user.appId,
             displayName: user.displayName,
+            /** False when the user signs with their own wallet (no Corven-held keys). */
+            embeddedWallets: user.embeddedWallets,
             identities: user.identities.map((i) => ({
                 id: i.id,
                 kind: i.kind,
                 // Google ids mean nothing to people; show the email instead.
                 value: i.kind === 'GOOGLE' ? i.label : i.value,
+                /** The wallet's name, for wallets. */
+                label: i.kind === 'WALLET' ? i.label : null,
                 verifiedAt: i.verifiedAt,
             })),
             passkeys: user.passkeys.map((p) => ({ id: p.id, name: p.name, rpId: p.rpId, createdAt: p.createdAt, lastUsedAt: p.lastUsedAt })),
@@ -425,6 +477,11 @@ export class AccountsService {
     private requireMethod(ctx: ConnectRequestContext, method: LoginMethod) {
         if (!ctx.app.loginMethods.includes(method)) throw fail(403, `${method.toLowerCase()} sign-in is turned off for this app.`, 'method_disabled');
     }
+}
+
+/** The page's host (or "server" for non-browser calls), shown in wallet messages. */
+function hostOf(ctx: ConnectRequestContext): string {
+    return ctx.origin ? new URL(ctx.origin).host : 'server';
 }
 
 /** Passkeys are bound to the domain of the page that uses them. */

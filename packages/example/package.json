@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckb-ccc/ccc": "^1.3.6",
     "@ckb-ccc/core": "^1.18.0",
     "@corven/connect-react": "0.1.0",
     "react": "^19.0.0",

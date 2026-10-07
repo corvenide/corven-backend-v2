@@ -5,12 +5,13 @@ import { shortAddress, type Network } from '@corven/connect';
 
 import * as Icon from './icons';
 import { useConnectContext, useCorvenConnect } from './provider';
+import { ownAddress } from './screens/wallet';
 import { cssVars } from './theme';
 
 export function ConnectButton({ label = 'Sign in', network = 'TESTNET', className }: { label?: string; network?: Network; className?: string }) {
-    const { tokens } = useConnectContext();
+    const { tokens, connect } = useConnectContext();
     const { ready, authenticated, user, login, openWallet } = useCorvenConnect();
-    const address = user?.wallets.find((w) => w.network === network)?.address;
+    const address = user ? ownAddress(user, network, connect.externalWallet) || undefined : undefined;
 
     const style = {
         ...(cssVars(tokens) as React.CSSProperties),

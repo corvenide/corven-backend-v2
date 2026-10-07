@@ -1,7 +1,8 @@
 // apps/connect-service/src/wallets/wallets.service.ts
 //
 // One CKB testnet and one mainnet wallet per Connect user, created on first
-// sign-in. Keys are sealed at rest (vault.ts) and only decrypted to sign.
+// sign-in, except for people who signed up with their own wallet (they sign
+// with it). Keys are sealed at rest (vault.ts) and only decrypted to sign.
 //
 // Signing rules:
 //   - The transaction must spend at least one cell of the user's wallet.
@@ -88,10 +89,13 @@ export class WalletsService {
         return this.scriptsCache;
     }
 
-    /** Creates any missing wallets for a user. */
+    /** Creates any missing wallets for a user (none for people who use their own wallet). */
     async ensureWallets(userId: string): Promise<void> {
         const vault = this.vault();
         if (!vault) return;
+
+        const user = await this.prisma.connectUser.findUnique({ where: { id: userId }, select: { embeddedWallets: true } });
+        if (!user?.embeddedWallets) return;
 
         const have = new Set(
             (await this.prisma.connectWallet.findMany({ where: { userId }, select: { network: true } })).map((w) => w.network),
@@ -274,7 +278,7 @@ export class WalletsService {
         if (!this.enabled) throw fail(503, 'Wallets are not set up on this server.', 'wallets_disabled');
         await this.ensureWallets(userId);
         const wallet = await this.prisma.connectWallet.findUnique({ where: { userId_network: { userId, network } } });
-        if (!wallet) throw fail(404, 'Wallet not found.', 'wallet_not_found');
+        if (!wallet) throw fail(404, 'This account signs with its own wallet, not a Corven wallet.', 'wallet_not_found');
         return wallet as WalletRow;
     }
 

@@ -32,13 +32,23 @@ declare module './client' {
         /**
          * A ccc signer for the signed-in user's wallet. Pass your own ccc client
          * (e.g. a devnet or custom RPC); defaults to the public testnet/mainnet.
+         *
+         * For people who signed in with their own wallet this is that wallet's
+         * CCC signer (testnet), and their wallet shows its own approval prompt.
          */
-        getSigner(network?: Network, client?: ccc.Client): CorvenConnectSigner;
+        getSigner(network?: Network, client?: ccc.Client): ccc.Signer;
     }
 }
 
-CorvenConnect.prototype.getSigner = function getSigner(this: CorvenConnect, network: Network = 'TESTNET', client?: ccc.Client) {
-    const wallet = this.user?.wallets.find((w) => w.network === network);
+CorvenConnect.prototype.getSigner = function getSigner(this: CorvenConnect, network: Network = 'TESTNET', client?: ccc.Client): ccc.Signer {
+    const user = this.user;
+    if (user && !user.embeddedWallets) {
+        const external = this.externalWallet;
+        if (!external) throw new CorvenConnectError('Reconnect your wallet to sign.', 0, 'wallet_disconnected');
+        if (network !== 'TESTNET') throw new CorvenConnectError('Your own wallet is connected on testnet. Switch networks in your wallet app.', 0, 'unsupported_network');
+        return external.signer as unknown as ccc.Signer;
+    }
+    const wallet = user?.wallets.find((w) => w.network === network);
     if (!wallet) throw new CorvenConnectError('Sign in first.', 401, 'unauthorized');
     const ckb = client ?? (network === 'MAINNET' ? new ccc.ClientPublicMainnet() : new ccc.ClientPublicTestnet());
     return new CorvenConnectSigner(ckb, wallet.publicKey, this, network);

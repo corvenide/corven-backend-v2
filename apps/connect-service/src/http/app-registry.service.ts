@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '@app/prisma';
 
-export const LOGIN_METHODS = ['PHONE', 'EMAIL', 'GOOGLE', 'PASSKEY'] as const;
+export const LOGIN_METHODS = ['PHONE', 'EMAIL', 'GOOGLE', 'PASSKEY', 'WALLET'] as const;
 export type LoginMethod = (typeof LOGIN_METHODS)[number];
 
 export interface ConnectAppInfo {
