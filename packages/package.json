@@ -1,0 +1,15 @@
+{
+  "name": "corven-connect-sdk",
+  "private": true,
+  "description": "Corven Connect SDK packages. Separate npm workspace from the backend (pnpm) so the backend image and lockfile are unaffected.",
+  "workspaces": [
+    "connect",
+    "connect-react",
+    "example"
+  ],
+  "scripts": {
+    "build": "npm run build -w @corven/connect && npm run build -w @corven/connect-react",
+    "typecheck": "npm run typecheck -w @corven/connect && npm run typecheck -w @corven/connect-react",
+    "example": "npm run dev -w corven-connect-example"
+  }
+}

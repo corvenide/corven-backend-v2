@@ -570,3 +570,175 @@ model WalletTransfer {
 
     @@index([userId, network, createdAt])
 }
+
+// ===========================================================================
+// Corven Connect: embedded CKB wallets with social and phone sign-in for
+// other apps (the SDK in packages/connect). Separate from Corven IDE users:
+// its own users, sessions, signing secret (CONNECT_JWT_SECRET) and wallet
+// master key (CONNECT_WALLET_ENCRYPTION_KEY). Served by apps/connect-service.
+// ===========================================================================
+
+enum ConnectIdentityKind {
+    PHONE
+    EMAIL
+    GOOGLE
+}
+
+/// An app that embeds Corven Connect. Its id is the public app id the SDK
+/// sends; only pages on `allowedOrigins` may use it.
+model ConnectApp {
+    id   String @id
+    name String
+
+    /// Exact origins, e.g. https://myapp.xyz, http://localhost:5173.
+    allowedOrigins String[]
+    /// Google OAuth client id whose authorized origins include the app's pages.
+    googleClientId String?
+    /// Sign-in methods offered: PHONE, EMAIL, GOOGLE, PASSKEY.
+    loginMethods   String[] @default(["PHONE", "EMAIL", "GOOGLE", "PASSKEY"])
+    /// Mainnet wallets can sign only when this is on.
+    mainnetEnabled Boolean  @default(false)
+
+    logoUrl String?
+
+    users ConnectUser[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+/// A person signed in to one Connect app. Users of different apps are
+/// different rows, so one app can never act for another app's users.
+model ConnectUser {
+    id String @id @default(uuid())
+
+    appId String
+    app   ConnectApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+    displayName String?
+
+    identities ConnectIdentity[]
+    passkeys   ConnectPasskey[]
+    sessions   ConnectSession[]
+    wallets    ConnectWallet[]
+    signatures ConnectSignature[]
+
+    lastLoginAt DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([appId])
+}
+
+/// A verified way to sign in: phone number (E.164), email (lowercase) or
+/// Google account id (`sub`). Unique per app.
+model ConnectIdentity {
+    id String @id @default(uuid())
+
+    appId  String
+    userId String
+    user   ConnectUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    kind  ConnectIdentityKind
+    value String
+    /// Email shown for a Google identity.
+    label String?
+
+    verifiedAt DateTime @default(now())
+    createdAt  DateTime @default(now())
+
+    @@unique([appId, kind, value])
+    @@index([userId])
+}
+
+/// A WebAuthn credential. `rpId` is the app's domain it was created on.
+model ConnectPasskey {
+    id String @id @default(uuid())
+
+    userId String
+    user   ConnectUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    credentialId String   @unique
+    /// COSE public key, base64url.
+    publicKey    String
+    counter      Int      @default(0)
+    transports   String[]
+    rpId         String
+    name         String?
+
+    lastUsedAt DateTime?
+    createdAt  DateTime  @default(now())
+
+    @@index([userId])
+}
+
+/// Refresh tokens (SHA-256 hashed), rotated on every use; reusing a revoked
+/// one revokes its whole family.
+model ConnectSession {
+    id String @id @default(uuid())
+
+    userId String
+    user   ConnectUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    tokenHash String @unique
+    familyId  String
+
+    expiresAt    DateTime
+    revokedAt    DateTime?
+    replacedById String?
+
+    userAgent String?
+    ipAddress String?
+    origin    String?
+
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([familyId])
+}
+
+/// One CKB wallet per user and network. Private key sealed like the IDE's
+/// wallets but with its own master key (CONNECT_WALLET_ENCRYPTION_KEY).
+model ConnectWallet {
+    id String @id @default(uuid())
+
+    userId String
+    user   ConnectUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    network   WalletNetwork
+    address   String
+    publicKey String
+
+    encryptedKey   String
+    wrappedDataKey String
+    keyVersion     Int    @default(1)
+
+    exportedAt DateTime?
+    createdAt  DateTime  @default(now())
+
+    signatures ConnectSignature[]
+
+    @@unique([userId, network])
+    @@index([address])
+}
+
+/// Every transaction a Connect wallet signed: audit trail and the mainnet
+/// daily limit. `outflow` is CKB that leaves the wallet, in shannons.
+model ConnectSignature {
+    id String @id @default(uuid())
+
+    userId String
+    user   ConnectUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    walletId String
+    wallet   ConnectWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+    network WalletNetwork
+    txHash  String
+    outflow String
+    origin  String?
+
+    createdAt DateTime @default(now())
+
+    @@index([userId, network, createdAt])
+}

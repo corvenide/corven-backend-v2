@@ -1,0 +1,34 @@
+{
+  "name": "@corven/connect",
+  "version": "0.1.0",
+  "description": "Corven Connect: phone, email, Google and passkey sign-in with an embedded CKB wallet.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0"
+  },
+  "peerDependencies": {
+    "@ckb-ccc/core": ">=1.18.0"
+  },
+  "devDependencies": {
+    "@ckb-ccc/core": "^1.18.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  }
+}

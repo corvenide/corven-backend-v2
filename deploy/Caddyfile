@@ -8,6 +8,11 @@
 		reverse_proxy terminal-service:8004
 	}
 
+	# Corven Connect API (its own service, same domain).
+	handle /connect/* {
+		reverse_proxy connect-service:8007
+	}
+
 	handle {
 		reverse_proxy api-gateway:8000
 	}

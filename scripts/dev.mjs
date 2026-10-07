@@ -3,9 +3,10 @@
 //
 // Runs every backend service in one terminal.
 //
-//   pnpm dev                      all services except cell-service
-//   pnpm dev --all                everything, including cell-service
+//   pnpm dev                      all services except cell- and connect-service
+//   pnpm dev --all                everything, including cell- and connect-service
 //   pnpm dev auth api-gateway     only the services you name
+//   pnpm dev connect              only Corven Connect (needs CONNECT_* in .env)
 //
 // One `tsc --watch` compiles the whole monorepo into dist-dev/. Each
 // service runs as a plain Node process from that output and restarts only
@@ -35,6 +36,7 @@ const SERVICES = [
     { name: 'terminal-service', short: 'terminal', color: 36, portEnv: 'TERMINAL_SERVICE_PORT', port: 8004 },
     { name: 'file-service', short: 'file', color: 32, portEnv: 'FILE_SERVICE_PORT', port: 8005 },
     { name: 'cell-service', short: 'cell', color: 90, portEnv: 'CELL_SERVICE_PORT', port: 8006, optional: true },
+    { name: 'connect-service', short: 'connect', color: 95, portEnv: 'CONNECT_SERVICE_PORT', port: 8007, optional: true },
     // Last, so its TCP clients find the others already listening.
     { name: 'api-gateway', short: 'gateway', color: 97, portEnv: 'API_GATEWAY_PORT', port: 8000 },
 ];

@@ -38,6 +38,15 @@
         "tsConfigPath": "apps/cell-service/tsconfig.app.json"
       }
     },
+    "connect-service": {
+      "type": "application",
+      "root": "apps/connect-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/connect-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/connect-service/tsconfig.app.json"
+      }
+    },
     "file-service": {
       "type": "application",
       "root": "apps/file-service",

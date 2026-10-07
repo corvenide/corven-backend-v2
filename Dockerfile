@@ -1,6 +1,6 @@
 # One image for every backend service. Pick the service at run time with
 # SERVICE (api-gateway, auth-service, workspace-service, runtime-service,
-# file-service or terminal-service).
+# file-service, terminal-service or connect-service).
 
 FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS base
 
@@ -19,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN for app in api-gateway auth-service workspace-service runtime-service file-service terminal-service; do \
+RUN for app in api-gateway auth-service workspace-service runtime-service file-service terminal-service connect-service; do \
         pnpm nest build "$app" || exit 1; \
     done
 

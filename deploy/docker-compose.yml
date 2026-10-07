@@ -1,5 +1,6 @@
 # Production stack for one Lightsail instance: Caddy (HTTPS for the API and
-# the frontend), PostgreSQL, and the six backend services.
+# the frontend), PostgreSQL, the six Corven IDE services and the Corven
+# Connect service.
 #
 # Run from the repository root:
 #   docker compose -f deploy/docker-compose.yml up -d
@@ -93,6 +94,14 @@ services:
     environment:
       SERVICE: api-gateway
 
+  # Corven Connect (sign-in + embedded wallets for other apps). Separate from
+  # the IDE services; Caddy routes https://API_DOMAIN/connect/* here.
+  connect-service:
+    <<: *backend
+    environment:
+      SERVICE: connect-service
+      CONNECT_SERVICE_HOST: 0.0.0.0
+
   caddy:
     image: public.ecr.aws/docker/library/caddy:2-alpine
     restart: unless-stopped
@@ -111,6 +120,7 @@ services:
     depends_on:
       - api-gateway
       - terminal-service
+      - connect-service
     logging: *logging
 
 volumes:
