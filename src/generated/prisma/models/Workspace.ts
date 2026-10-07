@@ -31,6 +31,7 @@ export type WorkspaceMinAggregateOutputType = {
   hostId: string | null
   userId: string | null
   templateId: string | null
+  temporary: boolean | null
   runtimeNetwork: string | null
   runtimeVolume: string | null
   ckbDataVolume: string | null
@@ -51,6 +52,7 @@ export type WorkspaceMaxAggregateOutputType = {
   hostId: string | null
   userId: string | null
   templateId: string | null
+  temporary: boolean | null
   runtimeNetwork: string | null
   runtimeVolume: string | null
   ckbDataVolume: string | null
@@ -71,6 +73,7 @@ export type WorkspaceCountAggregateOutputType = {
   hostId: number
   userId: number
   templateId: number
+  temporary: number
   runtimeNetwork: number
   runtimeVolume: number
   ckbDataVolume: number
@@ -93,6 +96,7 @@ export type WorkspaceMinAggregateInputType = {
   hostId?: true
   userId?: true
   templateId?: true
+  temporary?: true
   runtimeNetwork?: true
   runtimeVolume?: true
   ckbDataVolume?: true
@@ -113,6 +117,7 @@ export type WorkspaceMaxAggregateInputType = {
   hostId?: true
   userId?: true
   templateId?: true
+  temporary?: true
   runtimeNetwork?: true
   runtimeVolume?: true
   ckbDataVolume?: true
@@ -133,6 +138,7 @@ export type WorkspaceCountAggregateInputType = {
   hostId?: true
   userId?: true
   templateId?: true
+  temporary?: true
   runtimeNetwork?: true
   runtimeVolume?: true
   ckbDataVolume?: true
@@ -226,6 +232,7 @@ export type WorkspaceGroupByOutputType = {
   hostId: string | null
   userId: string
   templateId: string | null
+  temporary: boolean
   runtimeNetwork: string | null
   runtimeVolume: string | null
   ckbDataVolume: string | null
@@ -267,6 +274,7 @@ export type WorkspaceWhereInput = {
   hostId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   userId?: Prisma.StringFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  temporary?: Prisma.BoolFilter<"Workspace"> | boolean
   runtimeNetwork?: Prisma.StringNullableFilter<"Workspace"> | string | null
   runtimeVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
   ckbDataVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
@@ -292,6 +300,7 @@ export type WorkspaceOrderByWithRelationInput = {
   hostId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporary?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrderInput | Prisma.SortOrder
   runtimeVolume?: Prisma.SortOrderInput | Prisma.SortOrder
   ckbDataVolume?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -320,6 +329,7 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   hostId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   userId?: Prisma.StringFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  temporary?: Prisma.BoolFilter<"Workspace"> | boolean
   runtimeNetwork?: Prisma.StringNullableFilter<"Workspace"> | string | null
   runtimeVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
   ckbDataVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
@@ -345,6 +355,7 @@ export type WorkspaceOrderByWithAggregationInput = {
   hostId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporary?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrderInput | Prisma.SortOrder
   runtimeVolume?: Prisma.SortOrderInput | Prisma.SortOrder
   ckbDataVolume?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -371,6 +382,7 @@ export type WorkspaceScalarWhereWithAggregatesInput = {
   hostId?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   userId?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
+  temporary?: Prisma.BoolWithAggregatesFilter<"Workspace"> | boolean
   runtimeNetwork?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   runtimeVolume?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   ckbDataVolume?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
@@ -389,6 +401,7 @@ export type WorkspaceCreateInput = {
   name: string
   status?: $Enums.WorkspaceStatus
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -414,6 +427,7 @@ export type WorkspaceUncheckedCreateInput = {
   hostId?: string | null
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -435,6 +449,7 @@ export type WorkspaceUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -460,6 +475,7 @@ export type WorkspaceUncheckedUpdateInput = {
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -483,6 +499,7 @@ export type WorkspaceCreateManyInput = {
   hostId?: string | null
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -501,6 +518,7 @@ export type WorkspaceUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -521,6 +539,7 @@ export type WorkspaceUncheckedUpdateManyInput = {
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -551,6 +570,7 @@ export type WorkspaceCountOrderByAggregateInput = {
   hostId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrder
+  temporary?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrder
   runtimeVolume?: Prisma.SortOrder
   ckbDataVolume?: Prisma.SortOrder
@@ -571,6 +591,7 @@ export type WorkspaceMaxOrderByAggregateInput = {
   hostId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrder
+  temporary?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrder
   runtimeVolume?: Prisma.SortOrder
   ckbDataVolume?: Prisma.SortOrder
@@ -591,6 +612,7 @@ export type WorkspaceMinOrderByAggregateInput = {
   hostId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   templateId?: Prisma.SortOrder
+  temporary?: Prisma.SortOrder
   runtimeNetwork?: Prisma.SortOrder
   runtimeVolume?: Prisma.SortOrder
   ckbDataVolume?: Prisma.SortOrder
@@ -744,6 +766,7 @@ export type WorkspaceCreateWithoutUserInput = {
   name: string
   status?: $Enums.WorkspaceStatus
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -767,6 +790,7 @@ export type WorkspaceUncheckedCreateWithoutUserInput = {
   status?: $Enums.WorkspaceStatus
   hostId?: string | null
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -819,6 +843,7 @@ export type WorkspaceScalarWhereInput = {
   hostId?: Prisma.StringNullableFilter<"Workspace"> | string | null
   userId?: Prisma.StringFilter<"Workspace"> | string
   templateId?: Prisma.StringNullableFilter<"Workspace"> | string | null
+  temporary?: Prisma.BoolFilter<"Workspace"> | boolean
   runtimeNetwork?: Prisma.StringNullableFilter<"Workspace"> | string | null
   runtimeVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
   ckbDataVolume?: Prisma.StringNullableFilter<"Workspace"> | string | null
@@ -837,6 +862,7 @@ export type WorkspaceCreateWithoutHostInput = {
   name: string
   status?: $Enums.WorkspaceStatus
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -860,6 +886,7 @@ export type WorkspaceUncheckedCreateWithoutHostInput = {
   status?: $Enums.WorkspaceStatus
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -907,6 +934,7 @@ export type WorkspaceCreateWithoutFilesInput = {
   name: string
   status?: $Enums.WorkspaceStatus
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -931,6 +959,7 @@ export type WorkspaceUncheckedCreateWithoutFilesInput = {
   hostId?: string | null
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -967,6 +996,7 @@ export type WorkspaceUpdateWithoutFilesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -991,6 +1021,7 @@ export type WorkspaceUncheckedUpdateWithoutFilesInput = {
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1011,6 +1042,7 @@ export type WorkspaceCreateWithoutDeploymentsInput = {
   name: string
   status?: $Enums.WorkspaceStatus
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -1035,6 +1067,7 @@ export type WorkspaceUncheckedCreateWithoutDeploymentsInput = {
   hostId?: string | null
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -1071,6 +1104,7 @@ export type WorkspaceUpdateWithoutDeploymentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1095,6 +1129,7 @@ export type WorkspaceUncheckedUpdateWithoutDeploymentsInput = {
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1115,6 +1150,7 @@ export type WorkspaceCreateWithoutContainersInput = {
   name: string
   status?: $Enums.WorkspaceStatus
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -1139,6 +1175,7 @@ export type WorkspaceUncheckedCreateWithoutContainersInput = {
   hostId?: string | null
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -1175,6 +1212,7 @@ export type WorkspaceUpdateWithoutContainersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1199,6 +1237,7 @@ export type WorkspaceUncheckedUpdateWithoutContainersInput = {
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1220,6 +1259,7 @@ export type WorkspaceCreateManyUserInput = {
   status?: $Enums.WorkspaceStatus
   hostId?: string | null
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -1238,6 +1278,7 @@ export type WorkspaceUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1261,6 +1302,7 @@ export type WorkspaceUncheckedUpdateWithoutUserInput = {
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1283,6 +1325,7 @@ export type WorkspaceUncheckedUpdateManyWithoutUserInput = {
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   hostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1302,6 +1345,7 @@ export type WorkspaceCreateManyHostInput = {
   status?: $Enums.WorkspaceStatus
   userId: string
   templateId?: string | null
+  temporary?: boolean
   runtimeNetwork?: string | null
   runtimeVolume?: string | null
   ckbDataVolume?: string | null
@@ -1320,6 +1364,7 @@ export type WorkspaceUpdateWithoutHostInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1343,6 +1388,7 @@ export type WorkspaceUncheckedUpdateWithoutHostInput = {
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1365,6 +1411,7 @@ export type WorkspaceUncheckedUpdateManyWithoutHostInput = {
   status?: Prisma.EnumWorkspaceStatusFieldUpdateOperationsInput | $Enums.WorkspaceStatus
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   runtimeNetwork?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ckbDataVolume?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1434,6 +1481,7 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   hostId?: boolean
   userId?: boolean
   templateId?: boolean
+  temporary?: boolean
   runtimeNetwork?: boolean
   runtimeVolume?: boolean
   ckbDataVolume?: boolean
@@ -1460,6 +1508,7 @@ export type WorkspaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   hostId?: boolean
   userId?: boolean
   templateId?: boolean
+  temporary?: boolean
   runtimeNetwork?: boolean
   runtimeVolume?: boolean
   ckbDataVolume?: boolean
@@ -1482,6 +1531,7 @@ export type WorkspaceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   hostId?: boolean
   userId?: boolean
   templateId?: boolean
+  temporary?: boolean
   runtimeNetwork?: boolean
   runtimeVolume?: boolean
   ckbDataVolume?: boolean
@@ -1504,6 +1554,7 @@ export type WorkspaceSelectScalar = {
   hostId?: boolean
   userId?: boolean
   templateId?: boolean
+  temporary?: boolean
   runtimeNetwork?: boolean
   runtimeVolume?: boolean
   ckbDataVolume?: boolean
@@ -1517,7 +1568,7 @@ export type WorkspaceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "status" | "hostId" | "userId" | "templateId" | "runtimeNetwork" | "runtimeVolume" | "ckbDataVolume" | "lastStartedAt" | "lastStoppedAt" | "provisionStage" | "provisionError" | "lastActivityAt" | "filesSnapshotAt" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
+export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "status" | "hostId" | "userId" | "templateId" | "temporary" | "runtimeNetwork" | "runtimeVolume" | "ckbDataVolume" | "lastStartedAt" | "lastStoppedAt" | "provisionStage" | "provisionError" | "lastActivityAt" | "filesSnapshotAt" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
 export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   host?: boolean | Prisma.Workspace$hostArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1556,6 +1607,11 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     hostId: string | null
     userId: string
     templateId: string | null
+    /**
+     * Temporary workspaces are deleted 24 hours after their last use.
+     * Guests can only make temporary ones.
+     */
+    temporary: boolean
     runtimeNetwork: string | null
     runtimeVolume: string | null
     ckbDataVolume: string | null
@@ -2015,6 +2071,7 @@ export interface WorkspaceFieldRefs {
   readonly hostId: Prisma.FieldRef<"Workspace", 'String'>
   readonly userId: Prisma.FieldRef<"Workspace", 'String'>
   readonly templateId: Prisma.FieldRef<"Workspace", 'String'>
+  readonly temporary: Prisma.FieldRef<"Workspace", 'Boolean'>
   readonly runtimeNetwork: Prisma.FieldRef<"Workspace", 'String'>
   readonly runtimeVolume: Prisma.FieldRef<"Workspace", 'String'>
   readonly ckbDataVolume: Prisma.FieldRef<"Workspace", 'String'>

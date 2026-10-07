@@ -72,7 +72,8 @@ export type DeployNetwork = (typeof DeployNetwork)[keyof typeof DeployNetwork]
 export const AuthProvider = {
   EMAIL: 'EMAIL',
   CKB_WALLET: 'CKB_WALLET',
-  GOOGLE: 'GOOGLE'
+  GOOGLE: 'GOOGLE',
+  GUEST: 'GUEST'
 } as const
 
 export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]

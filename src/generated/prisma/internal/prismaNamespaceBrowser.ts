@@ -206,6 +206,7 @@ export const WorkspaceScalarFieldEnum = {
   hostId: 'hostId',
   userId: 'userId',
   templateId: 'templateId',
+  temporary: 'temporary',
   runtimeNetwork: 'runtimeNetwork',
   runtimeVolume: 'runtimeVolume',
   ckbDataVolume: 'ckbDataVolume',
