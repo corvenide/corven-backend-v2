@@ -79,7 +79,7 @@ export class AccountsService {
 
         this.sendPerIp.consume(`send:${ctx.app.id}:${ctx.ip}`);
         this.sendPerDestination.consume(`send:${ctx.app.id}:${destination}`);
-        await this.otp.send(destination, channel);
+        await this.otp.send(destination, channel, { appName: ctx.app.name, purpose: 'sign-in' });
 
         return {
             sent: true,
@@ -238,7 +238,7 @@ export class AccountsService {
         const channel: OtpChannel = identity.kind === 'EMAIL' ? 'email' : PHONE_CHANNELS.includes(body.channel as OtpChannel) ? (body.channel as OtpChannel) : 'sms';
 
         this.sendPerDestination.consume(`send:${ctx.app.id}:${identity.value}`);
-        await this.otp.send(identity.value, channel);
+        await this.otp.send(identity.value, channel, { appName: ctx.app.name, purpose: 'confirm' });
         return { sent: true, channel, to: identity.kind === 'EMAIL' ? maskEmail(identity.value) : maskPhone(identity.value) };
     }
 

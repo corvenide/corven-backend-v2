@@ -2,24 +2,37 @@
 //
 // One-time codes for phone (SMS, WhatsApp, voice call) and email.
 //
-// twilio   Twilio Verify generates, sends and checks the codes
-//          (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID).
-//          Email codes need an email integration on the Verify service
-//          (Twilio console > Verify > Services > Email).
-// console  Development only: codes are generated here and printed to the
-//          service log. Refused in production unless
-//          CONNECT_ALLOW_CONSOLE_OTP=1.
+// Phone codes (CONNECT_OTP_PROVIDER):
+//   twilio   Twilio Verify generates, sends and checks the codes
+//            (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID).
+//   console  Development only: codes are printed to the service log.
+//            Refused in production unless CONNECT_ALLOW_CONSOLE_OTP=1.
+//
+// Email codes (CONNECT_EMAIL_PROVIDER, default: smtp when SMTP_HOST is set,
+// otherwise the same as phone):
+//   smtp     Codes generated here and emailed through Corven's SMTP mailer
+//            (libs/mailer: SMTP_HOST, SMTP_USER, SMTP_PASS, MAIL_FROM).
+//   twilio   Twilio Verify's email channel (needs a SendGrid integration).
+//   console  As above.
 
 import { Logger } from '@nestjs/common';
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
+
+import { codeEmail, mailerFromEnv, type Mailer } from '@app/mailer';
 
 import { fail } from '../http/errors';
 
 export type OtpChannel = 'sms' | 'whatsapp' | 'call' | 'email';
 
+export interface OtpContext {
+    /** The app the person is signing in to, for the message text. */
+    appName?: string;
+    purpose?: 'sign-in' | 'confirm';
+}
+
 export interface OtpProvider {
     readonly name: string;
-    send(to: string, channel: OtpChannel): Promise<void>;
+    send(to: string, channel: OtpChannel, context?: OtpContext): Promise<void>;
     /** True when the code is right. Throws only for provider failures. */
     check(to: string, code: string): Promise<boolean>;
 }
@@ -75,25 +88,21 @@ export class TwilioVerifyProvider implements OtpProvider {
     }
 }
 
-const CODE_TTL_MS = 10 * 60 * 1000;
+const CODE_TTL_MINUTES = 10;
 const MAX_TRIES = 5;
 
-export class ConsoleOtpProvider implements OtpProvider {
-    readonly name = 'console';
-    private readonly logger = new Logger('ConnectOtp');
+/** Codes generated and checked here (hashed, in memory, 10 minutes, 5 tries). */
+class LocalCodes {
     private readonly codes = new Map<string, { hash: Buffer; expiresAt: number; tries: number }>();
 
-    /** The last code sent to each destination, for tests. */
-    readonly lastCode = new Map<string, string>();
-
-    async send(to: string, channel: OtpChannel): Promise<void> {
+    issue(to: string): string {
         const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
-        this.codes.set(to, { hash: digest(code), expiresAt: Date.now() + CODE_TTL_MS, tries: 0 });
-        this.lastCode.set(to, code);
-        this.logger.log(`[dev] ${channel} code for ${to}: ${code}`);
+        this.codes.set(to, { hash: digest(code), expiresAt: Date.now() + CODE_TTL_MINUTES * 60_000, tries: 0 });
+        if (this.codes.size > 10_000) this.sweep();
+        return code;
     }
 
-    async check(to: string, code: string): Promise<boolean> {
+    check(to: string, code: string): boolean {
         const entry = this.codes.get(to);
         if (!entry || entry.expiresAt < Date.now()) return false;
         entry.tries += 1;
@@ -105,17 +114,84 @@ export class ConsoleOtpProvider implements OtpProvider {
         if (ok) this.codes.delete(to);
         return ok;
     }
+
+    private sweep(): void {
+        const now = Date.now();
+        for (const [to, entry] of this.codes) if (entry.expiresAt < now) this.codes.delete(to);
+    }
+}
+
+export class ConsoleOtpProvider implements OtpProvider {
+    readonly name = 'console';
+    private readonly logger = new Logger('ConnectOtp');
+    private readonly codes = new LocalCodes();
+
+    /** The last code sent to each destination, for tests. */
+    readonly lastCode = new Map<string, string>();
+
+    async send(to: string, channel: OtpChannel): Promise<void> {
+        const code = this.codes.issue(to);
+        this.lastCode.set(to, code);
+        this.logger.log(`[dev] ${channel} code for ${to}: ${code}`);
+    }
+
+    async check(to: string, code: string): Promise<boolean> {
+        return this.codes.check(to, code);
+    }
+}
+
+/** Email codes sent through Corven's SMTP mailer. */
+export class SmtpEmailOtpProvider implements OtpProvider {
+    readonly name = 'smtp';
+    private readonly logger = new Logger('ConnectEmail');
+    private readonly codes = new LocalCodes();
+
+    constructor(private readonly mailer: Mailer) { }
+
+    async send(to: string, _channel: OtpChannel, context: OtpContext = {}): Promise<void> {
+        const code = this.codes.issue(to);
+        const appName = context.appName || 'Corven';
+        const mail = codeEmail({ code, appName, purpose: context.purpose ?? 'sign-in', minutesValid: CODE_TTL_MINUTES });
+        try {
+            await this.mailer.send({ to, fromName: appName, ...mail });
+        } catch (error) {
+            this.logger.warn(`Could not email a code to ${to}: ${error instanceof Error ? error.message : error}`);
+            throw fail(502, 'We couldn\'t send the email. Try again in a moment.', 'otp_send_failed');
+        }
+    }
+
+    async check(to: string, code: string): Promise<boolean> {
+        return this.codes.check(to, code);
+    }
+}
+
+/** Phone codes to one provider, email codes to another. */
+export class RoutingOtpProvider implements OtpProvider {
+    readonly name: string;
+
+    constructor(
+        private readonly phone: OtpProvider,
+        private readonly email: OtpProvider,
+    ) {
+        this.name = `phone:${phone.name}, email:${email.name}`;
+    }
+
+    send(to: string, channel: OtpChannel, context?: OtpContext): Promise<void> {
+        return (channel === 'email' ? this.email : this.phone).send(to, channel, context);
+    }
+
+    check(to: string, code: string): Promise<boolean> {
+        return (to.includes('@') ? this.email : this.phone).check(to, code);
+    }
 }
 
 const digest = (code: string) => createHash('sha256').update(code).digest();
 
-export function otpProviderFromEnv(env = process.env): OtpProvider {
-    const kind = (env.CONNECT_OTP_PROVIDER ?? (env.TWILIO_VERIFY_SERVICE_SID ? 'twilio' : 'console')).toLowerCase();
-
+function providerOfKind(kind: string, env: NodeJS.ProcessEnv): OtpProvider {
     if (kind === 'twilio') {
         const { TWILIO_ACCOUNT_SID: sid, TWILIO_AUTH_TOKEN: token, TWILIO_VERIFY_SERVICE_SID: service } = env;
         if (!sid || !token || !service) {
-            throw new Error('CONNECT_OTP_PROVIDER=twilio needs TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_VERIFY_SERVICE_SID');
+            throw new Error('Twilio codes need TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_VERIFY_SERVICE_SID');
         }
         return new TwilioVerifyProvider(sid, token, service);
     }
@@ -127,7 +203,23 @@ export function otpProviderFromEnv(env = process.env): OtpProvider {
         return new ConsoleOtpProvider();
     }
 
-    throw new Error(`Unknown CONNECT_OTP_PROVIDER "${kind}" (use twilio or console)`);
+    if (kind === 'smtp') {
+        const mailer = mailerFromEnv(env);
+        if (!mailer) throw new Error('CONNECT_EMAIL_PROVIDER=smtp needs SMTP_HOST (and SMTP_USER, SMTP_PASS, MAIL_FROM)');
+        return new SmtpEmailOtpProvider(mailer);
+    }
+
+    throw new Error(`Unknown code provider "${kind}" (use twilio, smtp or console)`);
+}
+
+export function otpProviderFromEnv(env: NodeJS.ProcessEnv = process.env): OtpProvider {
+    const phoneKind = (env.CONNECT_OTP_PROVIDER ?? (env.TWILIO_VERIFY_SERVICE_SID ? 'twilio' : 'console')).toLowerCase();
+    if (phoneKind === 'smtp') throw new Error('CONNECT_OTP_PROVIDER is for phone codes: use twilio or console');
+    const phone = providerOfKind(phoneKind, env);
+
+    const emailKind = (env.CONNECT_EMAIL_PROVIDER ?? (env.SMTP_HOST ? 'smtp' : phoneKind)).toLowerCase();
+    if (emailKind === phoneKind) return phone;
+    return new RoutingOtpProvider(phone, providerOfKind(emailKind, env));
 }
 
 export const OTP_PROVIDER = Symbol('OTP_PROVIDER');

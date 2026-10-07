@@ -27,6 +27,12 @@
       ],
       "@app/prisma/*": [
         "libs/prisma/src/*"
+      ],
+      "@app/mailer": [
+        "libs/mailer/src"
+      ],
+      "@app/mailer/*": [
+        "libs/mailer/src/*"
       ]
     }
   }

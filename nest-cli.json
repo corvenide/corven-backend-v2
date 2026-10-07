@@ -56,6 +56,15 @@
         "tsConfigPath": "apps/file-service/tsconfig.app.json"
       }
     },
+    "mailer": {
+      "type": "library",
+      "root": "libs/mailer",
+      "entryFile": "index",
+      "sourceRoot": "libs/mailer/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mailer/tsconfig.lib.json"
+      }
+    },
     "prisma": {
       "type": "library",
       "root": "libs/prisma",

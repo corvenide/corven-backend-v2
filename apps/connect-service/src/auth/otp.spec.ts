@@ -1,4 +1,4 @@
-import { ConsoleOtpProvider, otpProviderFromEnv, TwilioVerifyProvider } from './otp';
+import { ConsoleOtpProvider, otpProviderFromEnv, RoutingOtpProvider, SmtpEmailOtpProvider, TwilioVerifyProvider } from './otp';
 
 describe('ConsoleOtpProvider', () => {
     it('accepts the sent code once', async () => {
@@ -61,5 +61,53 @@ describe('otpProviderFromEnv', () => {
     });
     it('needs all Twilio settings', () => {
         expect(() => otpProviderFromEnv({ CONNECT_OTP_PROVIDER: 'twilio' })).toThrow(/TWILIO_ACCOUNT_SID/);
+    });
+});
+
+describe('email codes over SMTP', () => {
+    const smtpEnv = { SMTP_HOST: 'smtp.example.com', SMTP_USER: 'no-reply@corvanide.space', SMTP_PASS: 'x', MAIL_FROM: 'Corven <no-reply@corvanide.space>' };
+
+    it('routes email to SMTP and phone to Twilio', () => {
+        const otp = otpProviderFromEnv({ ...smtpEnv, TWILIO_ACCOUNT_SID: 'a', TWILIO_AUTH_TOKEN: 'b', TWILIO_VERIFY_SERVICE_SID: 'c' });
+        expect(otp.name).toBe('phone:twilio, email:smtp');
+    });
+
+    it('can keep email on Twilio', () => {
+        const otp = otpProviderFromEnv({ ...smtpEnv, CONNECT_EMAIL_PROVIDER: 'twilio', TWILIO_ACCOUNT_SID: 'a', TWILIO_AUTH_TOKEN: 'b', TWILIO_VERIFY_SERVICE_SID: 'c' });
+        expect(otp.name).toBe('twilio');
+    });
+
+    it('needs SMTP settings when asked for smtp', () => {
+        expect(() => otpProviderFromEnv({ CONNECT_EMAIL_PROVIDER: 'smtp' })).toThrow(/SMTP_HOST/);
+    });
+
+    it('emails the code it later accepts', async () => {
+        const send = jest.fn().mockResolvedValue(undefined);
+        const otp = new SmtpEmailOtpProvider({ send } as never);
+        await otp.send('amani@example.com', 'email', { appName: 'Kisumu Market' });
+
+        const mail = send.mock.calls[0][0];
+        expect(mail).toMatchObject({ to: 'amani@example.com', fromName: 'Kisumu Market' });
+        const code = /(\d{6}) is your Kisumu Market sign-in code/.exec(mail.subject)![1];
+        expect(mail.text).toContain(code);
+        expect(await otp.check('amani@example.com', code)).toBe(true);
+        expect(await otp.check('amani@example.com', code)).toBe(false);
+    });
+
+    it('turns SMTP failures into a friendly 502', async () => {
+        const otp = new SmtpEmailOtpProvider({ send: jest.fn().mockRejectedValue(new Error('535 bad login')) } as never);
+        await expect(otp.send('a@b.co', 'email')).rejects.toMatchObject({ status: 502 });
+    });
+
+    it('routing checks email codes with the email provider', async () => {
+        const phone = new ConsoleOtpProvider();
+        const email = new ConsoleOtpProvider();
+        const otp = new RoutingOtpProvider(phone, email);
+        await otp.send('a@b.co', 'email');
+        await otp.send('+254712345678', 'sms');
+        expect(email.lastCode.has('a@b.co')).toBe(true);
+        expect(phone.lastCode.has('+254712345678')).toBe(true);
+        expect(await otp.check('a@b.co', email.lastCode.get('a@b.co')!)).toBe(true);
+        expect(await otp.check('+254712345678', phone.lastCode.get('+254712345678')!)).toBe(true);
     });
 });

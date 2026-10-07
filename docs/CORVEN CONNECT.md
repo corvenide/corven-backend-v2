@@ -18,9 +18,11 @@ Same database, same Docker image (`SERVICE=connect-service`), same domain.
 
 ## Set up on the server
 
-1. Twilio Verify: create a Verify service (console > Verify > Services).
-   Enable SMS, WhatsApp and Voice. For email codes, add an email integration
-   (SendGrid) to the service.
+1. Phone codes: create a Twilio Verify service (console > Verify > Services)
+   and enable SMS, WhatsApp and Voice.
+   Email codes: go through Corven's own SMTP mailer (`libs/mailer`); set the
+   `SMTP_*` and `MAIL_FROM` settings. (Or `CONNECT_EMAIL_PROVIDER=twilio` to use
+   Twilio Verify's email channel, which needs a SendGrid integration.)
 2. Add to `deploy/.env` (see `.env.example`):
    ```
    CONNECT_JWT_SECRET=$(openssl rand -base64 48)
@@ -30,6 +32,11 @@ Same database, same Docker image (`SERVICE=connect-service`), same domain.
    TWILIO_ACCOUNT_SID=AC...
    TWILIO_AUTH_TOKEN=...
    TWILIO_VERIFY_SERVICE_SID=VA...
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=you@yourdomain.com
+   SMTP_PASS=<app password>
+   MAIL_FROM="Corven <you@yourdomain.com>"
    ```
 3. `bash deploy/deploy.sh` (runs the migration `20261007120000_corven_connect`,
    starts `connect-service`, reloads Caddy).
