@@ -401,7 +401,14 @@ export const ModelName = {
   Script: 'Script',
   Address: 'Address',
   UserWallet: 'UserWallet',
-  WalletTransfer: 'WalletTransfer'
+  WalletTransfer: 'WalletTransfer',
+  ConnectApp: 'ConnectApp',
+  ConnectUser: 'ConnectUser',
+  ConnectIdentity: 'ConnectIdentity',
+  ConnectPasskey: 'ConnectPasskey',
+  ConnectSession: 'ConnectSession',
+  ConnectWallet: 'ConnectWallet',
+  ConnectSignature: 'ConnectSignature'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "communityPost" | "communityComment" | "communityVote" | "walletChallenge" | "refreshToken" | "host" | "workspace" | "workspaceFile" | "contractDeployment" | "workspaceContainer" | "block" | "transaction" | "cell" | "script" | "address" | "userWallet" | "walletTransfer"
+    modelProps: "user" | "communityPost" | "communityComment" | "communityVote" | "walletChallenge" | "refreshToken" | "host" | "workspace" | "workspaceFile" | "contractDeployment" | "workspaceContainer" | "block" | "transaction" | "cell" | "script" | "address" | "userWallet" | "walletTransfer" | "connectApp" | "connectUser" | "connectIdentity" | "connectPasskey" | "connectSession" | "connectWallet" | "connectSignature"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1753,6 +1760,524 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ConnectApp: {
+      payload: Prisma.$ConnectAppPayload<ExtArgs>
+      fields: Prisma.ConnectAppFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectAppFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectAppFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectAppFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectAppFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectAppFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectAppCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectAppCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectAppCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectAppDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>
+        }
+        update: {
+          args: Prisma.ConnectAppUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectAppDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectAppUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectAppUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectAppUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectAppPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectAppAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectApp>
+        }
+        groupBy: {
+          args: Prisma.ConnectAppGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectAppGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectAppCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectAppCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectUser: {
+      payload: Prisma.$ConnectUserPayload<ExtArgs>
+      fields: Prisma.ConnectUserFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectUserFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectUserFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectUserFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectUserFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectUserFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectUserCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectUserCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectUserCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectUserDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>
+        }
+        update: {
+          args: Prisma.ConnectUserUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectUserDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectUserUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectUserUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectUserUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectUserPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectUserAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectUser>
+        }
+        groupBy: {
+          args: Prisma.ConnectUserGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectUserGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectUserCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectUserCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectIdentity: {
+      payload: Prisma.$ConnectIdentityPayload<ExtArgs>
+      fields: Prisma.ConnectIdentityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectIdentityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectIdentityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectIdentityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectIdentityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectIdentityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectIdentityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectIdentityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectIdentityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectIdentityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>
+        }
+        update: {
+          args: Prisma.ConnectIdentityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectIdentityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectIdentityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectIdentityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectIdentityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectIdentityPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectIdentityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectIdentity>
+        }
+        groupBy: {
+          args: Prisma.ConnectIdentityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectIdentityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectIdentityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectIdentityCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectPasskey: {
+      payload: Prisma.$ConnectPasskeyPayload<ExtArgs>
+      fields: Prisma.ConnectPasskeyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectPasskeyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectPasskeyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectPasskeyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectPasskeyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectPasskeyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectPasskeyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectPasskeyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectPasskeyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectPasskeyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>
+        }
+        update: {
+          args: Prisma.ConnectPasskeyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectPasskeyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectPasskeyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectPasskeyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectPasskeyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectPasskeyPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectPasskeyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectPasskey>
+        }
+        groupBy: {
+          args: Prisma.ConnectPasskeyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectPasskeyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectPasskeyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectPasskeyCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectSession: {
+      payload: Prisma.$ConnectSessionPayload<ExtArgs>
+      fields: Prisma.ConnectSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>
+        }
+        update: {
+          args: Prisma.ConnectSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectSession>
+        }
+        groupBy: {
+          args: Prisma.ConnectSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectWallet: {
+      payload: Prisma.$ConnectWalletPayload<ExtArgs>
+      fields: Prisma.ConnectWalletFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectWalletFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectWalletFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectWalletFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectWalletFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectWalletFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectWalletCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectWalletCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectWalletCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectWalletDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>
+        }
+        update: {
+          args: Prisma.ConnectWalletUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectWalletDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectWalletUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectWalletUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectWalletUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectWalletPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectWalletAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectWallet>
+        }
+        groupBy: {
+          args: Prisma.ConnectWalletGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectWalletGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectWalletCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectWalletCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConnectSignature: {
+      payload: Prisma.$ConnectSignaturePayload<ExtArgs>
+      fields: Prisma.ConnectSignatureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectSignatureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectSignatureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectSignatureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectSignatureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>
+        }
+        findMany: {
+          args: Prisma.ConnectSignatureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>[]
+        }
+        create: {
+          args: Prisma.ConnectSignatureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>
+        }
+        createMany: {
+          args: Prisma.ConnectSignatureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectSignatureCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectSignatureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>
+        }
+        update: {
+          args: Prisma.ConnectSignatureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectSignatureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectSignatureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectSignatureUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectSignatureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectSignaturePayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectSignatureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnectSignature>
+        }
+        groupBy: {
+          args: Prisma.ConnectSignatureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectSignatureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectSignatureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectSignatureCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2073,6 +2598,110 @@ export const WalletTransferScalarFieldEnum = {
 export type WalletTransferScalarFieldEnum = (typeof WalletTransferScalarFieldEnum)[keyof typeof WalletTransferScalarFieldEnum]
 
 
+export const ConnectAppScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  allowedOrigins: 'allowedOrigins',
+  googleClientId: 'googleClientId',
+  loginMethods: 'loginMethods',
+  mainnetEnabled: 'mainnetEnabled',
+  logoUrl: 'logoUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectAppScalarFieldEnum = (typeof ConnectAppScalarFieldEnum)[keyof typeof ConnectAppScalarFieldEnum]
+
+
+export const ConnectUserScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  displayName: 'displayName',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectUserScalarFieldEnum = (typeof ConnectUserScalarFieldEnum)[keyof typeof ConnectUserScalarFieldEnum]
+
+
+export const ConnectIdentityScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  userId: 'userId',
+  kind: 'kind',
+  value: 'value',
+  label: 'label',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectIdentityScalarFieldEnum = (typeof ConnectIdentityScalarFieldEnum)[keyof typeof ConnectIdentityScalarFieldEnum]
+
+
+export const ConnectPasskeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  counter: 'counter',
+  transports: 'transports',
+  rpId: 'rpId',
+  name: 'name',
+  lastUsedAt: 'lastUsedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectPasskeyScalarFieldEnum = (typeof ConnectPasskeyScalarFieldEnum)[keyof typeof ConnectPasskeyScalarFieldEnum]
+
+
+export const ConnectSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  familyId: 'familyId',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  replacedById: 'replacedById',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  origin: 'origin',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectSessionScalarFieldEnum = (typeof ConnectSessionScalarFieldEnum)[keyof typeof ConnectSessionScalarFieldEnum]
+
+
+export const ConnectWalletScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  network: 'network',
+  address: 'address',
+  publicKey: 'publicKey',
+  encryptedKey: 'encryptedKey',
+  wrappedDataKey: 'wrappedDataKey',
+  keyVersion: 'keyVersion',
+  exportedAt: 'exportedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectWalletScalarFieldEnum = (typeof ConnectWalletScalarFieldEnum)[keyof typeof ConnectWalletScalarFieldEnum]
+
+
+export const ConnectSignatureScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  walletId: 'walletId',
+  network: 'network',
+  txHash: 'txHash',
+  outflow: 'outflow',
+  origin: 'origin',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectSignatureScalarFieldEnum = (typeof ConnectSignatureScalarFieldEnum)[keyof typeof ConnectSignatureScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2363,6 +2992,20 @@ export type ListEnumWalletNetworkFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'ConnectIdentityKind'
+ */
+export type EnumConnectIdentityKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConnectIdentityKind'>
+    
+
+
+/**
+ * Reference to a field of type 'ConnectIdentityKind[]'
+ */
+export type ListEnumConnectIdentityKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConnectIdentityKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2503,6 +3146,13 @@ export type GlobalOmitConfig = {
   address?: Prisma.AddressOmit
   userWallet?: Prisma.UserWalletOmit
   walletTransfer?: Prisma.WalletTransferOmit
+  connectApp?: Prisma.ConnectAppOmit
+  connectUser?: Prisma.ConnectUserOmit
+  connectIdentity?: Prisma.ConnectIdentityOmit
+  connectPasskey?: Prisma.ConnectPasskeyOmit
+  connectSession?: Prisma.ConnectSessionOmit
+  connectWallet?: Prisma.ConnectWalletOmit
+  connectSignature?: Prisma.ConnectSignatureOmit
 }
 
 /* Types for Logging */

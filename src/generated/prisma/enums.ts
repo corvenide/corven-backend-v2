@@ -139,3 +139,12 @@ export const WalletNetwork = {
 } as const
 
 export type WalletNetwork = (typeof WalletNetwork)[keyof typeof WalletNetwork]
+
+
+export const ConnectIdentityKind = {
+  PHONE: 'PHONE',
+  EMAIL: 'EMAIL',
+  GOOGLE: 'GOOGLE'
+} as const
+
+export type ConnectIdentityKind = (typeof ConnectIdentityKind)[keyof typeof ConnectIdentityKind]

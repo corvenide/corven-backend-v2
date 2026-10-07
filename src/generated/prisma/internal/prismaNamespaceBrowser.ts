@@ -68,7 +68,14 @@ export const ModelName = {
   Script: 'Script',
   Address: 'Address',
   UserWallet: 'UserWallet',
-  WalletTransfer: 'WalletTransfer'
+  WalletTransfer: 'WalletTransfer',
+  ConnectApp: 'ConnectApp',
+  ConnectUser: 'ConnectUser',
+  ConnectIdentity: 'ConnectIdentity',
+  ConnectPasskey: 'ConnectPasskey',
+  ConnectSession: 'ConnectSession',
+  ConnectWallet: 'ConnectWallet',
+  ConnectSignature: 'ConnectSignature'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -366,6 +373,110 @@ export const WalletTransferScalarFieldEnum = {
 } as const
 
 export type WalletTransferScalarFieldEnum = (typeof WalletTransferScalarFieldEnum)[keyof typeof WalletTransferScalarFieldEnum]
+
+
+export const ConnectAppScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  allowedOrigins: 'allowedOrigins',
+  googleClientId: 'googleClientId',
+  loginMethods: 'loginMethods',
+  mainnetEnabled: 'mainnetEnabled',
+  logoUrl: 'logoUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectAppScalarFieldEnum = (typeof ConnectAppScalarFieldEnum)[keyof typeof ConnectAppScalarFieldEnum]
+
+
+export const ConnectUserScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  displayName: 'displayName',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectUserScalarFieldEnum = (typeof ConnectUserScalarFieldEnum)[keyof typeof ConnectUserScalarFieldEnum]
+
+
+export const ConnectIdentityScalarFieldEnum = {
+  id: 'id',
+  appId: 'appId',
+  userId: 'userId',
+  kind: 'kind',
+  value: 'value',
+  label: 'label',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectIdentityScalarFieldEnum = (typeof ConnectIdentityScalarFieldEnum)[keyof typeof ConnectIdentityScalarFieldEnum]
+
+
+export const ConnectPasskeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  counter: 'counter',
+  transports: 'transports',
+  rpId: 'rpId',
+  name: 'name',
+  lastUsedAt: 'lastUsedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectPasskeyScalarFieldEnum = (typeof ConnectPasskeyScalarFieldEnum)[keyof typeof ConnectPasskeyScalarFieldEnum]
+
+
+export const ConnectSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  familyId: 'familyId',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  replacedById: 'replacedById',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  origin: 'origin',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectSessionScalarFieldEnum = (typeof ConnectSessionScalarFieldEnum)[keyof typeof ConnectSessionScalarFieldEnum]
+
+
+export const ConnectWalletScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  network: 'network',
+  address: 'address',
+  publicKey: 'publicKey',
+  encryptedKey: 'encryptedKey',
+  wrappedDataKey: 'wrappedDataKey',
+  keyVersion: 'keyVersion',
+  exportedAt: 'exportedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectWalletScalarFieldEnum = (typeof ConnectWalletScalarFieldEnum)[keyof typeof ConnectWalletScalarFieldEnum]
+
+
+export const ConnectSignatureScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  walletId: 'walletId',
+  network: 'network',
+  txHash: 'txHash',
+  outflow: 'outflow',
+  origin: 'origin',
+  createdAt: 'createdAt'
+} as const
+
+export type ConnectSignatureScalarFieldEnum = (typeof ConnectSignatureScalarFieldEnum)[keyof typeof ConnectSignatureScalarFieldEnum]
 
 
 export const SortOrder = {

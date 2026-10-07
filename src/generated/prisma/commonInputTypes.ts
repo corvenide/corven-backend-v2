@@ -494,6 +494,23 @@ export type EnumWalletNetworkWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
 }
 
+export type EnumConnectIdentityKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectIdentityKind | Prisma.EnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel> | $Enums.ConnectIdentityKind
+}
+
+export type EnumConnectIdentityKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectIdentityKind | Prisma.EnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectIdentityKindWithAggregatesFilter<$PrismaModel> | $Enums.ConnectIdentityKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -985,6 +1002,23 @@ export type NestedEnumWalletNetworkWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
   _max?: Prisma.NestedEnumWalletNetworkFilter<$PrismaModel>
+}
+
+export type NestedEnumConnectIdentityKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectIdentityKind | Prisma.EnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel> | $Enums.ConnectIdentityKind
+}
+
+export type NestedEnumConnectIdentityKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConnectIdentityKind | Prisma.EnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConnectIdentityKind[] | Prisma.ListEnumConnectIdentityKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConnectIdentityKindWithAggregatesFilter<$PrismaModel> | $Enums.ConnectIdentityKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConnectIdentityKindFilter<$PrismaModel>
 }
 
 

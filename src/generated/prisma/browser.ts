@@ -119,3 +119,44 @@ export type UserWallet = Prisma.UserWalletModel
  * CKB sent from a Corven wallet, for history and the mainnet daily limit.
  */
 export type WalletTransfer = Prisma.WalletTransferModel
+/**
+ * Model ConnectApp
+ * An app that embeds Corven Connect. Its id is the public app id the SDK
+ * sends; only pages on `allowedOrigins` may use it.
+ */
+export type ConnectApp = Prisma.ConnectAppModel
+/**
+ * Model ConnectUser
+ * A person signed in to one Connect app. Users of different apps are
+ * different rows, so one app can never act for another app's users.
+ */
+export type ConnectUser = Prisma.ConnectUserModel
+/**
+ * Model ConnectIdentity
+ * A verified way to sign in: phone number (E.164), email (lowercase) or
+ * Google account id (`sub`). Unique per app.
+ */
+export type ConnectIdentity = Prisma.ConnectIdentityModel
+/**
+ * Model ConnectPasskey
+ * A WebAuthn credential. `rpId` is the app's domain it was created on.
+ */
+export type ConnectPasskey = Prisma.ConnectPasskeyModel
+/**
+ * Model ConnectSession
+ * Refresh tokens (SHA-256 hashed), rotated on every use; reusing a revoked
+ * one revokes its whole family.
+ */
+export type ConnectSession = Prisma.ConnectSessionModel
+/**
+ * Model ConnectWallet
+ * One CKB wallet per user and network. Private key sealed like the IDE's
+ * wallets but with its own master key (CONNECT_WALLET_ENCRYPTION_KEY).
+ */
+export type ConnectWallet = Prisma.ConnectWalletModel
+/**
+ * Model ConnectSignature
+ * Every transaction a Connect wallet signed: audit trail and the mainnet
+ * daily limit. `outflow` is CKB that leaves the wallet, in shannons.
+ */
+export type ConnectSignature = Prisma.ConnectSignatureModel
