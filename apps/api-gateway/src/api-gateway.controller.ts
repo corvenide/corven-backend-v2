@@ -3,6 +3,7 @@
 import {
     BadRequestException,
     Body,
+    ForbiddenException,
     Controller,
     Delete,
     Get,
@@ -43,6 +44,26 @@ export class ApiGatewayController {
     // =========================================
 
     private readonly authLimiter = new RateLimiter(20, 60_000);
+    // Generous: a classroom or hackathon often shares one IP address.
+    private readonly guestLimiter = new RateLimiter(Number(process.env.GUEST_SESSIONS_PER_IP_HOUR) || 60, 60 * 60_000);
+
+    /**
+     * Starts a guest session: no sign-in, temporary workspaces only. The
+     * IDE calls this when someone opens the dashboard without a session.
+     */
+    @Post('auth/guest')
+    @HttpCode(200)
+    async guestStart(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        assertTrustedOrigin(req);
+        this.guestLimiter.consume(`guest:${req.ip}`);
+
+        const session = await this.gatewayService.guestStart({ meta: sessionMeta(req) });
+
+        return this.startSession(res, session);
+    }
 
     @Post('auth/wallet/challenge')
     createWalletChallenge(
@@ -60,6 +81,7 @@ export class ApiGatewayController {
     async walletLogin(
         @Req() req: Request,
         @Res({ passthrough: true }) res: Response,
+        @Headers('authorization') authorization: string | undefined,
         @Body()
         body: {
             walletAddress: string;
@@ -74,6 +96,8 @@ export class ApiGatewayController {
             challengeId: body?.challengeId,
             signature: body?.signature,
             meta: sessionMeta(req),
+            // A guest connecting a wallet keeps their workspaces.
+            guestToken: bearerToken(authorization),
         });
 
         return this.startSession(res, session);
@@ -84,6 +108,7 @@ export class ApiGatewayController {
     async googleLogin(
         @Req() req: Request,
         @Res({ passthrough: true }) res: Response,
+        @Headers('authorization') authorization: string | undefined,
         @Body() body: { credential?: unknown },
     ) {
         assertTrustedOrigin(req);
@@ -92,6 +117,7 @@ export class ApiGatewayController {
         const session = await this.gatewayService.googleLogin({
             credential: typeof body?.credential === 'string' ? body.credential : '',
             meta: sessionMeta(req),
+            guestToken: bearerToken(authorization),
         });
 
         return this.startSession(res, session);
@@ -106,7 +132,7 @@ export class ApiGatewayController {
     /** The user's Corven-held testnet and mainnet wallets, with balances. */
     @Get('wallet')
     async listWallets(@Headers('authorization') authorization: string) {
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'use Corven wallets');
         return this.gatewayService.listWallets(user.id);
     }
 
@@ -119,7 +145,7 @@ export class ApiGatewayController {
         @Body() body: Record<string, unknown>,
     ) {
         assertTrustedOrigin(req);
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'use Corven wallets');
         this.walletLimiter.consume(`transfer:${user.id}`);
         return this.gatewayService.walletTransfer(user.id, body ?? {});
     }
@@ -133,7 +159,7 @@ export class ApiGatewayController {
         @Body() body: { transaction?: unknown },
     ) {
         assertTrustedOrigin(req);
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'use Corven wallets');
         this.walletLimiter.consume(`sign:${user.id}`);
         return this.gatewayService.walletSignTestnet(user.id, body?.transaction);
     }
@@ -148,7 +174,7 @@ export class ApiGatewayController {
         @Body() body: Record<string, unknown>,
     ) {
         assertTrustedOrigin(req);
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'use Corven wallets');
         this.walletLimiter.consume(`export:${user.id}`);
         res.setHeader('Cache-Control', 'no-store');
         return this.gatewayService.walletExport(user.id, body ?? {});
@@ -278,6 +304,7 @@ export class ApiGatewayController {
             refreshToken: string;
             refreshTokenExpiresAt: string | Date;
             user: unknown;
+            claimedWorkspaces?: unknown[];
         },
     ) {
         setRefreshCookie(res, session.refreshToken, session.refreshTokenExpiresAt);
@@ -285,6 +312,7 @@ export class ApiGatewayController {
         return {
             accessToken: session.accessToken,
             user: session.user,
+            ...(session.claimedWorkspaces ? { claimedWorkspaces: session.claimedWorkspaces } : {}),
         };
     }
 
@@ -337,7 +365,7 @@ export class ApiGatewayController {
         @Headers('authorization') authorization: string,
         @Body() body: { kind: string; title: string; body: string },
     ) {
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'post in the community');
         this.postLimiter.consume(`post:${user.id}`);
 
         return this.gatewayService.createCommunityPost({
@@ -381,7 +409,7 @@ export class ApiGatewayController {
         @Param('id') postId: string,
         @Body() body: { body: string },
     ) {
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'comment');
         this.commentLimiter.consume(`comment:${user.id}`);
 
         return this.gatewayService.addCommunityComment({ userId: user.id, postId, body: body?.body });
@@ -402,7 +430,7 @@ export class ApiGatewayController {
         @Headers('authorization') authorization: string,
         @Param('id') postId: string,
     ) {
-        const user = await this.getUserFromAuthorizationHeader(authorization);
+        const user = await this.getAccountUser(authorization, 'vote');
         this.voteLimiter.consume(`vote:${user.id}`);
 
         return this.gatewayService.toggleCommunityVote(user.id, postId);
@@ -438,6 +466,7 @@ export class ApiGatewayController {
         body: {
             name: string;
             templateId?: string;
+            temporary?: boolean;
         },
     ) {
         const user =
@@ -453,6 +482,29 @@ export class ApiGatewayController {
             userId: user.id,
             name: body.name,
             templateId: body.templateId,
+            temporary: body.temporary === true,
+            guest: user.isGuest === true,
+        });
+    }
+
+    /** Keep a workspace ({temporary:false}) or let it expire ({temporary:true}). */
+    @Patch('workspaces/:id')
+    async updateWorkspace(
+        @Headers('authorization') authorization: string,
+        @Param('id') workspaceId: string,
+        @Body() body: { temporary?: unknown },
+    ) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+
+        if (typeof body?.temporary !== 'boolean') {
+            throw new BadRequestException('temporary must be true or false');
+        }
+
+        return this.gatewayService.setWorkspaceTemporary({
+            userId: user.id,
+            workspaceId,
+            temporary: body.temporary,
+            guest: user.isGuest === true,
         });
     }
 
@@ -1195,6 +1247,17 @@ export class ApiGatewayController {
         return result.user;
     }
 
+    /** Like getUserFromAuthorizationHeader, but guests are turned away. */
+    private async getAccountUser(authorization: string | undefined, action: string) {
+        const user = await this.getUserFromAuthorizationHeader(authorization);
+
+        if (user.isGuest) {
+            throw new ForbiddenException(`Connect a wallet or sign in to ${action}.`);
+        }
+
+        return user;
+    }
+
     private parseBooleanQuery(
         value: string | undefined,
         defaultValue: boolean,
@@ -1222,4 +1285,10 @@ export class ApiGatewayController {
 
         return defaultValue;
     }
+}
+
+/** The token from a `Bearer …` header, if there is one. */
+function bearerToken(authorization?: string): string | undefined {
+    const [scheme, token] = (authorization ?? '').trim().split(/\s+/);
+    return scheme?.toLowerCase() === 'bearer' && token ? token : undefined;
 }

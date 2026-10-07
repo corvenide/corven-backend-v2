@@ -42,10 +42,12 @@ Same database, same Docker image (`SERVICE=connect-service`), same domain.
    starts `connect-service`, reloads Caddy).
 4. Check: `curl https://staging-api.corvanide.space/connect/health`
 
-## Manage apps (dashboard in Corven IDE)
+## Manage apps (Connect dashboard)
 
-Developers manage their apps at **Connect** in the Corven IDE top bar
-(`/connect`), signed in with their normal Corven IDE account. No admin token needed.
+Corven Connect has its own site at `/connect` on the IDE frontend (own layout,
+linked from the landing page header, not from the IDE). Developers sign in with
+their Corven account (wallet, Google or email; IDE guest sessions can't own
+apps). No admin token needed. Docs for app developers are at `/connect/docs`.
 
 - **Apps**: create up to 10 apps, each gets an `app_…` id. The creator is the owner.
 - **Overview**: total, new and active users, sign-ins, codes sent and signed
@@ -58,8 +60,8 @@ Developers manage their apps at **Connect** in the Corven IDE top bar
   Roles: Owner (everything), Admin (settings, users, inviting admins/viewers),
   Viewer (read only). An app always keeps at least one owner.
 
-The dashboard API is `/connect/v1/dashboard/*`, authorised with the IDE access
-token. Invite links point at `CONNECT_DASHBOARD_URL` (falls back to the first
+The dashboard API is `/connect/v1/dashboard/*`, authorised with the Corven
+access token (guests get 403 `guest`). Invite links point at `CONNECT_DASHBOARD_URL` (falls back to the first
 `CORS_ORIGINS` entry). Apps made earlier with the admin API have no members; give
 one to an IDE user with:
 

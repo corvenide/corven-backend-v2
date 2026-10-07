@@ -16,7 +16,6 @@ import {
     parseSignature,
     verifyWalletOwnership,
 } from './wallet-verification';
-import { WalletService } from './wallets/wallet.service';
 import {
     GoogleVerificationError,
     verifyGoogleCredential,
@@ -40,6 +39,15 @@ interface UserRecord {
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
+/** A guest's workspaces handed to the account they signed in to. */
+export interface ClaimedWorkspace {
+    id: string;
+    name: string;
+    temporary: boolean;
+}
+
+type Tx = Parameters<Parameters<PrismaService['$transaction']>[0]>[0];
+
 function unauthorized(message: string): RpcException {
     return new RpcException({ statusCode: 401, message });
 }
@@ -58,8 +66,88 @@ export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
-        private readonly wallets?: WalletService,
     ) { }
+
+    // ------------------------------------------------------------------
+    // Guests: use the IDE without signing in
+    // ------------------------------------------------------------------
+
+    /**
+     * Starts a guest session. Guests get a real (but nameless) account so
+     * every service keeps working with normal access tokens; they can only
+     * make temporary workspaces. Signing in later with a wallet or Google
+     * hands those workspaces to the real account.
+     */
+    async guestStart(data: { meta?: SessionMeta }) {
+        const user = await this.prisma.user.create({
+            data: {
+                name: `Guest ${randomBytes(2).toString('hex').toUpperCase()}`,
+                authProvider: 'GUEST',
+            },
+        });
+
+        return this.issueSession(user, data.meta);
+    }
+
+    /** The guest behind an access token, or null for anything else. */
+    private async guestIdFrom(token?: string): Promise<string | null> {
+        if (!token) return null;
+
+        try {
+            const payload = await this.jwtService.verifyAsync<{ sub?: string; typ?: string }>(token);
+            if (!payload.sub || payload.typ !== 'access') return null;
+
+            const user = await this.prisma.user.findUnique({
+                where: { id: payload.sub },
+                select: { id: true, authProvider: true },
+            });
+
+            return user?.authProvider === 'GUEST' ? user.id : null;
+        } catch {
+            return null;
+        }
+    }
+
+    private async guestWorkspaces(tx: Tx, guestId: string): Promise<ClaimedWorkspace[]> {
+        return tx.workspace.findMany({
+            where: { userId: guestId, status: { not: 'DELETED' } },
+            select: { id: true, name: true, temporary: true },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    /** Moves a guest's workspaces into an existing account and removes the guest. */
+    private async mergeGuest(tx: Tx, guestId: string, accountId: string): Promise<ClaimedWorkspace[]> {
+        const stillGuest = await tx.user.findFirst({ where: { id: guestId, authProvider: 'GUEST' }, select: { id: true } });
+        if (!stillGuest || guestId === accountId) return [];
+
+        const workspaces = await this.guestWorkspaces(tx, guestId);
+
+        await tx.workspace.updateMany({ where: { userId: guestId }, data: { userId: accountId } });
+        await tx.user.delete({ where: { id: guestId } });
+
+        return workspaces;
+    }
+
+    /**
+     * Turns the guest itself into the new account, keeping its id (and so
+     * its workspaces). Old guest sessions are revoked: they must not carry
+     * over to an account that now has a wallet or Google behind it.
+     */
+    private async upgradeGuest(
+        tx: Tx,
+        guestId: string,
+        data: { name: string; authProvider: 'CKB_WALLET' | 'GOOGLE'; walletAddress?: string; email?: string; googleId?: string },
+    ): Promise<{ user: UserRecord; workspaces: ClaimedWorkspace[] } | null> {
+        const upgraded = await tx.user.updateMany({ where: { id: guestId, authProvider: 'GUEST' }, data });
+        if (upgraded.count === 0) return null;
+
+        await tx.refreshToken.updateMany({ where: { userId: guestId, revokedAt: null }, data: { revokedAt: new Date() } });
+
+        const user = await tx.user.findUniqueOrThrow({ where: { id: guestId } });
+
+        return { user, workspaces: await this.guestWorkspaces(tx, guestId) };
+    }
 
     // ------------------------------------------------------------------
     // Wallet authentication
@@ -107,6 +195,8 @@ export class AuthService {
         challengeId: string;
         signature: unknown;
         meta?: SessionMeta;
+        /** The current access token, when a guest is connecting a wallet. */
+        guestToken?: string;
     }) {
         const walletAddress = (data.walletAddress ?? '').trim();
 
@@ -154,15 +244,17 @@ export class AuthService {
             );
         }
 
-        const user = await this.prisma.$transaction(async (tx) => {
+        const guestId = await this.guestIdFrom(data.guestToken);
+
+        const { user, claimed: claimedWorkspaces } = await this.prisma.$transaction(async (tx) => {
             // Atomically claim the challenge so it can only be used once,
             // even with concurrent requests.
-            const claimed = await tx.walletChallenge.updateMany({
+            const challengeClaim = await tx.walletChallenge.updateMany({
                 where: { id: challenge.id, usedAt: null },
                 data: { usedAt: new Date() },
             });
 
-            if (claimed.count === 0) {
+            if (challengeClaim.count === 0) {
                 throw unauthorized('This sign-in request was already used. Please try again.');
             }
 
@@ -170,25 +262,41 @@ export class AuthService {
                 where: { walletAddress },
             });
 
-            const account =
-                existing ??
-                (await tx.user.create({
-                    data: {
-                        name: this.walletDisplayName(walletAddress),
-                        walletAddress,
-                        authProvider: 'CKB_WALLET',
-                    },
-                }));
+            let account: UserRecord | null = existing;
+            let claimed: ClaimedWorkspace[] = [];
+
+            if (existing) {
+                if (guestId) claimed = await this.mergeGuest(tx, guestId, existing.id);
+            } else if (guestId) {
+                const upgraded = await this.upgradeGuest(tx, guestId, {
+                    name: this.walletDisplayName(walletAddress),
+                    walletAddress,
+                    authProvider: 'CKB_WALLET',
+                });
+
+                if (upgraded) {
+                    account = upgraded.user;
+                    claimed = upgraded.workspaces;
+                }
+            }
+
+            account ??= await tx.user.create({
+                data: {
+                    name: this.walletDisplayName(walletAddress),
+                    walletAddress,
+                    authProvider: 'CKB_WALLET',
+                },
+            });
 
             await tx.walletChallenge.update({
                 where: { id: challenge.id },
                 data: { userId: account.id },
             });
 
-            return account;
+            return { user: account, claimed };
         });
 
-        return this.issueSession(user, data.meta);
+        return { ...(await this.issueSession(user, data.meta)), claimedWorkspaces };
     }
 
     // ------------------------------------------------------------------
@@ -204,7 +312,7 @@ export class AuthService {
      * someone could register a victim's address first and keep access
      * after the victim later signed in with Google.
      */
-    async googleLogin(data: { credential: string; meta?: SessionMeta }) {
+    async googleLogin(data: { credential: string; meta?: SessionMeta; guestToken?: string }) {
         let identity: GoogleIdentity;
 
         try {
@@ -226,9 +334,11 @@ export class AuthService {
         }
 
         let user: UserRecord;
+        let claimed: ClaimedWorkspace[] = [];
+        const guestId = await this.guestIdFrom(data.guestToken);
 
         try {
-            user = await this.findOrCreateGoogleUser(identity);
+            ({ user, claimed } = await this.findOrCreateGoogleUser(identity, guestId));
         } catch (error) {
             // Two first-time sign-ins racing: the other one created the user.
             if ((error as { code?: string })?.code !== 'P2002') throw error;
@@ -240,19 +350,18 @@ export class AuthService {
             user = existing;
         }
 
-        // Google users get Corven-held testnet and mainnet wallets. Best effort:
-        // a failure here mustn't block sign-in (the wallet page retries).
-        await this.wallets?.ensureWallets(user.id).catch((error) =>
-            this.logger.error(`Creating wallets for ${user.id} failed: ${error instanceof Error ? error.message : error}`),
-        );
-
-        return this.issueSession(user, data.meta);
+        return { ...(await this.issueSession(user, data.meta)), claimedWorkspaces: claimed };
     }
 
-    private async findOrCreateGoogleUser(identity: GoogleIdentity): Promise<UserRecord> {
+    private async findOrCreateGoogleUser(
+        identity: GoogleIdentity,
+        guestId: string | null,
+    ): Promise<{ user: UserRecord; claimed: ClaimedWorkspace[] }> {
         return this.prisma.$transaction(async (tx) => {
             const linked = await tx.user.findUnique({ where: { googleId: identity.sub } });
-            if (linked) return linked;
+            if (linked) {
+                return { user: linked, claimed: guestId ? await this.mergeGuest(tx, guestId, linked.id) : [] };
+            }
 
             const byEmail = await tx.user.findUnique({ where: { email: identity.email } });
 
@@ -263,14 +372,19 @@ export class AuthService {
                 });
             }
 
-            return tx.user.create({
-                data: {
-                    name: identity.name ?? identity.email.split('@')[0],
-                    email: identity.email,
-                    googleId: identity.sub,
-                    authProvider: 'GOOGLE',
-                },
-            });
+            const fields = {
+                name: identity.name ?? identity.email.split('@')[0],
+                email: identity.email,
+                googleId: identity.sub,
+                authProvider: 'GOOGLE' as const,
+            };
+
+            if (guestId) {
+                const upgraded = await this.upgradeGuest(tx, guestId, fields);
+                if (upgraded) return { user: upgraded.user, claimed: upgraded.workspaces };
+            }
+
+            return { user: await tx.user.create({ data: fields }), claimed: [] };
         });
     }
 
@@ -356,6 +470,14 @@ export class AuthService {
             throw unauthorized('Session not found');
         }
 
+        if (current.revokedAt && current.replacedById && this.withinReuseGrace(current.revokedAt)) {
+            // Rotated moments ago, but the browser never stored the new token:
+            // the page navigated or reloaded while the refresh was in flight.
+            // Treat it as the same session rather than theft (which would sign
+            // the person out, and cost a guest their workspaces).
+            return this.rotateFamily(current, data.meta);
+        }
+
         if (current.revokedAt) {
             // A revoked token being presented again means it was copied.
             // Kill every session descended from the same login.
@@ -403,6 +525,61 @@ export class AuthService {
             if (revoked.count === 0) {
                 throw unauthorized('Session expired. Please sign in again.');
             }
+        });
+
+        return {
+            accessToken: this.signAccessToken(current.user),
+            refreshToken: next.token,
+            refreshTokenExpiresAt: next.expiresAt,
+            user: this.sanitizeUser(current.user),
+        };
+    }
+
+    /** REFRESH_REUSE_GRACE_SECONDS (default 30): how late a just-rotated token is still accepted. */
+    private withinReuseGrace(revokedAt: Date): boolean {
+        const raw = Number(process.env.REFRESH_REUSE_GRACE_SECONDS);
+        const seconds = Number.isFinite(raw) && raw >= 0 ? raw : 30;
+        return Date.now() - revokedAt.getTime() < seconds * 1000;
+    }
+
+    /** Issues a new token in the family and retires every other live one. */
+    private async rotateFamily(
+        current: { userId: string; familyId: string; expiresAt: Date; user: UserRecord },
+        meta?: SessionMeta,
+    ) {
+        if (current.expiresAt.getTime() < Date.now()) {
+            throw unauthorized('Session expired. Please sign in again.');
+        }
+
+        const next = this.generateRefreshToken();
+
+        await this.prisma.$transaction(async (tx) => {
+            const family = await tx.refreshToken.findFirst({
+                where: { familyId: current.familyId },
+                orderBy: { createdAt: 'desc' },
+                select: { revokedAt: true, replacedById: true },
+            });
+
+            // The family was ended (sign-out, or real reuse detected).
+            if (!family || (family.revokedAt && !family.replacedById)) {
+                throw unauthorized('Session expired. Please sign in again.');
+            }
+
+            const created = await tx.refreshToken.create({
+                data: {
+                    userId: current.userId,
+                    familyId: current.familyId,
+                    tokenHash: this.hashToken(next.token),
+                    expiresAt: next.expiresAt,
+                    userAgent: meta?.userAgent?.slice(0, 500),
+                    ipAddress: meta?.ipAddress?.slice(0, 100),
+                },
+            });
+
+            await tx.refreshToken.updateMany({
+                where: { familyId: current.familyId, revokedAt: null, id: { not: created.id } },
+                data: { revokedAt: new Date(), replacedById: created.id },
+            });
         });
 
         return {
@@ -563,6 +740,7 @@ export class AuthService {
             walletAddress: user.walletAddress,
             authProvider: user.authProvider,
             role: user.role,
+            isGuest: user.authProvider === 'GUEST',
             createdAt: user.createdAt,
         };
     }

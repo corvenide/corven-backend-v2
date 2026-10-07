@@ -20,9 +20,19 @@ export class WorkspaceServiceController {
             userId: string;
             name: string;
             templateId?: string;
+            temporary?: boolean;
+            guest?: boolean;
         },
     ) {
         return this.workspaceService.create(data);
+    }
+
+    @MessagePattern({ cmd: 'workspace.setTemporary' })
+    setTemporary(
+        @Payload()
+        data: { userId: string; workspaceId: string; temporary: boolean; guest?: boolean },
+    ) {
+        return this.workspaceService.setTemporary(data);
     }
 
     @MessagePattern({ cmd: 'workspace.findMine' })

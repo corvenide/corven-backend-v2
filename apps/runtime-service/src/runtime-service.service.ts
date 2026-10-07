@@ -17,6 +17,7 @@ import {
 
 import { PrismaService } from 'libs/prisma/src/prisma.service';
 import { recordWorkspaceActivity } from 'libs/prisma/src/workspace-activity';
+import { expiredTemporaryWhere, temporaryWorkspaceTtlMs } from 'libs/prisma/src/temporary-workspaces';
 
 import { BuildCacheService } from './build-cache.service';
 import { DockerService, type DockerClient } from './docker/docker.service';
@@ -607,6 +608,11 @@ export class RuntimeServiceService implements OnModuleInit, OnModuleDestroy {
 
             const reap = this.maintenanceTicks % REAP_EVERY_TICKS === 0;
 
+            if (reap) {
+                await this.deleteExpiredTemporaryWorkspaces();
+                await this.deleteAbandonedGuests();
+            }
+
             for (const hostId of this.scheduler.schedulableHostIds) {
                 const client = this.docker.on(hostId);
 
@@ -712,6 +718,54 @@ export class RuntimeServiceService implements OnModuleInit, OnModuleDestroy {
         }
 
         return stopped;
+    }
+
+    /** Deletes temporary workspaces nobody has used for TEMPORARY_WORKSPACE_HOURS. */
+    async deleteExpiredTemporaryWorkspaces(now = Date.now()): Promise<number> {
+        const expired = await this.prisma.workspace.findMany({
+            where: expiredTemporaryWhere(now),
+            select: { id: true },
+            take: 50,
+        });
+
+        let deleted = 0;
+
+        for (const { id } of expired) {
+            // Re-check: it may have been used, kept or deleted since the query.
+            const still = await this.prisma.workspace.count({ where: { id, ...expiredTemporaryWhere(now) } });
+            if (still === 0) continue;
+
+            try {
+                this.logger.log(`Temporary workspace ${id} expired; deleting`);
+                await this.deleteWorkspaceRuntime(id);
+                deleted += 1;
+            } catch (error) {
+                this.logger.warn(`Could not delete expired workspace ${id}: ${error instanceof Error ? error.message : error}`);
+            }
+        }
+
+        return deleted;
+    }
+
+    /**
+     * Removes guest accounts that have nothing left: no live workspaces and
+     * no session refreshed within the temporary-workspace window.
+     */
+    async deleteAbandonedGuests(now = Date.now()): Promise<number> {
+        const cutoff = new Date(now - temporaryWorkspaceTtlMs());
+
+        const result = await this.prisma.user.deleteMany({
+            where: {
+                authProvider: 'GUEST',
+                createdAt: { lt: cutoff },
+                workspaces: { none: { status: { not: WorkspaceStatus.DELETED } } },
+                refreshTokens: { none: { createdAt: { gte: cutoff } } },
+            },
+        });
+
+        if (result.count > 0) this.logger.log(`Removed ${result.count} abandoned guest session(s)`);
+
+        return result.count;
     }
 
     /** Keeps the database copy of active workspaces' files fresh. */

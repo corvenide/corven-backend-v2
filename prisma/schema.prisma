@@ -54,6 +54,8 @@ enum AuthProvider {
     EMAIL
     CKB_WALLET
     GOOGLE
+    /// No sign-in: a browser session that can only make temporary workspaces.
+    GUEST
 }
 
 enum CellStatus {
@@ -277,6 +279,10 @@ model Workspace {
 
     templateId String?
 
+    /// Temporary workspaces are deleted 24 hours after their last use.
+    /// Guests can only make temporary ones.
+    temporary Boolean @default(false)
+
     runtimeNetwork String?
     runtimeVolume  String?
     ckbDataVolume  String?
@@ -308,6 +314,7 @@ model Workspace {
     @@index([status])
     @@index([createdAt])
     @@index([hostId, status])
+    @@index([temporary, status])
 }
 
 /// Copy of a workspace's source files, so the editor works while the

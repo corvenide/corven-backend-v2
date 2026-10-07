@@ -35,6 +35,8 @@ export interface AuthSession {
     refreshToken: string;
     refreshTokenExpiresAt: string;
     user: unknown;
+    /** Workspaces a guest brought along when they signed in. */
+    claimedWorkspaces?: unknown[];
 }
 
 @Injectable()
@@ -61,18 +63,23 @@ export class ApiGatewayService {
         return this.sendToAuthService('auth.wallet.challenge', data);
     }
 
+    guestStart(data: { meta: SessionMeta }) {
+        return this.sendToAuthService<AuthSession>('auth.guest', data);
+    }
+
     walletLogin(data: {
         walletAddress: string;
         challengeId: string;
         signature: unknown;
         meta: SessionMeta;
+        guestToken?: string;
     }) {
         // Signature verification can call out to public CKB nodes for
         // known-script lookups, so allow a little longer than default.
         return this.sendToAuthService<AuthSession>('auth.wallet.login', data, 15_000);
     }
 
-    googleLogin(data: { credential: string; meta: SessionMeta }) {
+    googleLogin(data: { credential: string; meta: SessionMeta; guestToken?: string }) {
         // Verifying the ID token may fetch Google's signing keys.
         return this.sendToAuthService<AuthSession>('auth.google.login', data, 15_000);
     }
@@ -135,12 +142,18 @@ export class ApiGatewayService {
         userId: string;
         name: string;
         templateId?: string;
+        temporary?: boolean;
+        guest?: boolean;
     }) {
         return this.send(
             this.workspaceClient,
             'workspace.create',
             data,
         );
+    }
+
+    setWorkspaceTemporary(data: { userId: string; workspaceId: string; temporary: boolean; guest?: boolean }) {
+        return this.send(this.workspaceClient, 'workspace.setTemporary', data);
     }
 
     findMyWorkspaces(userId: string) {
@@ -721,7 +734,12 @@ export class ApiGatewayService {
         // the page can show them instead of treating them as a lost session.
         if (statusCode === 429) return new HttpException(message, 429);
 
-        if (command.startsWith('community.') || command.startsWith('wallet.')) {
+        if (
+            command.startsWith('community.') ||
+            command.startsWith('wallet.') ||
+            command === 'workspace.create' ||
+            command === 'workspace.setTemporary'
+        ) {
             if (statusCode === 403) return new ForbiddenException(message);
             if (statusCode === 404) return new NotFoundException(message);
         }

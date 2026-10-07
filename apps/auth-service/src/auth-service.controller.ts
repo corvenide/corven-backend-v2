@@ -9,6 +9,11 @@ import { AuthService, type SessionMeta } from './auth-service.service';
 export class AuthServiceController {
     constructor(private readonly authService: AuthService) { }
 
+    @MessagePattern({ cmd: 'auth.guest' })
+    guestStart(@Payload() data: { meta?: SessionMeta }) {
+        return this.authService.guestStart(data ?? {});
+    }
+
     @MessagePattern({ cmd: 'auth.wallet.challenge' })
     createWalletChallenge(@Payload() data: { walletAddress: string }) {
         return this.authService.createWalletChallenge(data);
@@ -22,13 +27,14 @@ export class AuthServiceController {
             challengeId: string;
             signature: unknown;
             meta?: SessionMeta;
+            guestToken?: string;
         },
     ) {
         return this.authService.walletLogin(data);
     }
 
     @MessagePattern({ cmd: 'auth.google.login' })
-    googleLogin(@Payload() data: { credential: string; meta?: SessionMeta }) {
+    googleLogin(@Payload() data: { credential: string; meta?: SessionMeta; guestToken?: string }) {
         return this.authService.googleLogin(data);
     }
 

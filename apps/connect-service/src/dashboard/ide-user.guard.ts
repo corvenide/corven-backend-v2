@@ -1,7 +1,6 @@
 // apps/connect-service/src/dashboard/ide-user.guard.ts
 //
-// The Connect dashboard lives in the Corven IDE, so it uses the developer's
-// Corven IDE session: an IDE access token (signed by auth-service with
+// The Connect dashboard uses the developer's Corven account session: an IDE access token (signed by auth-service with
 // JWT_SECRET, `typ: 'access'`). Connect only verifies these tokens; it never
 // issues them.
 
@@ -40,10 +39,18 @@ export class IdeUserGuard implements CanActivate {
         }
         if (!payload.sub || payload.typ !== 'access') throw fail(401, 'Invalid token.', 'unauthorized');
 
-        const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, select: { id: true, name: true, email: true } });
+        const user = await this.prisma.user.findUnique({
+            where: { id: payload.sub },
+            select: { id: true, name: true, email: true, authProvider: true },
+        });
         if (!user) throw fail(401, 'Your Corven account no longer exists.', 'unauthorized');
 
-        req.ideUser = user;
+        // Guests (no sign-in) can try the IDE but can't own Connect apps.
+        if (user.authProvider === 'GUEST') {
+            throw fail(403, 'Connect a wallet or sign in to manage Connect apps.', 'guest');
+        }
+
+        req.ideUser = { id: user.id, name: user.name, email: user.email };
         return true;
     }
 }
