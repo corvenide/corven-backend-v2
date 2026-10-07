@@ -133,8 +133,8 @@ export type ConnectApp = Prisma.ConnectAppModel
 export type ConnectUser = Prisma.ConnectUserModel
 /**
  * Model ConnectIdentity
- * A verified way to sign in: phone number (E.164), email (lowercase) or
- * Google account id (`sub`). Unique per app.
+ * A verified way to sign in: phone number (E.164), email (lowercase),
+ * Google account id (`sub`) or wallet address. Unique per app.
  */
 export type ConnectIdentity = Prisma.ConnectIdentityModel
 /**

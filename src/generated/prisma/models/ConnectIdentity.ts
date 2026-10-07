@@ -14,8 +14,8 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model ConnectIdentity
- * A verified way to sign in: phone number (E.164), email (lowercase) or
- * Google account id (`sub`). Unique per app.
+ * A verified way to sign in: phone number (E.164), email (lowercase),
+ * Google account id (`sub`) or wallet address. Unique per app.
  */
 export type ConnectIdentityModel = runtime.Types.Result.DefaultSelection<Prisma.$ConnectIdentityPayload>
 
@@ -609,7 +609,7 @@ export type $ConnectIdentityPayload<ExtArgs extends runtime.Types.Extensions.Int
     kind: $Enums.ConnectIdentityKind
     value: string
     /**
-     * Email shown for a Google identity.
+     * Email shown for a Google identity; wallet name for a wallet.
      */
     label: string | null
     verifiedAt: Date

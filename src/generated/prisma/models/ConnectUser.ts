@@ -29,6 +29,7 @@ export type ConnectUserMinAggregateOutputType = {
   id: string | null
   appId: string | null
   displayName: string | null
+  embeddedWallets: boolean | null
   lastLoginAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -38,6 +39,7 @@ export type ConnectUserMaxAggregateOutputType = {
   id: string | null
   appId: string | null
   displayName: string | null
+  embeddedWallets: boolean | null
   lastLoginAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -47,6 +49,7 @@ export type ConnectUserCountAggregateOutputType = {
   id: number
   appId: number
   displayName: number
+  embeddedWallets: number
   lastLoginAt: number
   createdAt: number
   updatedAt: number
@@ -58,6 +61,7 @@ export type ConnectUserMinAggregateInputType = {
   id?: true
   appId?: true
   displayName?: true
+  embeddedWallets?: true
   lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
@@ -67,6 +71,7 @@ export type ConnectUserMaxAggregateInputType = {
   id?: true
   appId?: true
   displayName?: true
+  embeddedWallets?: true
   lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +81,7 @@ export type ConnectUserCountAggregateInputType = {
   id?: true
   appId?: true
   displayName?: true
+  embeddedWallets?: true
   lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
@@ -158,6 +164,7 @@ export type ConnectUserGroupByOutputType = {
   id: string
   appId: string
   displayName: string | null
+  embeddedWallets: boolean
   lastLoginAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -188,6 +195,7 @@ export type ConnectUserWhereInput = {
   id?: Prisma.StringFilter<"ConnectUser"> | string
   appId?: Prisma.StringFilter<"ConnectUser"> | string
   displayName?: Prisma.StringNullableFilter<"ConnectUser"> | string | null
+  embeddedWallets?: Prisma.BoolFilter<"ConnectUser"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"ConnectUser"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ConnectUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConnectUser"> | Date | string
@@ -203,6 +211,7 @@ export type ConnectUserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   appId?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
+  embeddedWallets?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -221,6 +230,7 @@ export type ConnectUserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ConnectUserWhereInput | Prisma.ConnectUserWhereInput[]
   appId?: Prisma.StringFilter<"ConnectUser"> | string
   displayName?: Prisma.StringNullableFilter<"ConnectUser"> | string | null
+  embeddedWallets?: Prisma.BoolFilter<"ConnectUser"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"ConnectUser"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ConnectUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConnectUser"> | Date | string
@@ -236,6 +246,7 @@ export type ConnectUserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   appId?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
+  embeddedWallets?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -251,6 +262,7 @@ export type ConnectUserScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ConnectUser"> | string
   appId?: Prisma.StringWithAggregatesFilter<"ConnectUser"> | string
   displayName?: Prisma.StringNullableWithAggregatesFilter<"ConnectUser"> | string | null
+  embeddedWallets?: Prisma.BoolWithAggregatesFilter<"ConnectUser"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ConnectUser"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConnectUser"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ConnectUser"> | Date | string
@@ -259,6 +271,7 @@ export type ConnectUserScalarWhereWithAggregatesInput = {
 export type ConnectUserCreateInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -274,6 +287,7 @@ export type ConnectUserUncheckedCreateInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -287,6 +301,7 @@ export type ConnectUserUncheckedCreateInput = {
 export type ConnectUserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -302,6 +317,7 @@ export type ConnectUserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -316,6 +332,7 @@ export type ConnectUserCreateManyInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -324,6 +341,7 @@ export type ConnectUserCreateManyInput = {
 export type ConnectUserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -333,6 +351,7 @@ export type ConnectUserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -352,6 +371,7 @@ export type ConnectUserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   appId?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
+  embeddedWallets?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -361,6 +381,7 @@ export type ConnectUserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   appId?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
+  embeddedWallets?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -370,6 +391,7 @@ export type ConnectUserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   appId?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
+  embeddedWallets?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -495,6 +517,7 @@ export type ConnectUserUpdateOneRequiredWithoutSignaturesNestedInput = {
 export type ConnectUserCreateWithoutAppInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -508,6 +531,7 @@ export type ConnectUserCreateWithoutAppInput = {
 export type ConnectUserUncheckedCreateWithoutAppInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -551,6 +575,7 @@ export type ConnectUserScalarWhereInput = {
   id?: Prisma.StringFilter<"ConnectUser"> | string
   appId?: Prisma.StringFilter<"ConnectUser"> | string
   displayName?: Prisma.StringNullableFilter<"ConnectUser"> | string | null
+  embeddedWallets?: Prisma.BoolFilter<"ConnectUser"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"ConnectUser"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ConnectUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConnectUser"> | Date | string
@@ -559,6 +584,7 @@ export type ConnectUserScalarWhereInput = {
 export type ConnectUserCreateWithoutIdentitiesInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -573,6 +599,7 @@ export type ConnectUserUncheckedCreateWithoutIdentitiesInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -601,6 +628,7 @@ export type ConnectUserUpdateToOneWithWhereWithoutIdentitiesInput = {
 export type ConnectUserUpdateWithoutIdentitiesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -615,6 +643,7 @@ export type ConnectUserUncheckedUpdateWithoutIdentitiesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -627,6 +656,7 @@ export type ConnectUserUncheckedUpdateWithoutIdentitiesInput = {
 export type ConnectUserCreateWithoutPasskeysInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -641,6 +671,7 @@ export type ConnectUserUncheckedCreateWithoutPasskeysInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -669,6 +700,7 @@ export type ConnectUserUpdateToOneWithWhereWithoutPasskeysInput = {
 export type ConnectUserUpdateWithoutPasskeysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -683,6 +715,7 @@ export type ConnectUserUncheckedUpdateWithoutPasskeysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -695,6 +728,7 @@ export type ConnectUserUncheckedUpdateWithoutPasskeysInput = {
 export type ConnectUserCreateWithoutSessionsInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -709,6 +743,7 @@ export type ConnectUserUncheckedCreateWithoutSessionsInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -737,6 +772,7 @@ export type ConnectUserUpdateToOneWithWhereWithoutSessionsInput = {
 export type ConnectUserUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -751,6 +787,7 @@ export type ConnectUserUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -763,6 +800,7 @@ export type ConnectUserUncheckedUpdateWithoutSessionsInput = {
 export type ConnectUserCreateWithoutWalletsInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -777,6 +815,7 @@ export type ConnectUserUncheckedCreateWithoutWalletsInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -805,6 +844,7 @@ export type ConnectUserUpdateToOneWithWhereWithoutWalletsInput = {
 export type ConnectUserUpdateWithoutWalletsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -819,6 +859,7 @@ export type ConnectUserUncheckedUpdateWithoutWalletsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -831,6 +872,7 @@ export type ConnectUserUncheckedUpdateWithoutWalletsInput = {
 export type ConnectUserCreateWithoutSignaturesInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -845,6 +887,7 @@ export type ConnectUserUncheckedCreateWithoutSignaturesInput = {
   id?: string
   appId: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -873,6 +916,7 @@ export type ConnectUserUpdateToOneWithWhereWithoutSignaturesInput = {
 export type ConnectUserUpdateWithoutSignaturesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -887,6 +931,7 @@ export type ConnectUserUncheckedUpdateWithoutSignaturesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   appId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -899,6 +944,7 @@ export type ConnectUserUncheckedUpdateWithoutSignaturesInput = {
 export type ConnectUserCreateManyAppInput = {
   id?: string
   displayName?: string | null
+  embeddedWallets?: boolean
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -907,6 +953,7 @@ export type ConnectUserCreateManyAppInput = {
 export type ConnectUserUpdateWithoutAppInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -920,6 +967,7 @@ export type ConnectUserUpdateWithoutAppInput = {
 export type ConnectUserUncheckedUpdateWithoutAppInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -933,6 +981,7 @@ export type ConnectUserUncheckedUpdateWithoutAppInput = {
 export type ConnectUserUncheckedUpdateManyWithoutAppInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  embeddedWallets?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1009,6 +1058,7 @@ export type ConnectUserSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   appId?: boolean
   displayName?: boolean
+  embeddedWallets?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1025,6 +1075,7 @@ export type ConnectUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   appId?: boolean
   displayName?: boolean
+  embeddedWallets?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1035,6 +1086,7 @@ export type ConnectUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   appId?: boolean
   displayName?: boolean
+  embeddedWallets?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1045,12 +1097,13 @@ export type ConnectUserSelectScalar = {
   id?: boolean
   appId?: boolean
   displayName?: boolean
+  embeddedWallets?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConnectUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "appId" | "displayName" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["connectUser"]>
+export type ConnectUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "appId" | "displayName" | "embeddedWallets" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["connectUser"]>
 export type ConnectUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   app?: boolean | Prisma.ConnectAppDefaultArgs<ExtArgs>
   identities?: boolean | Prisma.ConnectUser$identitiesArgs<ExtArgs>
@@ -1081,6 +1134,11 @@ export type $ConnectUserPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     appId: string
     displayName: string | null
+    /**
+     * False for people who signed up with their own wallet: they sign with
+     * it, so Corven holds no keys for them.
+     */
+    embeddedWallets: boolean
     lastLoginAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -1516,6 +1574,7 @@ export interface ConnectUserFieldRefs {
   readonly id: Prisma.FieldRef<"ConnectUser", 'String'>
   readonly appId: Prisma.FieldRef<"ConnectUser", 'String'>
   readonly displayName: Prisma.FieldRef<"ConnectUser", 'String'>
+  readonly embeddedWallets: Prisma.FieldRef<"ConnectUser", 'Boolean'>
   readonly lastLoginAt: Prisma.FieldRef<"ConnectUser", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ConnectUser", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ConnectUser", 'DateTime'>

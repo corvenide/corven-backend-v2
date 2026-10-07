@@ -604,7 +604,7 @@ export type $ConnectAppPayload<ExtArgs extends runtime.Types.Extensions.Internal
      */
     googleClientId: string | null
     /**
-     * Sign-in methods offered: PHONE, EMAIL, GOOGLE, PASSKEY.
+     * Sign-in methods offered: PHONE, EMAIL, GOOGLE, PASSKEY, WALLET.
      */
     loginMethods: string[]
     /**

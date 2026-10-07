@@ -394,6 +394,7 @@ export const ConnectUserScalarFieldEnum = {
   id: 'id',
   appId: 'appId',
   displayName: 'displayName',
+  embeddedWallets: 'embeddedWallets',
   lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
