@@ -1,7 +1,7 @@
 // A ready-made button: "Sign in" when signed out, the wallet address
 // (opens the wallet) when signed in.
 
-import { shortAddress, type Network } from '@corven/connect';
+import { shortAddress, type Network } from '@corven-sdk/connect';
 
 import * as Icon from './icons';
 import { useConnectContext, useCorvenConnect } from './provider';

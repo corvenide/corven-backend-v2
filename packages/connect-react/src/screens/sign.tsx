@@ -2,7 +2,7 @@
 // signing and key export need.
 
 import { useMemo, useState } from 'react';
-import { formatCkb, shortAddress, type SignApproval, type SignRequest, type StepUpPurpose } from '@corven/connect';
+import { formatCkb, shortAddress, type SignApproval, type SignRequest, type StepUpPurpose } from '@corven-sdk/connect';
 
 import { GoogleButton } from '../google';
 import * as Icon from '../icons';

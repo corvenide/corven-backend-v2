@@ -1,7 +1,7 @@
 // Small building blocks shared by the screens.
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { CorvenConnectError } from '@corven/connect';
+import { CorvenConnectError } from '@corven-sdk/connect';
 
 import * as Icon from './icons';
 

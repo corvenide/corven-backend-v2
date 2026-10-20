@@ -1,5 +1,5 @@
 {
-  "name": "@corven/connect-react",
+  "name": "@corven-sdk/connect-react",
   "version": "0.1.0",
   "description": "React provider, hook and sign-in modal for Corven Connect.",
   "license": "MIT",
@@ -20,11 +20,11 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react --external react-dom --external @corven/connect --external @ckb-ccc/core --external @ckb-ccc/ccc",
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react --external react-dom --external @corven-sdk/connect --external @ckb-ccc/core --external @ckb-ccc/ccc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@corven/connect": "0.1.0"
+    "@corven-sdk/connect": "0.1.0"
   },
   "peerDependencies": {
     "@ckb-ccc/core": ">=1.18.0",

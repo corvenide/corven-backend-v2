@@ -8,8 +8,23 @@ import { ApiGatewayService } from './api-gateway.service';
 import { createPreviewProxy, PREVIEW_PATH } from './preview-proxy';
 import { allowedOrigins } from './auth-session';
 
+import { ValidationPipe } from '@nestjs/common';
+import { StructuredLogger } from 'libs/logger/src/structured-logger.service';
+
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(ApiGatewayModule);
+    const logger = new StructuredLogger('ApiGateway');
+    const app = await NestFactory.create<NestExpressApplication>(ApiGatewayModule, {
+        logger,
+    });
+
+    // Enforce class-validator input validation globally
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            transform: true,
+            forbidNonWhitelisted: false,
+        }),
+    );
 
     // Dev-server previews are proxied before CORS and body parsing, so the
     // request body and the opaque-origin iframe pass through untouched.
@@ -38,7 +53,9 @@ async function bootstrap() {
     // Devnet RPC relays can carry a transaction with a contract binary.
     app.useBodyParser('json', { limit: '2mb' });
 
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix('api', {
+        exclude: ['metrics'],
+    });
 
     const port = process.env.API_GATEWAY_PORT || 8000;
 

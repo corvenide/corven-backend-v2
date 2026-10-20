@@ -1,7 +1,7 @@
 // Sign-in screens: method picker, code entry, and wallet creation.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { shortAddress, type PhoneChannel } from '@corven/connect';
+import { shortAddress, type PhoneChannel } from '@corven-sdk/connect';
 
 import { GoogleButton } from '../google';
 import * as Icon from '../icons';

@@ -2,8 +2,8 @@
 
 | Package | What |
 |---|---|
-| `@corven/connect` | Framework-free client: sign-in, session, wallets, a ccc signer |
-| `@corven/connect-react` | Provider, `useCorvenConnect()`, `<ConnectButton>`, and the modal |
+| `@corven-sdk/connect` | Framework-free client: sign-in, session, wallets, a ccc signer |
+| `@corven-sdk/connect-react` | Provider, `useCorvenConnect()`, `<ConnectButton>`, and the modal |
 | `example` | Vite + React example app |
 
 This folder is its own npm workspace (the backend uses pnpm and doesn't
@@ -17,7 +17,7 @@ cp example/.env.example example/.env   # set VITE_CORVEN_APP_ID
 npm run example               # http://localhost:5199
 ```
 
-Publish: `npm publish -w @corven/connect --access public`, then
-`-w @corven/connect-react`. (Create the `@corven` npm org first.)
+Publish: `npm publish -w @corven-sdk/connect --access public`, then
+`-w @corven-sdk/connect-react`. (Create the `@corven` npm org first.)
 
 Backend setup and the API: `docs/CORVEN CONNECT.md`.

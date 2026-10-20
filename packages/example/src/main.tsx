@@ -4,7 +4,7 @@
 import { StrictMode, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ccc } from '@ckb-ccc/core';
-import { ConnectButton, CorvenConnectProvider, UserRejectedError, formatCkb, useCorvenConnect } from '@corven/connect-react';
+import { ConnectButton, CorvenConnectProvider, UserRejectedError, formatCkb, useCorvenConnect } from '@corven-sdk/connect-react';
 
 const params = new URLSearchParams(location.search);
 const env = import.meta.env;
@@ -69,7 +69,7 @@ function App() {
         <CorvenConnectProvider
             appId={params.get('app') ?? env.VITE_CORVEN_APP_ID}
             apiUrl={env.VITE_CORVEN_API_URL || undefined}
-            theme={(params.get('theme') as 'dark' | 'light' | null) ?? 'dark'}
+            theme={(params.get('theme') as 'dark' | 'light' | null) ?? 'light'}
             accent={params.get('accent') ?? undefined}
             clients={clients}
         >

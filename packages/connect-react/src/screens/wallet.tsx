@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { ccc } from '@ckb-ccc/core';
-import { formatCkb, shortAddress, UserRejectedError, type Network, type WalletsResponse } from '@corven/connect';
+import { formatCkb, shortAddress, UserRejectedError, type Network, type WalletsResponse } from '@corven-sdk/connect';
 
 import * as Icon from '../icons';
 import { useConnectContext } from '../provider';

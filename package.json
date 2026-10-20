@@ -5,11 +5,17 @@
   "author": "Jimleston osoi",
   "private": true,
   "license": "UNLICENSED",
+  "workspaces": [
+    "packages/connect",
+    "packages/connect-react",
+    "packages/example"
+  ],
   "scripts": {
-    "build": "nest build",
-    "dev": "node scripts/dev.mjs",
+    "build": "npm run build --workspace=corven-connect-example",
+    "build:backend": "nest build",
+    "dev": "npm run dev --workspace=corven-connect-example",
+    "dev:backend": "node scripts/dev.mjs",
     "dev:all": "node scripts/dev.mjs --all",
-    "build:workspace": "pnpm --filter workspace-service build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -94,7 +100,12 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "apps/**/*.{ts,js}",
+      "libs/**/*.{ts,js}",
+      "!**/*.spec.{ts,js}",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/src/generated/**"
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
@@ -105,6 +116,7 @@
     "moduleNameMapper": {
       "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",
       "^@app/mailer(|/.*)$": "<rootDir>/libs/mailer/src/$1",
+      "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1",
       "^(libs|src)/(.*)$": "<rootDir>/$1/$2",
       "^(\\.{1,2}/.*)\\.js$": "$1"
     }
