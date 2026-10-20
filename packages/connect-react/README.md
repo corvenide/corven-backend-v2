@@ -1,15 +1,15 @@
-# @corven/connect-react
+# @corven-sdk/connect-react
 
 Phone, email, Google and passkey sign-in with an embedded CKB wallet, for
 React apps.
 
 ```
-npm install @corven/connect-react @ckb-ccc/core
+npm install @corven-sdk/connect-react @ckb-ccc/core
 npm install @ckb-ccc/ccc   # optional: "Connect a wallet" (JoyID, MetaMask, UniSat, OKX…)
 ```
 
 ```tsx
-import { CorvenConnectProvider, ConnectButton, useCorvenConnect } from '@corven/connect-react';
+import { CorvenConnectProvider, ConnectButton, useCorvenConnect } from '@corven-sdk/connect-react';
 import { ccc } from '@ckb-ccc/core';
 
 export default function App() {
@@ -58,7 +58,7 @@ function Pay() {
 
 `ready`, `authenticated`, `user`, `config`, `login()`, `openWallet()`,
 `closeModal()`, `logout()`, `getSigner(network)`, `externalWallet`,
-`reconnectWallet()`, `client` (the `@corven/connect` client).
+`reconnectWallet()`, `client` (the `@corven-sdk/connect` client).
 
 People who signed in with their own wallet (`user.embeddedWallets === false`)
 sign with it: `getSigner('TESTNET')` returns that wallet's CCC signer and the

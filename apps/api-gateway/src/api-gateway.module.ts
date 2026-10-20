@@ -4,8 +4,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
+import { AuthController } from './auth.controller';
+import { WalletController } from './wallet.controller';
+import { WorkspaceController } from './workspace.controller';
+import { CommunityController } from './community.controller';
 import { AiController } from './ai/ai.controller';
 import { AiService } from './ai/ai.service';
+import { MetricsService } from 'libs/logger/src/metrics.service';
+import { StructuredLogger } from 'libs/logger/src/structured-logger.service';
 
 @Module({
     imports: [
@@ -76,7 +82,14 @@ import { AiService } from './ai/ai.service';
             }
         ]),
     ],
-    controllers: [ApiGatewayController, AiController],
-    providers: [ApiGatewayService, AiService],
+    controllers: [
+        ApiGatewayController,
+        AuthController,
+        WalletController,
+        WorkspaceController,
+        CommunityController,
+        AiController,
+    ],
+    providers: [ApiGatewayService, AiService, MetricsService, StructuredLogger],
 })
 export class ApiGatewayModule { }

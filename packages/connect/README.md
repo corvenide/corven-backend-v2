@@ -1,10 +1,10 @@
-# @corven/connect
+# @corven-sdk/connect
 
 The framework-free Corven Connect client. For React, use
-`@corven/connect-react`, which adds the modal.
+`@corven-sdk/connect-react`, which adds the modal.
 
 ```ts
-import { createCorvenConnect } from '@corven/connect';
+import { createCorvenConnect } from '@corven-sdk/connect';
 
 const connect = createCorvenConnect({ appId: 'app_…' });
 await connect.init();                                   // restores a saved session

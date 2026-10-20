@@ -16,6 +16,8 @@ import { RuntimeServiceController } from './runtime-service.controller';
 import { RuntimeServiceService } from './runtime-service.service';
 import { WorkspaceFileSync } from './workspace-file-sync.service';
 
+import { RuntimeHealthService } from './runtime-health.service';
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -32,6 +34,7 @@ import { WorkspaceFileSync } from './workspace-file-sync.service';
 
     providers: [
         RuntimeServiceService,
+        RuntimeHealthService,
         WorkspaceFileSync,
         HostScheduler,
         BuildCacheService,
@@ -44,6 +47,7 @@ import { WorkspaceFileSync } from './workspace-file-sync.service';
 
     exports: [
         RuntimeServiceService,
+        RuntimeHealthService,
     ],
 })
 export class RuntimeServiceModule { }

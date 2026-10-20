@@ -24,7 +24,7 @@ import {
     type SignApproval,
     type SignRequest,
     type User,
-} from '@corven/connect';
+} from '@corven-sdk/connect';
 
 import { findRememberedSigner, rememberedWallet, rememberWallet } from './external-wallets';
 import { Modal } from './modal';
@@ -239,7 +239,7 @@ export function useCorvenConnect() {
             await connect.useExternalSigner(signer, stored.wallet);
             return true;
         },
-        /** The underlying @corven/connect client. */
+        /** The underlying @corven-sdk/connect client. */
         client: connect,
     };
 }

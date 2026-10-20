@@ -8,8 +8,8 @@
     "example"
   ],
   "scripts": {
-    "build": "npm run build -w @corven/connect && npm run build -w @corven/connect-react",
-    "typecheck": "npm run typecheck -w @corven/connect && npm run typecheck -w @corven/connect-react",
+    "build": "npm run build -w @corven-sdk/connect && npm run build -w @corven-sdk/connect-react",
+    "typecheck": "npm run typecheck -w @corven-sdk/connect && npm run typecheck -w @corven-sdk/connect-react",
     "example": "npm run dev -w corven-connect-example"
   }
 }

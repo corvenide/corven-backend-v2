@@ -283,7 +283,7 @@ export class CorvenConnect {
     async approve(request: SignRequest): Promise<SignApproval> {
         if (this.approvalHandler) return this.approvalHandler(request);
         if (request.network === 'TESTNET') return { approved: true };
-        throw new CorvenConnectError('Mainnet signing needs an approval handler (use @corven/connect-react).', 0, 'step_up_required');
+        throw new CorvenConnectError('Mainnet signing needs an approval handler (use @corven-sdk/connect-react).', 0, 'step_up_required');
     }
 
     // ------------------------------------------------------------ http
